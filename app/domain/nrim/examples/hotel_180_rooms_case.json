@@ -1,0 +1,188 @@
+{
+    "schema_version": "1.0.0",
+    "case_id": "case_hotel_180_001",
+    "project_id": "project_hotel_180_001",
+    "deployment_id": null,
+    "mode": "architecture_assurance",
+    "status": "incomplete",
+    "nodes": [
+        {
+            "id": "req_room_capacity",
+            "category": "requirement",
+            "type": "CapacityRequirement",
+            "name": "Support 180 hotel rooms",
+            "status": "confirmed",
+            "properties": {
+                "room_count": 180
+            },
+            "evidence": [
+                {
+                    "id": "evidence_room_capacity",
+                    "kind": "user_statement",
+                    "statement": "The hotel contains 180 rooms.",
+                    "source_reference": "demo_requirement",
+                    "value": {
+                        "room_count": 180
+                    },
+                    "confidence": 1.0,
+                    "created_at": "2026-07-12T12:00:00Z"
+                }
+            ],
+            "confidence": 1.0,
+            "requires_engineer_review": false
+        },
+        {
+            "id": "req_live_channels",
+            "category": "requirement",
+            "type": "CapacityRequirement",
+            "name": "Provide 85 live television channels",
+            "status": "confirmed",
+            "properties": {
+                "channel_count": 85
+            },
+            "evidence": [
+                {
+                    "id": "evidence_live_channels",
+                    "kind": "user_statement",
+                    "statement": "The deployment requires 85 channels.",
+                    "source_reference": "demo_requirement",
+                    "value": {
+                        "channel_count": 85
+                    },
+                    "confidence": 1.0,
+                    "created_at": "2026-07-12T12:00:00Z"
+                }
+            ],
+            "confidence": 1.0,
+            "requires_engineer_review": false
+        },
+        {
+            "id": "req_catchup",
+            "category": "requirement",
+            "type": "FunctionalRequirement",
+            "name": "Provide CatchUP television",
+            "status": "confirmed",
+            "properties": {
+                "retention_days": null,
+                "recorded_channel_count": null
+            },
+            "evidence": [
+                {
+                    "id": "evidence_catchup",
+                    "kind": "user_statement",
+                    "statement": "The customer requires CatchUP.",
+                    "source_reference": "demo_requirement",
+                    "value": {
+                        "catchup_required": true
+                    },
+                    "confidence": 1.0,
+                    "created_at": "2026-07-12T12:00:00Z"
+                }
+            ],
+            "confidence": 1.0,
+            "requires_engineer_review": true
+        },
+        {
+            "id": "arch_catchup_storage",
+            "category": "architecture",
+            "type": "Storage",
+            "name": "CatchUP recording storage",
+            "status": "inferred",
+            "properties": {
+                "required_capacity_tb": null
+            },
+            "evidence": [
+                {
+                    "id": "evidence_storage_required",
+                    "kind": "deterministic_rule",
+                    "statement": "CatchUP requires persistent recording storage.",
+                    "source_reference": "RULE_CATCHUP_REQUIRES_STORAGE",
+                    "value": {
+                        "derived_from": "req_catchup"
+                    },
+                    "confidence": 1.0,
+                    "created_at": "2026-07-12T12:00:00Z"
+                }
+            ],
+            "confidence": 1.0,
+            "requires_engineer_review": true
+        },
+        {
+            "id": "failure_storage_sizing_unknown",
+            "category": "failure",
+            "type": "CapacityViolation",
+            "name": "CatchUP storage cannot be sized",
+            "status": "inferred",
+            "properties": {
+                "severity": "high",
+                "missing_fields": [
+                    "retention_days",
+                    "recorded_channel_count",
+                    "average_bitrate_mbps"
+                ],
+                "predictability_class": "condition_predictable"
+            },
+            "evidence": [
+                {
+                    "id": "evidence_storage_sizing_unknown",
+                    "kind": "deterministic_rule",
+                    "statement": "Storage sizing requires retention period, recorded channel count, and bitrate.",
+                    "source_reference": "RULE_STORAGE_SIZING_INPUTS",
+                    "value": null,
+                    "confidence": 1.0,
+                    "created_at": "2026-07-12T12:00:00Z"
+                }
+            ],
+            "confidence": 1.0,
+            "requires_engineer_review": true
+        }
+    ],
+    "edges": [
+        {
+            "id": "edge_catchup_satisfied_by_storage",
+            "source_node_id": "req_catchup",
+            "target_node_id": "arch_catchup_storage",
+            "type": "satisfied_by",
+            "status": "inferred",
+            "evidence": [
+                {
+                    "id": "evidence_catchup_storage_edge",
+                    "kind": "deterministic_rule",
+                    "statement": "CatchUP requires a storage component.",
+                    "source_reference": "RULE_CATCHUP_REQUIRES_STORAGE",
+                    "value": null,
+                    "confidence": 1.0,
+                    "created_at": "2026-07-12T12:00:00Z"
+                }
+            ],
+            "confidence": 1.0,
+            "properties": {}
+        },
+        {
+            "id": "edge_storage_contributes_to_risk",
+            "source_node_id": "arch_catchup_storage",
+            "target_node_id": "failure_storage_sizing_unknown",
+            "type": "contributes_to",
+            "status": "inferred",
+            "evidence": [
+                {
+                    "id": "evidence_storage_risk_edge",
+                    "kind": "deterministic_rule",
+                    "statement": "Unknown storage capacity creates a deployment-sizing risk.",
+                    "source_reference": "RULE_STORAGE_SIZING_INPUTS",
+                    "value": null,
+                    "confidence": 1.0,
+                    "created_at": "2026-07-12T12:00:00Z"
+                }
+            ],
+            "confidence": 1.0,
+            "properties": {}
+        }
+    ],
+    "observations": [],
+    "diagnostic_tests": [],
+    "interventions": [],
+    "forecasts": [],
+    "created_at": "2026-07-12T12:00:00Z",
+    "updated_at": "2026-07-12T12:00:00Z"
+}
