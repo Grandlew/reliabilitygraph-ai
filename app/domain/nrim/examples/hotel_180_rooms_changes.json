@@ -1,0 +1,41 @@
+{
+    "schema_version": "1.0.0",
+    "batch_id": "batch_hotel_001_changes",
+    "deployment_id": "deployment_hotel_001",
+    "source": "synthetic_day04_example",
+    "collected_at": "2026-07-14T20:10:00Z",
+    "events": [
+        {
+            "schema_version": "1.0.0",
+            "event_id": "change_retention_policy_001",
+            "deployment_id": "deployment_hotel_001",
+            "component_node_id": "service_catchup",
+            "service_node_ids": [
+                "service_catchup"
+            ],
+            "observed_at": "2026-07-14T14:00:00Z",
+            "ingested_at": "2026-07-14T14:00:10Z",
+            "timezone_source": "UTC",
+            "clock_skew_ms": 0,
+            "signal_type": "configuration_change",
+            "signal_name": "iptv.catchup.retention_policy_change",
+            "value": {
+                "previous_days": 3,
+                "new_days": 7
+            },
+            "unit": null,
+            "attributes": [],
+            "collection_source": "synthetic_change_audit",
+            "source_record_id": "change-record-001",
+            "quality": "high",
+            "golden_signal": null,
+            "baseline_status": "unknown",
+            "baseline_value": null,
+            "deviation_score": null,
+            "case_id": null,
+            "evidence_ids": [
+                "evidence_retention_change_001"
+            ]
+        }
+    ]
+}
