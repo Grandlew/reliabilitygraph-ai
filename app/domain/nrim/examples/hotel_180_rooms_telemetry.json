@@ -1,0 +1,96 @@
+{
+    "schema_version": "1.0.0",
+    "batch_id": "batch_hotel_001_evening",
+    "deployment_id": "deployment_hotel_001",
+    "source": "synthetic_day04_example",
+    "collected_at": "2026-07-14T20:10:00Z",
+    "events": [
+        {
+            "schema_version": "1.0.0",
+            "event_id": "telemetry_storage_utilization_001",
+            "deployment_id": "deployment_hotel_001",
+            "component_node_id": "arch_catchup_storage",
+            "service_node_ids": [
+                "service_catchup"
+            ],
+            "observed_at": "2026-07-14T20:05:00Z",
+            "ingested_at": "2026-07-14T20:05:05Z",
+            "timezone_source": "UTC",
+            "clock_skew_ms": 0,
+            "signal_type": "metric",
+            "signal_name": "system.disk.utilization",
+            "value": 86.4,
+            "unit": "percent",
+            "attributes": [
+                {
+                    "key": "mount_point",
+                    "value": "/catchup",
+                    "quality": "high"
+                }
+            ],
+            "collection_source": "synthetic_os_agent",
+            "source_record_id": "os-record-001",
+            "quality": "high",
+            "golden_signal": "saturation",
+            "baseline_status": "unknown",
+            "baseline_value": null,
+            "deviation_score": null,
+            "case_id": null,
+            "evidence_ids": []
+        },
+        {
+            "schema_version": "1.0.0",
+            "event_id": "telemetry_storage_latency_001",
+            "deployment_id": "deployment_hotel_001",
+            "component_node_id": "arch_catchup_storage",
+            "service_node_ids": [
+                "service_catchup"
+            ],
+            "observed_at": "2026-07-14T20:05:00Z",
+            "ingested_at": "2026-07-14T20:05:05Z",
+            "timezone_source": "UTC",
+            "clock_skew_ms": 0,
+            "signal_type": "metric",
+            "signal_name": "system.disk.io_latency",
+            "value": 42.7,
+            "unit": "milliseconds",
+            "attributes": [],
+            "collection_source": "synthetic_os_agent",
+            "source_record_id": "os-record-002",
+            "quality": "high",
+            "golden_signal": "latency",
+            "baseline_status": "unknown",
+            "baseline_value": null,
+            "deviation_score": null,
+            "case_id": null,
+            "evidence_ids": []
+        },
+        {
+            "schema_version": "1.0.0",
+            "event_id": "telemetry_catchup_failures_001",
+            "deployment_id": "deployment_hotel_001",
+            "component_node_id": "service_catchup",
+            "service_node_ids": [
+                "service_catchup"
+            ],
+            "observed_at": "2026-07-14T20:05:00Z",
+            "ingested_at": "2026-07-14T20:05:06Z",
+            "timezone_source": "UTC",
+            "clock_skew_ms": 0,
+            "signal_type": "metric",
+            "signal_name": "iptv.catchup.recording_failures",
+            "value": 12,
+            "unit": "failures_per_5_minutes",
+            "attributes": [],
+            "collection_source": "synthetic_application_metrics",
+            "source_record_id": "app-record-001",
+            "quality": "medium",
+            "golden_signal": "errors",
+            "baseline_status": "unknown",
+            "baseline_value": null,
+            "deviation_score": null,
+            "case_id": null,
+            "evidence_ids": []
+        }
+    ]
+}
