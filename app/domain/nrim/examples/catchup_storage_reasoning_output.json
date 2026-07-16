@@ -1,0 +1,286 @@
+{
+  "case_id": "case_hotel_180_operational_001",
+  "generated_at": "2026-07-16T10:52:09.670982Z",
+  "hypotheses": [
+    {
+      "hypothesis_id": "hyp_storage_io",
+      "failure_type": "storage_io_degradation",
+      "name": "CatchUP storage I/O degradation",
+      "description": "CatchUP recording failures may be caused by slow or unstable storage writes.",
+      "target_node_ids": [
+        "arch_catchup_storage"
+      ],
+      "affected_service_node_ids": [
+        "service_catchup"
+      ],
+      "status": "leading",
+      "evidence_links": [
+        {
+          "hypothesis_id": "hyp_storage_io",
+          "evidence": {
+            "evidence_id": "RULE_STORAGE_LATENCY_HIGH:telemetry_storage_latency_001",
+            "source_event_id": "telemetry_storage_latency_001",
+            "statement": "Elevated storage I/O latency supports storage-path degradation.",
+            "role": "supports",
+            "strength": "moderate",
+            "quality": "high",
+            "independent_source": "synthetic_os_agent",
+            "properties": {
+              "signal_name": "system.disk.io_latency",
+              "observed_value": 42.7,
+              "unit": "milliseconds",
+              "rule_id": "RULE_STORAGE_LATENCY_HIGH"
+            }
+          },
+          "weight": 1.7
+        },
+        {
+          "hypothesis_id": "hyp_storage_io",
+          "evidence": {
+            "evidence_id": "RULE_CATCHUP_RECORDING_FAILURES:telemetry_catchup_failures_001",
+            "source_event_id": "telemetry_catchup_failures_001",
+            "statement": "CatchUP recording failures are consistent with storage-path degradation.",
+            "role": "supports",
+            "strength": "moderate",
+            "quality": "medium",
+            "independent_source": "synthetic_application_metrics",
+            "properties": {
+              "signal_name": "iptv.catchup.recording_failures",
+              "observed_value": 12,
+              "unit": "failures_per_5_minutes",
+              "rule_id": "RULE_CATCHUP_RECORDING_FAILURES"
+            }
+          },
+          "weight": 1.2
+        }
+      ],
+      "ranking_score": 2.9,
+      "evidence_coverage": 0.717,
+      "required_confirmation_evidence": [
+        "Inspect write latency and I/O error evidence.",
+        "Verify service improvement after storage remediation."
+      ],
+      "missing_evidence": [
+        "Storage I/O queue depth.",
+        "Filesystem or hardware errors.",
+        "Per-channel recording distribution."
+      ],
+      "contradictions": [],
+      "created_at": "2026-07-16T10:52:09.670982Z",
+      "updated_at": "2026-07-16T10:52:09.670982Z"
+    },
+    {
+      "hypothesis_id": "hyp_storage_capacity",
+      "failure_type": "storage_capacity_saturation",
+      "name": "CatchUP storage capacity saturation",
+      "description": "CatchUP recording failures may be caused by insufficient free storage capacity.",
+      "target_node_ids": [
+        "arch_catchup_storage"
+      ],
+      "affected_service_node_ids": [
+        "service_catchup"
+      ],
+      "status": "supported",
+      "evidence_links": [
+        {
+          "hypothesis_id": "hyp_storage_capacity",
+          "evidence": {
+            "evidence_id": "RULE_STORAGE_UTILIZATION_HIGH:telemetry_storage_utilization_001",
+            "source_event_id": "telemetry_storage_utilization_001",
+            "statement": "High storage utilization supports a possible storage-capacity saturation hypothesis.",
+            "role": "supports",
+            "strength": "moderate",
+            "quality": "high",
+            "independent_source": "synthetic_os_agent",
+            "properties": {
+              "signal_name": "system.disk.utilization",
+              "observed_value": 86.4,
+              "unit": "percent",
+              "rule_id": "RULE_STORAGE_UTILIZATION_HIGH"
+            }
+          },
+          "weight": 1.7
+        }
+      ],
+      "ranking_score": 1.7,
+      "evidence_coverage": 0.483,
+      "required_confirmation_evidence": [
+        "Verify free capacity or allocation limit.",
+        "Verify whether freeing capacity restores recording."
+      ],
+      "missing_evidence": [
+        "Current free capacity trend.",
+        "Cleanup-job status.",
+        "Outcome after capacity remediation."
+      ],
+      "contradictions": [],
+      "created_at": "2026-07-16T10:52:09.670982Z",
+      "updated_at": "2026-07-16T10:52:09.670982Z"
+    },
+    {
+      "hypothesis_id": "hyp_catchup_application",
+      "failure_type": "catchup_application_failure",
+      "name": "CatchUP application or recording-worker failure",
+      "description": "The service may be failing independently of storage capacity or storage performance.",
+      "target_node_ids": [
+        "service_catchup"
+      ],
+      "affected_service_node_ids": [
+        "service_catchup"
+      ],
+      "status": "unresolved",
+      "evidence_links": [],
+      "ranking_score": 0.0,
+      "evidence_coverage": 0.0,
+      "required_confirmation_evidence": [
+        "Inspect recording-worker logs.",
+        "Verify worker health and restart behaviour."
+      ],
+      "missing_evidence": [
+        "Application exception logs.",
+        "Recording-worker state.",
+        "Failure distribution across channels."
+      ],
+      "contradictions": [],
+      "created_at": "2026-07-16T10:52:09.670982Z",
+      "updated_at": "2026-07-16T10:52:09.670982Z"
+    }
+  ],
+  "ranked_diagnostics": [
+    {
+      "diagnostic_id": "diag_storage_capacity",
+      "name": "Inspect CatchUP storage capacity and growth",
+      "question": "What are current free capacity, recent growth rate, retention cleanup status, and allocation limits?",
+      "hypothesis_ids": [
+        "hyp_storage_capacity",
+        "hyp_storage_io"
+      ],
+      "information_gain": 0.92,
+      "hypothesis_separation": 0.8,
+      "safety": 1.0,
+      "reversibility": 1.0,
+      "speed": 0.9,
+      "low_cost": 0.95,
+      "operational_risk": "observe_only",
+      "requires_engineer": false,
+      "expected_evidence": [
+        "Free storage capacity",
+        "Storage growth rate",
+        "Cleanup-job status",
+        "Storage allocation limits"
+      ],
+      "utility_score": 0.9155
+    },
+    {
+      "diagnostic_id": "diag_storage_io",
+      "name": "Inspect storage I/O health",
+      "question": "Are write latency, I/O queue depth, filesystem errors, or disk errors abnormal?",
+      "hypothesis_ids": [
+        "hyp_storage_io",
+        "hyp_storage_capacity"
+      ],
+      "information_gain": 0.9,
+      "hypothesis_separation": 0.85,
+      "safety": 1.0,
+      "reversibility": 1.0,
+      "speed": 0.85,
+      "low_cost": 0.9,
+      "operational_risk": "observe_only",
+      "requires_engineer": false,
+      "expected_evidence": [
+        "Write latency",
+        "I/O queue depth",
+        "Filesystem errors",
+        "Disk health"
+      ],
+      "utility_score": 0.91
+    },
+    {
+      "diagnostic_id": "diag_recording_worker",
+      "name": "Inspect CatchUP recording-worker health",
+      "question": "Are recording workers running, restarting, blocked, or reporting exceptions?",
+      "hypothesis_ids": [
+        "hyp_catchup_application",
+        "hyp_storage_io"
+      ],
+      "information_gain": 0.82,
+      "hypothesis_separation": 0.9,
+      "safety": 1.0,
+      "reversibility": 1.0,
+      "speed": 0.8,
+      "low_cost": 0.9,
+      "operational_risk": "observe_only",
+      "requires_engineer": false,
+      "expected_evidence": [
+        "Worker process state",
+        "Restart count",
+        "Application exceptions"
+      ],
+      "utility_score": 0.883
+    }
+  ],
+  "recommended_interventions": [
+    {
+      "intervention_id": "intervention_storage_io_inspection",
+      "name": "Inspect storage I/O and hardware health",
+      "hypothesis_id": "hyp_storage_io",
+      "target_node_ids": [
+        "arch_catchup_storage"
+      ],
+      "rationale": "Elevated I/O latency and recording failures may indicate storage-path degradation.",
+      "expected_effect": "Identify whether latency comes from saturation, filesystem errors, hardware problems, or queueing.",
+      "operational_risk": "observe_only",
+      "reversible": true,
+      "rollback_plan": "No system state is changed.",
+      "requires_engineer_approval": false,
+      "verification_test": "Inspect disk health, filesystem errors, queue depth, and write throughput.",
+      "approved_by": null,
+      "executed_at": null,
+      "outcome": null
+    },
+    {
+      "intervention_id": "intervention_storage_observe",
+      "name": "Inspect and validate CatchUP storage capacity",
+      "hypothesis_id": "hyp_storage_capacity",
+      "target_node_ids": [
+        "arch_catchup_storage"
+      ],
+      "rationale": "The current evidence suggests storage capacity may be contributing to recording failures.",
+      "expected_effect": "Determine whether storage capacity is genuinely constraining CatchUP recording.",
+      "operational_risk": "observe_only",
+      "reversible": true,
+      "rollback_plan": "No system state is changed.",
+      "requires_engineer_approval": false,
+      "verification_test": "Confirm free capacity, growth rate, cleanup state, and allocation limits.",
+      "approved_by": null,
+      "executed_at": null,
+      "outcome": null
+    },
+    {
+      "intervention_id": "intervention_storage_capacity_change",
+      "name": "Adjust retention or expand storage after approval",
+      "hypothesis_id": "hyp_storage_capacity",
+      "target_node_ids": [
+        "arch_catchup_storage"
+      ],
+      "rationale": "If capacity saturation is confirmed, storage demand must be reduced or capacity increased.",
+      "expected_effect": "Restore stable CatchUP recording and prevent capacity exhaustion.",
+      "operational_risk": "medium",
+      "reversible": true,
+      "rollback_plan": "Restore the previous retention policy or remove the newly introduced storage configuration if the change causes degradation.",
+      "requires_engineer_approval": true,
+      "verification_test": "Compare recording success, storage utilization, and write latency before and after the intervention.",
+      "approved_by": null,
+      "executed_at": null,
+      "outcome": null
+    }
+  ],
+  "leading_hypothesis_id": "hyp_storage_io",
+  "conclusion": "The current leading hypothesis is 'CatchUP storage I/O degradation'. This is not a confirmed root cause. Additional diagnostic evidence is required.",
+  "limitations": [
+    "The current telemetry is synthetic.",
+    "Rule thresholds are provisional.",
+    "No engineer-confirmed incident outcome exists.",
+    "Ranking scores are not probabilities."
+  ]
+}
