@@ -1,0 +1,243 @@
+{
+  "forecast": {
+    "forecast_id": "forecast_b4f6d991b2474bdc907942250fe56b75",
+    "deployment_id": "deployment_hotel_001",
+    "component_node_id": "arch_catchup_storage",
+    "signal_name": "system.disk.utilization",
+    "unit": "percent",
+    "generated_at": "2026-07-16T20:00:10.499190Z",
+    "latest_observation_at": "2026-07-15T01:00:00Z",
+    "latest_value": 88.7,
+    "threshold": 95.0,
+    "status": "available",
+    "slope_per_hour": 1.0,
+    "central_hours_to_threshold": 6.3,
+    "earliest_hours_to_threshold": 6.05,
+    "latest_hours_to_threshold": 10.077,
+    "trend_quality": 0.989,
+    "supporting_event_ids": [
+      "storage_001",
+      "storage_002",
+      "storage_003",
+      "storage_004",
+      "storage_005",
+      "storage_006",
+      "storage_007",
+      "storage_008",
+      "storage_009",
+      "storage_010",
+      "storage_011",
+      "storage_012",
+      "storage_013",
+      "storage_014",
+      "storage_015",
+      "storage_016",
+      "storage_017",
+      "storage_018"
+    ],
+    "assumptions": [
+      "Median pairwise slope represents recent growth.",
+      "Near-term behaviour remains in the same regime.",
+      "No capacity-changing intervention occurs."
+    ],
+    "limitations": [
+      "The interval is a conservative engineering estimate, not a calibrated probability interval.",
+      "Changes in occupancy, retention, cleanup, or storage capacity may invalidate the forecast."
+    ],
+    "abstention_reasons": []
+  },
+  "warning": {
+    "warning_id": "warning_f1f31dcac3da48a8a14d0fa80aabd82a",
+    "case_id": "case_hotel_180_temporal_001",
+    "deployment_id": "deployment_hotel_001",
+    "component_node_id": "arch_catchup_storage",
+    "failure_signature_id": "FS-CATCHUP-STORAGE-PRECURSOR-001",
+    "generated_at": "2026-07-16T20:00:10.515009Z",
+    "tier": "active_incident",
+    "title": "CatchUP storage-path early warning",
+    "conclusion": "CatchUP storage-path degradation may already be affecting service. Immediate engineer validation is required.",
+    "evidence": [
+      {
+        "evidence_id": "precursor:forecast_b4f6d991b2474bdc907942250fe56b75",
+        "signal_name": "system.disk.utilization",
+        "event_ids": [
+          "storage_001",
+          "storage_002",
+          "storage_003",
+          "storage_004",
+          "storage_005",
+          "storage_006",
+          "storage_007",
+          "storage_008",
+          "storage_009",
+          "storage_010",
+          "storage_011",
+          "storage_012",
+          "storage_013",
+          "storage_014",
+          "storage_015",
+          "storage_016",
+          "storage_017",
+          "storage_018"
+        ],
+        "statement": "Storage threshold crossing is forecast within 6.3 hours.",
+        "strength": 0.9,
+        "quality": "high"
+      },
+      {
+        "evidence_id": "precursor:telemetry_storage_latency_001",
+        "signal_name": "system.disk.io_latency",
+        "event_ids": [
+          "telemetry_storage_latency_001"
+        ],
+        "statement": "Storage I/O latency is elevated and may indicate storage-path degradation.",
+        "strength": 0.65,
+        "quality": "high"
+      },
+      {
+        "evidence_id": "precursor:telemetry_catchup_failures_001",
+        "signal_name": "iptv.catchup.recording_failures",
+        "event_ids": [
+          "telemetry_catchup_failures_001"
+        ],
+        "statement": "CatchUP recording failures are currently present.",
+        "strength": 0.8,
+        "quality": "medium"
+      }
+    ],
+    "forecast_id": "forecast_b4f6d991b2474bdc907942250fe56b75",
+    "recommended_next_test": "Inspect free capacity, storage growth, cleanup-job status, write latency, and recording-worker health.",
+    "requires_engineer_review": true,
+    "limitations": [
+      "Synthetic development thresholds are used.",
+      "No NetUP-certified operating limits are available.",
+      "The forecast assumes near-term trend continuity.",
+      "Root cause is not confirmed by this warning."
+    ]
+  },
+  "backtest": {
+    "evaluation_count": 12,
+    "available_forecast_count": 12,
+    "abstention_count": 0,
+    "threshold_crossing_observed": true,
+    "mean_absolute_error_hours": 0.576,
+    "early_warning_recall": 1.0,
+    "false_warning_count": 0,
+    "evaluations": [
+      {
+        "cutoff_index": 11,
+        "forecast_status": "available",
+        "forecast_hours": 13.474,
+        "actual_hours": 12.0,
+        "absolute_error_hours": 1.4740000000000002,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 12.0
+      },
+      {
+        "cutoff_index": 12,
+        "forecast_status": "available",
+        "forecast_hours": 12.119,
+        "actual_hours": 11.0,
+        "absolute_error_hours": 1.1189999999999998,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 11.0
+      },
+      {
+        "cutoff_index": 13,
+        "forecast_status": "available",
+        "forecast_hours": 11.146,
+        "actual_hours": 10.0,
+        "absolute_error_hours": 1.1460000000000008,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 10.0
+      },
+      {
+        "cutoff_index": 14,
+        "forecast_status": "available",
+        "forecast_hours": 9.676,
+        "actual_hours": 9.0,
+        "absolute_error_hours": 0.6760000000000002,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 9.0
+      },
+      {
+        "cutoff_index": 15,
+        "forecast_status": "available",
+        "forecast_hours": 8.785,
+        "actual_hours": 8.0,
+        "absolute_error_hours": 0.7850000000000001,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 8.0
+      },
+      {
+        "cutoff_index": 16,
+        "forecast_status": "available",
+        "forecast_hours": 7.602,
+        "actual_hours": 7.0,
+        "absolute_error_hours": 0.6020000000000003,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 7.0
+      },
+      {
+        "cutoff_index": 17,
+        "forecast_status": "available",
+        "forecast_hours": 6.3,
+        "actual_hours": 6.0,
+        "absolute_error_hours": 0.2999999999999998,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 6.0
+      },
+      {
+        "cutoff_index": 18,
+        "forecast_status": "available",
+        "forecast_hours": 5.4,
+        "actual_hours": 5.0,
+        "absolute_error_hours": 0.40000000000000036,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 5.0
+      },
+      {
+        "cutoff_index": 19,
+        "forecast_status": "available",
+        "forecast_hours": 4.172,
+        "actual_hours": 4.0,
+        "absolute_error_hours": 0.1719999999999997,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 4.0
+      },
+      {
+        "cutoff_index": 20,
+        "forecast_status": "available",
+        "forecast_hours": 3.159,
+        "actual_hours": 3.0,
+        "absolute_error_hours": 0.1589999999999998,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 3.0
+      },
+      {
+        "cutoff_index": 21,
+        "forecast_status": "available",
+        "forecast_hours": 2.059,
+        "actual_hours": 2.0,
+        "absolute_error_hours": 0.05900000000000016,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 2.0
+      },
+      {
+        "cutoff_index": 22,
+        "forecast_status": "available",
+        "forecast_hours": 0.976,
+        "actual_hours": 1.0,
+        "absolute_error_hours": 0.02400000000000002,
+        "warned_before_crossing": true,
+        "useful_lead_time_hours": 1.0
+      }
+    ]
+  },
+  "limitations": [
+    "All example data is synthetic.",
+    "Forecast intervals are not statistically calibrated.",
+    "Thresholds are provisional.",
+    "No real NetUP incident outcome is used."
+  ]
+}
