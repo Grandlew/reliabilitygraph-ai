@@ -1,6 +1,6 @@
 {
   "case_id": "case_hotel_180_operational_001",
-  "generated_at": "2026-07-16T10:52:09.670982Z",
+  "generated_at": "2026-07-16T11:05:20.068165Z",
   "hypotheses": [
     {
       "hypothesis_id": "hyp_storage_io",
@@ -66,8 +66,8 @@
         "Per-channel recording distribution."
       ],
       "contradictions": [],
-      "created_at": "2026-07-16T10:52:09.670982Z",
-      "updated_at": "2026-07-16T10:52:09.670982Z"
+      "created_at": "2026-07-16T11:05:20.068165Z",
+      "updated_at": "2026-07-16T11:05:20.068165Z"
     },
     {
       "hypothesis_id": "hyp_storage_capacity",
@@ -114,8 +114,8 @@
         "Outcome after capacity remediation."
       ],
       "contradictions": [],
-      "created_at": "2026-07-16T10:52:09.670982Z",
-      "updated_at": "2026-07-16T10:52:09.670982Z"
+      "created_at": "2026-07-16T11:05:20.068165Z",
+      "updated_at": "2026-07-16T11:05:20.068165Z"
     },
     {
       "hypothesis_id": "hyp_catchup_application",
@@ -142,8 +142,8 @@
         "Failure distribution across channels."
       ],
       "contradictions": [],
-      "created_at": "2026-07-16T10:52:09.670982Z",
-      "updated_at": "2026-07-16T10:52:09.670982Z"
+      "created_at": "2026-07-16T11:05:20.068165Z",
+      "updated_at": "2026-07-16T11:05:20.068165Z"
     }
   ],
   "ranked_diagnostics": [
