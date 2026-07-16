@@ -1,0 +1,12 @@
+{
+    "case_id": "case_hotel_180_operational_001",
+    "deployment_id": "deployment_hotel_001",
+    "description": "Synthetic CatchUP degradation scenario",
+    "telemetry_batch_file": "hotel_180_rooms_telemetry.json",
+    "change_batch_file": "hotel_180_rooms_changes.json",
+    "limitations": [
+        "The scenario is synthetic.",
+        "No real NetUP telemetry is used.",
+        "No engineer-confirmed root cause exists."
+    ]
+}
