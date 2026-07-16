@@ -10,7 +10,7 @@ from .temporal import (
     TemporalStatus,
     TrendEstimate,
 )
-
+from statistics import median
 
 QUALITY_RANK = {
     TelemetryQuality.VERIFIED: 4,
@@ -221,3 +221,90 @@ def calculate_recent_rate_of_change(
     )
 
     return fit_linear_trend(selected_series).slope_per_hour
+
+
+def fit_median_pairwise_slope(
+    series: TemporalSeries,
+) -> TrendEstimate:
+    if len(series.points) < 3:
+        raise ValueError(
+            "At least three points are required for robust slope."
+        )
+
+    start = series.points[0].timestamp
+
+    x = [
+        (point.timestamp - start).total_seconds() / 3600.0
+        for point in series.points
+    ]
+    y = [point.value for point in series.points]
+
+    slopes: list[float] = []
+
+    for left in range(len(x)):
+        for right in range(left + 1, len(x)):
+            delta_x = x[right] - x[left]
+
+            if delta_x <= 0:
+                continue
+
+            slopes.append(
+                (y[right] - y[left]) / delta_x
+            )
+
+    if not slopes:
+        raise ValueError("No valid temporal slope pairs exist.")
+
+    slope = median(slopes)
+
+    intercepts = [
+        y_value - slope * x_value
+        for x_value, y_value in zip(x, y, strict=True)
+    ]
+
+    intercept = median(intercepts)
+
+    predictions = [
+        intercept + slope * x_value
+        for x_value in x
+    ]
+
+    absolute_errors = [
+        abs(actual - predicted)
+        for actual, predicted in zip(y, predictions, strict=True)
+    ]
+
+    fit_mae = mean(absolute_errors)
+    value_range = max(y) - min(y)
+
+    normalized_error = (
+        fit_mae / value_range
+        if value_range > 0
+        else fit_mae
+    )
+
+    quality_score = max(
+        0.0,
+        min(1.0, 1.0 - normalized_error),
+    )
+
+    stable = (
+        quality_score >= 0.60
+        and len(series.points) >= 6
+    )
+
+    return TrendEstimate(
+        slope_per_hour=round(slope, 6),
+        intercept=round(intercept, 6),
+        fit_mae=round(fit_mae, 6),
+        start_time=series.points[0].timestamp,
+        end_time=series.points[-1].timestamp,
+        sample_count=len(series.points),
+        quality_score=round(quality_score, 4),
+        stable=stable,
+        assumptions=[
+            "Median pairwise slope represents recent growth.",
+            "Near-term behaviour remains in the same regime.",
+            "No capacity-changing intervention occurs.",
+        ],
+    )
