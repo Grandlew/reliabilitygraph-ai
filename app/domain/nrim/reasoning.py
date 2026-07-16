@@ -69,9 +69,8 @@ class HypothesisEvidenceLink(BaseModel):
 
     @model_validator(mode="after")
     def validate_link(self) -> "HypothesisEvidenceLink":
-        if self.weight is not None and self.evidence.quality == TelemetryQuality.QUARANTINED and self.weight != 0.0:
-            raise ValueError(
-                " Quarantined evidence with a non-zero weight is not allowed")
+        if self.evidence.quality == TelemetryQuality.QUARANTINED and self.weight != 0.0:
+            raise ValueError("Quarantined evidence must have a weight of 0.0")
         return self
 
 
@@ -148,14 +147,14 @@ class RecommendedIntervention(BaseModel):
 
     @model_validator(mode="after")
     def validate_intervention(self) -> "RecommendedIntervention":
-
-        if self.operational_risk == InterventionRisk.PROHIBITED_AUTONOMOUSLY and self.rollback_plan is None:
+        if self.reversible and not self.rollback_plan:
             raise ValueError(
-                "Rollback plan is required for prohibited automonous interventions")
+                "Reversible interventions must include a rollback plan")
 
-        if self.operational_risk == InterventionRisk.PROHIBITED_AUTONOMOUSLY and not self.requires_engineer_approval:
-            raise ValueError(
-                "Prohibited autonomous interventions must require engineer approval")
+        if self.operational_risk == InterventionRisk.PROHIBITED_AUTONOMOUSLY:
+            if not self.requires_engineer_approval:
+                raise ValueError(
+                    "Prohibited autonomous interventions must require engineer approval")
         return self
 
 
