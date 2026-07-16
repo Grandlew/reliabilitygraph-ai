@@ -13,6 +13,13 @@ from .reasoning import (
 from .rule_catalog import EvidenceRule, RuleEffect
 from .telemetry import CanonicalTelemetryEvent, TelemetryQuality
 
+from .diagnostic_ranker import (
+    create_catchup_diagnostic_options,
+    rank_diagnostics,
+)
+from .intervention_engine import create_interventions
+from .reasoning import ReasoningResult
+from .rule_catalog import CATCHUP_STORAGE_RULES
 
 STRENGTH_WEIGHTS = {
     EvidenceStrength.WEAK: 1.0,
@@ -353,3 +360,91 @@ def create_catchup_storage_hypotheses() -> list[FailureHypothesis]:
             ],
         ),
     ]
+
+
+def run_catchup_storage_reasoning(
+    *,
+    case_id: str,
+    events: list[CanonicalTelemetryEvent],
+) -> ReasoningResult:
+    hypotheses = create_catchup_storage_hypotheses()
+
+    scored_hypotheses: list[FailureHypothesis] = []
+
+    for hypothesis in hypotheses:
+        links = build_evidence_links(
+            hypothesis_id=hypothesis.hypothesis_id,
+            hypothesis_type=hypothesis.failure_type,
+            events=events,
+            rules=CATCHUP_STORAGE_RULES,
+        )
+
+        hypothesis_with_links = hypothesis.model_copy(
+            update={
+                "evidence_links": links,
+            }
+        )
+
+        scored_hypotheses.append(
+            score_hypothesis(hypothesis_with_links)
+        )
+
+    ranked_hypotheses = mark_leading_hypothesis(
+        scored_hypotheses
+    )
+
+    leading_ids = {
+        hypothesis.hypothesis_id
+        for hypothesis in ranked_hypotheses
+        if hypothesis.status == HypothesisStatus.LEADING
+    }
+
+    diagnostics = rank_diagnostics(
+        create_catchup_diagnostic_options(),
+        leading_hypothesis_ids=leading_ids,
+    )
+
+    interventions = []
+
+    for hypothesis in ranked_hypotheses:
+        interventions.extend(
+            create_interventions(hypothesis)
+        )
+
+    leading_hypothesis = next(
+        (
+            hypothesis
+            for hypothesis in ranked_hypotheses
+            if hypothesis.status == HypothesisStatus.LEADING
+        ),
+        None,
+    )
+
+    if leading_hypothesis is None:
+        conclusion = (
+            "No leading root-cause hypothesis can be selected from "
+            "the available evidence."
+        )
+        leading_hypothesis_id = None
+    else:
+        conclusion = (
+            f"The current leading hypothesis is "
+            f"'{leading_hypothesis.name}'. This is not a confirmed "
+            f"root cause. Additional diagnostic evidence is required."
+        )
+        leading_hypothesis_id = leading_hypothesis.hypothesis_id
+
+    return ReasoningResult(
+        case_id=case_id,
+        hypotheses=ranked_hypotheses,
+        ranked_diagnostics=diagnostics,
+        recommended_interventions=interventions,
+        leading_hypothesis_id=leading_hypothesis_id,
+        conclusion=conclusion,
+        limitations=[
+            "The current telemetry is synthetic.",
+            "Rule thresholds are provisional.",
+            "No engineer-confirmed incident outcome exists.",
+            "Ranking scores are not probabilities.",
+        ],
+    )
