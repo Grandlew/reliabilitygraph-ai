@@ -288,3 +288,68 @@ def mark_leading_hypothesis(
             updated.append(hypothesis)
 
     return updated
+
+
+def create_catchup_storage_hypotheses() -> list[FailureHypothesis]:
+    return [
+        FailureHypothesis(
+            hypothesis_id="hyp_storage_capacity",
+            failure_type="storage_capacity_saturation",
+            name="CatchUP storage capacity saturation",
+            description=(
+                "CatchUP recording failures may be caused by "
+                "insufficient free storage capacity."
+            ),
+            target_node_ids=["arch_catchup_storage"],
+            affected_service_node_ids=["service_catchup"],
+            required_confirmation_evidence=[
+                "Verify free capacity or allocation limit.",
+                "Verify whether freeing capacity restores recording.",
+            ],
+            missing_evidence=[
+                "Current free capacity trend.",
+                "Cleanup-job status.",
+                "Outcome after capacity remediation.",
+            ],
+        ),
+        FailureHypothesis(
+            hypothesis_id="hyp_storage_io",
+            failure_type="storage_io_degradation",
+            name="CatchUP storage I/O degradation",
+            description=(
+                "CatchUP recording failures may be caused by slow "
+                "or unstable storage writes."
+            ),
+            target_node_ids=["arch_catchup_storage"],
+            affected_service_node_ids=["service_catchup"],
+            required_confirmation_evidence=[
+                "Inspect write latency and I/O error evidence.",
+                "Verify service improvement after storage remediation.",
+            ],
+            missing_evidence=[
+                "Storage I/O queue depth.",
+                "Filesystem or hardware errors.",
+                "Per-channel recording distribution.",
+            ],
+        ),
+        FailureHypothesis(
+            hypothesis_id="hyp_catchup_application",
+            failure_type="catchup_application_failure",
+            name="CatchUP application or recording-worker failure",
+            description=(
+                "The service may be failing independently of "
+                "storage capacity or storage performance."
+            ),
+            target_node_ids=["service_catchup"],
+            affected_service_node_ids=["service_catchup"],
+            required_confirmation_evidence=[
+                "Inspect recording-worker logs.",
+                "Verify worker health and restart behaviour.",
+            ],
+            missing_evidence=[
+                "Application exception logs.",
+                "Recording-worker state.",
+                "Failure distribution across channels.",
+            ],
+        ),
+    ]
