@@ -7,8 +7,10 @@ from app.domain.nrim.alert_policy import (
 )
 from app.domain.nrim.temporal import (
     EarlyWarning,
+    PrecursorEvidence,
     WarningTier,
 )
+from app.domain.nrim.telemetry import TelemetryQuality
 
 
 def make_warning(
@@ -24,7 +26,16 @@ def make_warning(
         tier=tier,
         title="Storage warning",
         conclusion="Test warning.",
-        evidence=[],
+        evidence=[
+            PrecursorEvidence(
+                evidence_id="evidence_1",
+                signal_name="storage_usage",
+                event_ids=["event_1"],
+                statement="Storage usage is increasing.",
+                strength=0.9,
+                quality=TelemetryQuality.HIGH,
+            )
+        ],
         requires_engineer_review=(
             tier
             in {

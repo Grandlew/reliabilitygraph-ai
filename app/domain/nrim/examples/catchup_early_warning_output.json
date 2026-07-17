@@ -1,11 +1,11 @@
 {
   "forecast": {
-    "forecast_id": "forecast_b4f6d991b2474bdc907942250fe56b75",
+    "forecast_id": "forecast_9be0301e98b246b89e3cb4ec82ac2234",
     "deployment_id": "deployment_hotel_001",
     "component_node_id": "arch_catchup_storage",
     "signal_name": "system.disk.utilization",
     "unit": "percent",
-    "generated_at": "2026-07-16T20:00:10.499190Z",
+    "generated_at": "2026-07-16T20:32:03.920880Z",
     "latest_observation_at": "2026-07-15T01:00:00Z",
     "latest_value": 88.7,
     "threshold": 95.0,
@@ -47,18 +47,18 @@
     "abstention_reasons": []
   },
   "warning": {
-    "warning_id": "warning_f1f31dcac3da48a8a14d0fa80aabd82a",
+    "warning_id": "warning_c64376e65c0f4b079f0562af9026f82a",
     "case_id": "case_hotel_180_temporal_001",
     "deployment_id": "deployment_hotel_001",
     "component_node_id": "arch_catchup_storage",
     "failure_signature_id": "FS-CATCHUP-STORAGE-PRECURSOR-001",
-    "generated_at": "2026-07-16T20:00:10.515009Z",
+    "generated_at": "2026-07-16T20:32:03.920880Z",
     "tier": "active_incident",
     "title": "CatchUP storage-path early warning",
     "conclusion": "CatchUP storage-path degradation may already be affecting service. Immediate engineer validation is required.",
     "evidence": [
       {
-        "evidence_id": "precursor:forecast_b4f6d991b2474bdc907942250fe56b75",
+        "evidence_id": "precursor:forecast_9be0301e98b246b89e3cb4ec82ac2234",
         "signal_name": "system.disk.utilization",
         "event_ids": [
           "storage_001",
@@ -105,7 +105,7 @@
         "quality": "medium"
       }
     ],
-    "forecast_id": "forecast_b4f6d991b2474bdc907942250fe56b75",
+    "forecast_id": "forecast_9be0301e98b246b89e3cb4ec82ac2234",
     "recommended_next_test": "Inspect free capacity, storage growth, cleanup-job status, write latency, and recording-worker health.",
     "requires_engineer_review": true,
     "limitations": [
