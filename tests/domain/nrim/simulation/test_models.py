@@ -8,6 +8,9 @@ from app.domain.nrim.simulation.models import (
     SimulationNode,
     SimulationNodeType,
 )
+from app.domain.nrim.simulation.topology_generator import (
+    generate_hotel_topology,
+)
 
 
 def make_required_nodes() -> list[SimulationNode]:
@@ -65,3 +68,39 @@ def test_topology_requires_storage_relationship() -> None:
                 )
             ],
         )
+
+
+def test_non_shared_storage_uses_dedicated_service_pairs() -> None:
+    topology = generate_hotel_topology(
+        room_count=180,
+        floor_count=6,
+        redundant_middleware=True,
+        shared_storage=False,
+        seed=42,
+    )
+
+    services = {
+        node.node_id
+        for node in topology.nodes
+        if node.node_type == SimulationNodeType.CATCHUP_SERVICE
+    }
+    storage_nodes = [
+        node
+        for node in topology.nodes
+        if node.node_type == SimulationNodeType.CATCHUP_STORAGE
+    ]
+    storage_edges = [
+        edge
+        for edge in topology.edges
+        if edge.edge_type == SimulationEdgeType.STORES_ON
+    ]
+
+    assert topology.shared_storage is False
+    assert len(services) == 2
+    assert len(storage_nodes) == 2
+    assert len(storage_edges) == 2
+    assert len({edge.target_node_id for edge in storage_edges}) == 2
+    assert sum(
+        node.capacity["usable_capacity_tb"]
+        for node in storage_nodes
+    ) == 16.0

@@ -5,6 +5,7 @@ from copy import deepcopy
 from .fault_catalog import FAULT_CATALOG
 from .models import (
     DeploymentTopology,
+    FailureType,
     FaultSpecification,
     HiddenNodeState,
     HealthState,
@@ -60,18 +61,14 @@ def inject_fault(
 
     severity = fault.severity
 
-    if fault.failure_type.value == (
-        "storage_capacity_saturation"
-    ):
+    if fault.failure_type == FailureType.STORAGE_CAPACITY_SATURATION:
         target_state.latent_capacity_factor = max(
             0.0,
             1.0 - 0.70 * severity,
         )
         target_state.health_state = HealthState.DEGRADED
 
-    elif fault.failure_type.value == (
-        "storage_io_degradation"
-    ):
+    elif fault.failure_type == FailureType.STORAGE_IO_DEGRADATION:
         target_state.latent_latency_factor = (
             1.0 + 5.0 * severity
         )
@@ -80,17 +77,13 @@ def inject_fault(
         )
         target_state.health_state = HealthState.DEGRADED
 
-    elif fault.failure_type.value == (
-        "cleanup_job_failure"
-    ):
+    elif fault.failure_type == FailureType.CLEANUP_JOB_FAILURE:
         target_state.latent_error_factor = (
             1.0 + 3.0 * severity
         )
         target_state.health_state = HealthState.DEGRADED
 
-    elif fault.failure_type.value == (
-        "catchup_worker_failure"
-    ):
+    elif fault.failure_type == FailureType.CATCHUP_WORKER_FAILURE:
         target_state.latent_error_factor = (
             1.0 + 10.0 * severity
         )

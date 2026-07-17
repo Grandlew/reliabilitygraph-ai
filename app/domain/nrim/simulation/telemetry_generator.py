@@ -57,6 +57,25 @@ def _sample_poisson(
     return count - 1
 
 
+def apply_telemetry_missingness(
+    events: list[CanonicalTelemetryEvent],
+    *,
+    missing_probability: float,
+    rng: random.Random,
+) -> list[CanonicalTelemetryEvent]:
+    """Drop observations independently of fault state and labels."""
+    if not 0.0 <= missing_probability <= 1.0:
+        raise ValueError(
+            "missing_probability must be between zero and one"
+        )
+
+    return [
+        event
+        for event in events
+        if rng.random() >= missing_probability
+    ]
+
+
 def generate_storage_telemetry(
     *,
     topology: DeploymentTopology,

@@ -29,6 +29,22 @@ def test_audit_detects_class_in_scenario_id() -> None:
     assert warnings
 
 
+def test_audit_detects_failure_class_in_event_message() -> None:
+    scenario = {
+        "scenario_id": "scenario_123",
+        "telemetry": [
+            {
+                "signal_type": "log",
+                "value": "Detected storage_io_degradation",
+            }
+        ],
+    }
+
+    warnings = audit_observable_scenario(scenario)
+
+    assert warnings
+
+
 def test_healthy_scenario_requires_zero_root_causes() -> None:
     scenario = {
         "labels": {

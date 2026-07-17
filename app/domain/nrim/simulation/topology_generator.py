@@ -25,6 +25,10 @@ def generate_hotel_topology(
         )
 
     rng = random.Random(seed)
+    storage_pool_count = 1 if shared_storage else 2
+    total_storage_capacity_tb = (
+        8.0 if room_count < 150 else 16.0
+    )
 
     nodes: list[SimulationNode] = []
     edges: list[SimulationEdge] = []
@@ -90,24 +94,40 @@ def generate_hotel_topology(
         SimulationNodeType.DATABASE,
         "Middleware database",
     )
-    add_node(
-        "catchup_service_1",
-        SimulationNodeType.CATCHUP_SERVICE,
-        "CatchUP service",
-    )
-    add_node(
-        "catchup_storage_1",
-        SimulationNodeType.CATCHUP_STORAGE,
-        "CatchUP storage",
-        capacity={
-            "usable_capacity_tb": (
-                8.0 if room_count < 150 else 16.0
-            )
-        },
-        configuration={
-            "cleanup_enabled": True,
-        },
-    )
+    for pool_index in range(1, storage_pool_count + 1):
+        service_id = f"catchup_service_{pool_index}"
+        storage_id = f"catchup_storage_{pool_index}"
+
+        add_node(
+            service_id,
+            SimulationNodeType.CATCHUP_SERVICE,
+            f"CatchUP service {pool_index}",
+            metadata={
+                "storage_scope": (
+                    "shared" if shared_storage else "dedicated"
+                ),
+            },
+        )
+        add_node(
+            storage_id,
+            SimulationNodeType.CATCHUP_STORAGE,
+            f"CatchUP storage {pool_index}",
+            capacity={
+                "usable_capacity_tb": (
+                    total_storage_capacity_tb
+                    / storage_pool_count
+                )
+            },
+            configuration={
+                "cleanup_enabled": True,
+            },
+            metadata={
+                "shared": shared_storage,
+                "dedicated_service_node_id": (
+                    None if shared_storage else service_id
+                ),
+            },
+        )
     add_node(
         "epg_service_1",
         SimulationNodeType.EPG_SERVICE,
@@ -139,17 +159,21 @@ def generate_hotel_topology(
         "database_1",
         SimulationEdgeType.DEPENDS_ON,
     )
-    add_edge(
-        "middleware_1",
-        "catchup_service_1",
-        SimulationEdgeType.DEPENDS_ON,
-    )
-    add_edge(
-        "catchup_service_1",
-        "catchup_storage_1",
-        SimulationEdgeType.STORES_ON,
-        delay=5,
-    )
+    for pool_index in range(1, storage_pool_count + 1):
+        service_id = f"catchup_service_{pool_index}"
+        storage_id = f"catchup_storage_{pool_index}"
+
+        add_edge(
+            "middleware_1",
+            service_id,
+            SimulationEdgeType.DEPENDS_ON,
+        )
+        add_edge(
+            service_id,
+            storage_id,
+            SimulationEdgeType.STORES_ON,
+            delay=5,
+        )
     add_edge(
         "middleware_1",
         "epg_service_1",
@@ -178,11 +202,12 @@ def generate_hotel_topology(
             "database_1",
             SimulationEdgeType.DEPENDS_ON,
         )
-        add_edge(
-            "middleware_2",
-            "catchup_service_1",
-            SimulationEdgeType.DEPENDS_ON,
-        )
+        for pool_index in range(1, storage_pool_count + 1):
+            add_edge(
+                "middleware_2",
+                f"catchup_service_{pool_index}",
+                SimulationEdgeType.DEPENDS_ON,
+            )
 
     rooms_remaining = room_count
 
@@ -253,6 +278,7 @@ def generate_hotel_topology(
         ),
         room_count=room_count,
         floor_count=floor_count,
+        shared_storage=shared_storage,
         nodes=nodes,
         edges=edges,
     )

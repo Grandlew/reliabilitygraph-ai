@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import random
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from .dataset_builder import (
     build_scenario,
+    sample_injection_time,
     save_scenario,
 )
 from .models import (
@@ -58,7 +60,18 @@ def main() -> None:
             FailureType.STORAGE_IO_DEGRADATION
         ),
         target_node_id="catchup_storage_1",
-        injection_time=start_time + timedelta(hours=12),
+        injection_time=sample_injection_time(
+            start_time=start_time,
+            end_time=start_time + timedelta(
+                hours=regime.duration_hours
+            ),
+            sampling_interval_minutes=(
+                regime.sampling_interval_minutes
+            ),
+            rng=random.Random(
+                f"nrim-example:{seed}:injection"
+            ),
+        ),
         severity=0.75,
         parameters={
             "latency_multiplier": 4.0,
@@ -73,6 +86,7 @@ def main() -> None:
         regime=regime,
         start_time=start_time,
         fault=fault,
+        randomize_injection_time=False,
     )
 
     healthy = build_scenario(

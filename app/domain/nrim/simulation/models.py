@@ -92,6 +92,7 @@ class DeploymentTopology(BaseModel):
     deployment_family: str = Field(min_length=1)
     room_count: int = Field(gt=0)
     floor_count: int = Field(gt=0)
+    shared_storage: bool = True
 
     nodes: list[SimulationNode] = Field(min_length=1)
     edges: list[SimulationEdge] = Field(min_length=1)
@@ -120,15 +121,29 @@ class DeploymentTopology(BaseModel):
         node_map = {n.node_id: n for n in self.nodes}
         for node in self.nodes:
             if node.node_type == SimulationNodeType.CATCHUP_SERVICE:
-                valid_storage_edge = any(
+                storage_edges = [
+                    e
+                    for e in self.edges
+                    if (
                     e.source_node_id == node.node_id and
                     e.edge_type == SimulationEdgeType.STORES_ON and
                     node_map[e.target_node_id].node_type == SimulationNodeType.CATCHUP_STORAGE
-                    for e in self.edges
-                )
-                if not valid_storage_edge:
+                    )
+                ]
+                if not storage_edges:
                     raise ValueError(
                         f"CatchUPService {node.node_id} is missing a STORES_ON connection to a storage node")
+
+        if not self.shared_storage:
+            storage_targets = [
+                edge.target_node_id
+                for edge in self.edges
+                if edge.edge_type == SimulationEdgeType.STORES_ON
+            ]
+            if len(storage_targets) != len(set(storage_targets)):
+                raise ValueError(
+                    "Dedicated storage cannot be shared by multiple services"
+                )
 
         return self
 
@@ -148,6 +163,12 @@ class OperatingRegime(BaseModel):
     catchup_recording_channels: int = Field(gt=0)
     average_bitrate_mbps: float = Field(gt=0.0)
     retention_days: int = Field(gt=0)
+
+    telemetry_missing_probability: float = Field(
+        default=0.02,
+        ge=0.0,
+        le=1.0,
+    )
 
     random_seed: int
 

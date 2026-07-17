@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from collections import deque
 from copy import deepcopy
 from datetime import datetime, timedelta
+from heapq import heappop, heappush
 
 from .models import (
     DeploymentTopology,
@@ -10,6 +10,7 @@ from .models import (
     HealthState,
     HiddenNodeState,
     PropagationRecord,
+    SimulationEdge,
     SimulationEdgeType,
 )
 
@@ -36,7 +37,7 @@ def propagate_fault(
     updated = deepcopy(states)
     records: list[PropagationRecord] = []
 
-    outgoing: dict[str, list] = {}
+    outgoing: dict[str, list[SimulationEdge]] = {}
 
     for edge in topology.edges:
         if edge.edge_type not in ALLOWED_PROPAGATION_EDGES:
@@ -47,26 +48,67 @@ def propagate_fault(
             [],
         ).append(edge)
 
-    queue: deque[tuple[str, float, datetime]] = deque(
-        [
-            (
-                fault.target_node_id,
-                fault.severity,
-                timestamp,
-            )
-        ]
+    queue: list[tuple[float, int, str, datetime, SimulationEdge | None]] = []
+    sequence = 0
+    heappush(
+        queue,
+        (
+            -fault.severity,
+            sequence,
+            fault.target_node_id,
+            timestamp,
+            None,
+        ),
     )
 
-    visited_strength: dict[str, float] = {
-        fault.target_node_id: fault.severity
-    }
+    visited_nodes: set[str] = set()
+    recorded_edges: set[str] = set()
 
     while queue:
-        current_node_id, current_strength, current_time = (
-            queue.popleft()
-        )
+        (
+            negative_strength,
+            _,
+            current_node_id,
+            current_time,
+            incoming_edge,
+        ) = heappop(queue)
+        current_strength = -negative_strength
+
+        if current_node_id in visited_nodes:
+            continue
+
+        visited_nodes.add(current_node_id)
+
+        if incoming_edge is not None:
+            target_state = updated[current_node_id]
+            target_state.latent_error_factor *= (
+                1.0 + current_strength
+            )
+
+            if current_strength >= 0.75:
+                target_state.health_state = HealthState.CRITICAL
+            else:
+                target_state.health_state = HealthState.DEGRADED
+
+            target_state.caused_by_fault_id = fault.fault_id
+
+            if incoming_edge.edge_id not in recorded_edges:
+                records.append(
+                    PropagationRecord(
+                        source_node_id=incoming_edge.target_node_id,
+                        target_node_id=current_node_id,
+                        edge_id=incoming_edge.edge_id,
+                        fault_id=fault.fault_id,
+                        propagation_started_at=current_time,
+                        effect_strength=current_strength,
+                    )
+                )
+                recorded_edges.add(incoming_edge.edge_id)
 
         for edge in outgoing.get(current_node_id, []):
+            if edge.source_node_id in visited_nodes:
+                continue
+
             propagated_strength = (
                 current_strength
                 * edge.propagation_strength
@@ -76,50 +118,18 @@ def propagate_fault(
             if propagated_strength < minimum_strength:
                 continue
 
-            previous_strength = visited_strength.get(
-                edge.source_node_id,
-                0.0,
-            )
-
-            if propagated_strength <= previous_strength:
-                continue
-
             propagation_time = current_time + timedelta(
                 minutes=edge.propagation_delay_minutes
             )
-
-            target_state = updated[edge.source_node_id]
-            target_state.latent_error_factor *= (
-                1.0 + propagated_strength
-            )
-
-            if propagated_strength >= 0.75:
-                target_state.health_state = HealthState.CRITICAL
-            else:
-                target_state.health_state = HealthState.DEGRADED
-
-            target_state.caused_by_fault_id = fault.fault_id
-
-            records.append(
-                PropagationRecord(
-                    source_node_id=current_node_id,
-                    target_node_id=edge.source_node_id,
-                    edge_id=edge.edge_id,
-                    fault_id=fault.fault_id,
-                    propagation_started_at=propagation_time,
-                    effect_strength=propagated_strength,
-                )
-            )
-
-            visited_strength[edge.source_node_id] = (
-                propagated_strength
-            )
-
-            queue.append(
+            sequence += 1
+            heappush(
+                queue,
                 (
+                    -propagated_strength,
+                    sequence,
                     edge.source_node_id,
-                    propagated_strength,
                     propagation_time,
+                    edge,
                 )
             )
 
