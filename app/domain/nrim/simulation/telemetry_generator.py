@@ -30,7 +30,7 @@ def _quality_from_rng(
     return TelemetryQuality.LOW
 
 
-def _sample_poisson(
+def sample_poisson(
     rng: random.Random,
     rate: float,
 ) -> int:
@@ -104,7 +104,7 @@ def generate_storage_telemetry(
         + rng.gauss(0.0, 1.5),
     )
 
-    io_error_count = _sample_poisson(
+    io_error_count = sample_poisson(
         rng,
         0.1 * node_state.latent_error_factor,
     )
