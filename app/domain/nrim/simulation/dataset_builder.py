@@ -293,3 +293,51 @@ def save_scenario(
             file,
             indent=2,
         )
+
+
+def recorded_storage_growth_gb(
+    *,
+    channel_count: int,
+    average_bitrate_mbps: float,
+    interval_seconds: float,
+) -> float:
+    if channel_count <= 0:
+        raise ValueError(
+            "channel_count must be positive."
+        )
+
+    if average_bitrate_mbps <= 0:
+        raise ValueError(
+            "average_bitrate_mbps must be positive."
+        )
+
+    if interval_seconds <= 0:
+        raise ValueError(
+            "interval_seconds must be positive."
+        )
+
+    total_megabits = (
+        channel_count
+        * average_bitrate_mbps
+        * interval_seconds
+    )
+
+    total_megabytes = total_megabits / 8.0
+    total_gigabytes = total_megabytes / 1000.0
+
+    return total_gigabytes
+
+
+def utilization_increment_percent(
+    *,
+    growth_gb: float,
+    usable_capacity_tb: float,
+) -> float:
+    if usable_capacity_tb <= 0:
+        raise ValueError(
+            "usable_capacity_tb must be positive."
+        )
+
+    usable_capacity_gb = usable_capacity_tb * 1000.0
+
+    return growth_gb / usable_capacity_gb * 100.0
