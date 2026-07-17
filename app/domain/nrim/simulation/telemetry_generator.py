@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import random
 from datetime import datetime
 
@@ -27,6 +28,33 @@ def _quality_from_rng(
     if draw < 0.90:
         return TelemetryQuality.MEDIUM
     return TelemetryQuality.LOW
+
+
+def _sample_poisson(
+    rng: random.Random,
+    rate: float,
+) -> int:
+    """Sample a Poisson count using Knuth's exact algorithm.
+
+    This implementation is intended for the simulator's small event
+    rates and preserves reproducibility through the supplied Random
+    instance.
+    """
+    if not math.isfinite(rate) or rate < 0.0:
+        raise ValueError("Poisson rate must be finite and non-negative")
+
+    if rate == 0.0:
+        return 0
+
+    threshold = math.exp(-rate)
+    product = 1.0
+    count = 0
+
+    while product > threshold:
+        count += 1
+        product *= rng.random()
+
+    return count - 1
 
 
 def generate_storage_telemetry(
@@ -57,23 +85,9 @@ def generate_storage_telemetry(
         + rng.gauss(0.0, 1.5),
     )
 
-    io_error_count = max(
-        0,
-        int(
-            rng.poisson(
-                0.1
-                * node_state.latent_error_factor
-            )
-        )
-        if hasattr(rng, "poisson")
-        else int(
-            rng.random()
-            < min(
-                0.8,
-                0.01
-                * node_state.latent_error_factor,
-            )
-        ),
+    io_error_count = _sample_poisson(
+        rng,
+        0.1 * node_state.latent_error_factor,
     )
 
     common = {
