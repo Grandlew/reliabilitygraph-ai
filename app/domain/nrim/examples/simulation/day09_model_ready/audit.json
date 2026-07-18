@@ -1,0 +1,22 @@
+{
+  "window_count": 864,
+  "split_counts": {
+    "train": 448,
+    "test": 100,
+    "validation": 138,
+    "ood_test": 178
+  },
+  "failure_type_counts": {
+    "storage_io_degradation": 153,
+    "healthy": 432,
+    "cleanup_job_failure": 176,
+    "storage_capacity_saturation": 21,
+    "catchup_worker_failure": 82
+  },
+  "future_incident_counts": {
+    "0": 818,
+    "1": 46
+  },
+  "errors": [],
+  "warnings": []
+}
