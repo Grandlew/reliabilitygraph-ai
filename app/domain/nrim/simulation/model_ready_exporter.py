@@ -250,3 +250,84 @@ def export_scenario_windows(
         )
 
     return manifest_records
+
+
+def export_dataset(
+    *,
+    day08_manifest_path: Path,
+    output_root: Path,
+    specification: TemporalWindowSpecification,
+) -> dict[str, Any]:
+    manifest = load_json(
+        day08_manifest_path
+    )
+
+    feature_schema = build_feature_schema()
+
+    all_records: list[
+        ModelReadyManifestRecord
+    ] = []
+
+    for raw_record in manifest["records"]:
+        split = str(raw_record["split"])
+
+        observable_path = Path(
+            raw_record["observable_path"]
+        )
+        hidden_path = Path(
+            raw_record["hidden_path"]
+        )
+
+        split_output_dir = output_root / split
+
+        records = export_scenario_windows(
+            observable_path=observable_path,
+            hidden_path=hidden_path,
+            split=split,
+            output_dir=split_output_dir,
+            specification=specification,
+            feature_schema=feature_schema,
+        )
+
+        all_records.extend(records)
+
+    exported_manifest = {
+        "dataset_name": (
+            "nrim_model_ready_temporal_graphs"
+        ),
+        "dataset_version": "0.1.0",
+        "source_dataset_version": (
+            manifest.get("dataset_version")
+        ),
+        "window_specification": (
+            specification.model_dump(mode="json")
+        ),
+        "feature_schema": (
+            feature_schema.model_dump(mode="json")
+        ),
+        "records": [
+            record.model_dump(mode="json")
+            for record in all_records
+        ],
+    }
+
+    output_root.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    manifest_path = (
+        output_root / "manifest.json"
+    )
+
+    with manifest_path.open(
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            exported_manifest,
+            file,
+            indent=2,
+        )
+
+    return exported_manifest
