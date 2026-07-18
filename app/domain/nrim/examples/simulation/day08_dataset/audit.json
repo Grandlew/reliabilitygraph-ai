@@ -1,0 +1,32 @@
+{
+  "scenario_count": 50,
+  "split_counts": {
+    "train": 28,
+    "test": 4,
+    "validation": 8,
+    "ood_test": 10
+  },
+  "fault_class_counts": {
+    "storage_io_degradation": 10,
+    "cleanup_job_failure": 8,
+    "storage_capacity_saturation": 3,
+    "catchup_worker_failure": 4
+  },
+  "unique_topologies_by_split": {
+    "train": 14,
+    "test": 2,
+    "validation": 4,
+    "ood_test": 5
+  },
+  "mean_missingness_by_class": {
+    "storage_io_degradation": 0.073025,
+    "healthy": 0.074462,
+    "cleanup_job_failure": 0.062989,
+    "storage_capacity_saturation": 0.02181,
+    "catchup_worker_failure": 0.140493
+  },
+  "errors": [],
+  "warnings": [
+    "Failure-class imbalance exceeds 2:1."
+  ]
+}
