@@ -19,7 +19,7 @@ def build_markdown_report(
         "",
         f"**Domain:** {record.domain}",
         "",
-        f"**Status:** {record.status.value}",
+        f"**Status:** {record.status.value.upper()}",
         "",
         "## Fingerprint",
         "",

@@ -115,6 +115,8 @@ def missing_feature_fraction(
 
 def summarize_window(
     window: dict[str, Any],
+    *,
+    path: str | Path | None = None,
 ) -> WindowSummary:
     node_ids = list(window["node_ids"])
     node_feature_names = list(
@@ -173,7 +175,11 @@ def summarize_window(
     return WindowSummary(
         window_id=str(window["window_id"]),
         split=str(window["split"]),
-        path="",
+        path=(
+            str(path)
+            if path is not None
+            else str(window.get("path", "<in-memory>"))
+        ),
         node_count=len(node_ids),
         edge_count=len(edge_index),
         node_feature_count=len(node_feature_names),
@@ -211,15 +217,10 @@ def load_window_summaries(
     for manifest_record, window in iter_window_records(
         manifest
     ):
-        summary = summarize_window(window)
-
         summaries.append(
-            summary.model_copy(
-                update={
-                    "path": str(
-                        manifest_record["path"]
-                    ),
-                }
+            summarize_window(
+                window,
+                path=str(manifest_record["path"]),
             )
         )
 

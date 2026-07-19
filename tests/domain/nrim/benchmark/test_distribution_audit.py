@@ -24,7 +24,7 @@ def make_summary(
         node_feature_count=20,
         edge_feature_count=8,
         failure_type=failure_type,
-        current_incident=0,
+        current_incident=future_incident,
         future_incident=future_incident,
         root_cause_positive_count=(
             root_positive_count
