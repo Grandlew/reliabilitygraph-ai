@@ -390,3 +390,61 @@ def hybrid_engineering_baseline(
         )
 
     return results
+
+
+def rank_node_scores(
+    scores: list[NodeScore],
+) -> list[NodeScore]:
+
+    node_ids = [s.node_id for s in scores]
+    if len(node_ids) != len(set(node_ids)):
+        raise ValueError("Duplicate node IDs found in scores list")
+
+    # Sort by score descending, then node_id ascending for ties
+    return sorted(
+        scores,
+        key=lambda x: (-x.score, x.node_id)
+    )
+
+
+def run_baseline(
+    *,
+    window: dict[str, Any],
+    baseline: BaselineName,
+    random_seed: int = 42,
+) -> list[NodeScore]:
+    if baseline == BaselineName.RANDOM:
+        return random_baseline(
+            window=window,
+            seed=random_seed,
+        )
+
+    if baseline == BaselineName.STATIC_CRITICALITY:
+        return static_criticality_baseline(
+            window=window
+        )
+
+    if baseline == BaselineName.MAX_ANOMALY:
+        return anomaly_baseline(window=window)
+
+    if baseline == BaselineName.ERROR_EVIDENCE:
+        return error_evidence_baseline(
+            window=window
+        )
+
+    if baseline == BaselineName.TOPOLOGY_PROPAGATION:
+        return topology_propagation_baseline(
+            window=window,
+            local_scores=anomaly_baseline(
+                window=window
+            ),
+        )
+
+    if baseline == BaselineName.HYBRID_ENGINEERING:
+        return hybrid_engineering_baseline(
+            window=window
+        )
+
+    raise ValueError(
+        f"Unsupported baseline: {baseline.value}"
+    )
