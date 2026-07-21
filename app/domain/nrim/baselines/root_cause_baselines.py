@@ -12,6 +12,9 @@ from .models import (
     NodeScore,
 )
 
+from .topology_scoring import (
+    topology_propagation_baseline,
+)
 
 NODE_TYPE_CRITICALITY = {
     "catchup_storage": 1.00,
@@ -265,3 +268,125 @@ def error_evidence_baseline(
         )
 
     return scores
+
+
+def score_map(
+    scores: list[NodeScore],
+) -> dict[str, NodeScore]:
+    return {
+        item.node_id: item
+        for item in scores
+    }
+
+
+def hybrid_engineering_baseline(
+    *,
+    window: dict[str, Any],
+    anomaly_weight: float = 0.35,
+    error_weight: float = 0.25,
+    topology_weight: float = 0.25,
+    criticality_weight: float = 0.15,
+    missingness_penalty: float = 0.10,
+) -> list[NodeScore]:
+    total_weight = (
+        anomaly_weight
+        + error_weight
+        + topology_weight
+        + criticality_weight
+    )
+
+    if abs(total_weight - 1.0) > 1e-9:
+        raise ValueError(
+            "Positive hybrid weights must sum to 1."
+        )
+
+    anomaly = anomaly_baseline(window=window)
+    errors = error_evidence_baseline(window=window)
+    criticality = static_criticality_baseline(
+        window=window
+    )
+
+    topology = topology_propagation_baseline(
+        window=window,
+        local_scores=anomaly,
+    )
+
+    anomaly_by_id = score_map(anomaly)
+    errors_by_id = score_map(errors)
+    criticality_by_id = score_map(criticality)
+    topology_by_id = score_map(topology)
+
+    accessor = FeatureAccessor(
+        list(window["node_feature_names"])
+    )
+    rows = node_rows_by_id(window)
+
+    results = []
+
+    for node_id in window["node_ids"]:
+        node_id = str(node_id)
+
+        row = rows[node_id]
+
+        missing_features = [
+            name
+            for name in accessor.feature_names
+            if name.endswith("__missing")
+        ]
+
+        missing_fraction = (
+            sum(
+                accessor.get(row, name)
+                for name in missing_features
+            )
+            / len(missing_features)
+            if missing_features
+            else 0.0
+        )
+
+        components = {
+            "anomaly": (
+                anomaly_by_id[node_id].score
+            ),
+            "error": errors_by_id[node_id].score,
+            "topology": (
+                topology_by_id[node_id].score
+            ),
+            "criticality": (
+                criticality_by_id[node_id].score
+            ),
+        }
+
+        positive_score = (
+            anomaly_weight * components["anomaly"]
+            + error_weight * components["error"]
+            + topology_weight * components["topology"]
+            + criticality_weight
+            * components["criticality"]
+        )
+
+        penalty = (
+            missingness_penalty
+            * missing_fraction
+        )
+
+        final_score = max(
+            0.0,
+            positive_score - penalty,
+        )
+
+        results.append(
+            NodeScore(
+                node_id=node_id,
+                score=final_score,
+                evidence={
+                    **components,
+                    "missing_fraction": (
+                        missing_fraction
+                    ),
+                    "missingness_penalty": penalty,
+                },
+            )
+        )
+
+    return results
