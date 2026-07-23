@@ -16,7 +16,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.17849159568142753,
-      "mean_runtime_ms": 0.13652319456383155
+      "mean_runtime_ms": 0.15723405901909523
     },
     "test": {
       "window_count": 100,
@@ -31,7 +31,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.16591927224821962,
-      "mean_runtime_ms": 0.06765399943105876
+      "mean_runtime_ms": 0.06324500194750726
     },
     "ood_test": {
       "window_count": 178,
@@ -46,7 +46,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.18326515062609264,
-      "mean_runtime_ms": 0.048031462775020115
+      "mean_runtime_ms": 0.04739549895225281
     },
     "configuration": {
       "random_seed": 42,
@@ -72,7 +72,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.9057971014492754,
-      "mean_runtime_ms": 0.11735507692007915
+      "mean_runtime_ms": 0.12005652820664471
     },
     "test": {
       "window_count": 100,
@@ -87,7 +87,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.5866666666666667,
-      "mean_runtime_ms": 0.14032700331881642
+      "mean_runtime_ms": 0.14444599160924554
     },
     "ood_test": {
       "window_count": 178,
@@ -102,7 +102,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.5936329588014981,
-      "mean_runtime_ms": 0.11280785822257232
+      "mean_runtime_ms": 0.11210281302461798
     },
     "configuration": {
       "random_seed": 42,
@@ -128,7 +128,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.8260869565217391,
-      "mean_runtime_ms": 0.27943696435270965
+      "mean_runtime_ms": 0.2811239176915716
     },
     "test": {
       "window_count": 100,
@@ -143,7 +143,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.535,
-      "mean_runtime_ms": 0.20944100455380976
+      "mean_runtime_ms": 0.20642999792471528
     },
     "ood_test": {
       "window_count": 178,
@@ -158,7 +158,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.5823970037453183,
-      "mean_runtime_ms": 0.1597561797629414
+      "mean_runtime_ms": 0.15642697036036113
     },
     "configuration": {
       "random_seed": 42,
@@ -184,7 +184,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.8381642512077294,
-      "mean_runtime_ms": 0.15074637907462707
+      "mean_runtime_ms": 0.1475862218944383
     },
     "test": {
       "window_count": 100,
@@ -199,7 +199,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.52,
-      "mean_runtime_ms": 0.1863930036779493
+      "mean_runtime_ms": 0.17306098830886185
     },
     "ood_test": {
       "window_count": 178,
@@ -214,7 +214,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.6048689138576779,
-      "mean_runtime_ms": 0.13485337081731538
+      "mean_runtime_ms": 0.133577528870089
     },
     "configuration": {
       "random_seed": 42,
@@ -240,7 +240,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.8260869565217391,
-      "mean_runtime_ms": 0.40851376674043527
+      "mean_runtime_ms": 0.37178840231744276
     },
     "test": {
       "window_count": 100,
@@ -255,7 +255,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.535,
-      "mean_runtime_ms": 0.30397600028663874
+      "mean_runtime_ms": 0.302181001752615
     },
     "ood_test": {
       "window_count": 178,
@@ -270,7 +270,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.5823970037453183,
-      "mean_runtime_ms": 0.23151516621367316
+      "mean_runtime_ms": 0.22614493788209525
     },
     "configuration": {
       "random_seed": 42,
@@ -296,7 +296,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.8333333333333334,
-      "mean_runtime_ms": 0.7870608672459164
+      "mean_runtime_ms": 0.7186876728023955
     },
     "test": {
       "window_count": 100,
@@ -311,7 +311,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.535,
-      "mean_runtime_ms": 0.9505629993509501
+      "mean_runtime_ms": 0.871022999053821
     },
     "ood_test": {
       "window_count": 178,
@@ -326,7 +326,7 @@
       "healthy_false_selection_rate": 1.0,
       "faulty_coverage": 1.0,
       "selective_mrr": 0.5823970037453183,
-      "mean_runtime_ms": 0.7553943825278724
+      "mean_runtime_ms": 0.7085101096890867
     },
     "configuration": {
       "random_seed": 42,

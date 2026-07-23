@@ -15,7 +15,7 @@
     "healthy_false_selection_rate": 1.0,
     "faulty_coverage": 1.0,
     "selective_mrr": 0.9057971014492754,
-    "mean_runtime_ms": 0.11735507692007915
+    "mean_runtime_ms": 0.12005652820664471
   },
   "test": {
     "window_count": 100,
@@ -30,7 +30,7 @@
     "healthy_false_selection_rate": 1.0,
     "faulty_coverage": 1.0,
     "selective_mrr": 0.5866666666666667,
-    "mean_runtime_ms": 0.14032700331881642
+    "mean_runtime_ms": 0.14444599160924554
   },
   "ood_test": {
     "window_count": 178,
@@ -45,7 +45,7 @@
     "healthy_false_selection_rate": 1.0,
     "faulty_coverage": 1.0,
     "selective_mrr": 0.5936329588014981,
-    "mean_runtime_ms": 0.11280785822257232
+    "mean_runtime_ms": 0.11210281302461798
   },
   "configuration": {
     "random_seed": 42,
