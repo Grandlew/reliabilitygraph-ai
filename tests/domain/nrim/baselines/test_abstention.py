@@ -1,3 +1,5 @@
+import pytest
+
 from app.domain.nrim.baselines.abstention import (
     calculate_score_margin,
     decide_abstention,
@@ -24,7 +26,7 @@ def scores():
 def test_margin() -> None:
     assert calculate_score_margin(
         scores()
-    ) == 0.3
+    ) == pytest.approx(0.3)
 
 
 def test_abstains_on_low_top_score() -> None:
