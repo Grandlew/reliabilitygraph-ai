@@ -1,0 +1,56 @@
+{
+  "baseline": "random",
+  "benchmark_fingerprint": "993b38b0135103f24b93e73db4ee61590df8c72f62f63a921d1f30818d54a972",
+  "abstention_threshold": null,
+  "validation": {
+    "window_count": 138,
+    "evaluated_faulty_windows": 69,
+    "mrr": 0.17849159568142753,
+    "hits_at_1": 0.043478260869565216,
+    "hits_at_3": 0.14492753623188406,
+    "mean_rank": 10.927536231884059,
+    "median_rank": 10.0,
+    "healthy_window_count": 69,
+    "healthy_abstention_rate": 0.0,
+    "healthy_false_selection_rate": 1.0,
+    "faulty_coverage": 1.0,
+    "selective_mrr": 0.17849159568142753,
+    "mean_runtime_ms": 0.13652319456383155
+  },
+  "test": {
+    "window_count": 100,
+    "evaluated_faulty_windows": 50,
+    "mrr": 0.16591927224821962,
+    "hits_at_1": 0.06,
+    "hits_at_3": 0.12,
+    "mean_rank": 12.86,
+    "median_rank": 14.0,
+    "healthy_window_count": 50,
+    "healthy_abstention_rate": 0.0,
+    "healthy_false_selection_rate": 1.0,
+    "faulty_coverage": 1.0,
+    "selective_mrr": 0.16591927224821962,
+    "mean_runtime_ms": 0.06765399943105876
+  },
+  "ood_test": {
+    "window_count": 178,
+    "evaluated_faulty_windows": 89,
+    "mrr": 0.18326515062609264,
+    "hits_at_1": 0.056179775280898875,
+    "hits_at_3": 0.15730337078651685,
+    "mean_rank": 10.123595505617978,
+    "median_rank": 10.0,
+    "healthy_window_count": 89,
+    "healthy_abstention_rate": 0.0,
+    "healthy_false_selection_rate": 1.0,
+    "faulty_coverage": 1.0,
+    "selective_mrr": 0.18326515062609264,
+    "mean_runtime_ms": 0.048031462775020115
+  },
+  "configuration": {
+    "random_seed": 42,
+    "maximum_healthy_false_selection_rate": 0.1,
+    "minimum_faulty_coverage": 0.7,
+    "abstention_threshold_feasible": false
+  }
+}

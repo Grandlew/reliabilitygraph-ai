@@ -8,6 +8,7 @@ from app.domain.nrim.benchmark.dataset_loader import (
 )
 
 from .baseline_evaluator import (
+    NoFeasibleThresholdError,
     choose_abstention_threshold,
     evaluate_split,
     load_split_windows,
@@ -97,15 +98,25 @@ def main() -> None:
             f"\nEvaluating {baseline.value}"
         )
 
-        threshold = choose_abstention_threshold(
-            validation_windows=(
-                validation_windows
-            ),
-            baseline=baseline,
-            maximum_healthy_false_selection_rate=0.10,
-            minimum_faulty_coverage=0.70,
-            random_seed=42,
-        )
+        try:
+            threshold = choose_abstention_threshold(
+                validation_windows=(
+                    validation_windows
+                ),
+                baseline=baseline,
+                maximum_healthy_false_selection_rate=0.10,
+                minimum_faulty_coverage=0.70,
+                random_seed=42,
+            )
+            threshold_feasible = True
+        except NoFeasibleThresholdError:
+            threshold = None
+            threshold_feasible = False
+            print(
+                "No abstention threshold satisfies the "
+                "validation constraints; reporting the "
+                "unabstained baseline."
+            )
 
         _, validation_summary = evaluate_split(
             windows=validation_windows,
@@ -141,6 +152,9 @@ def main() -> None:
                 "random_seed": 42,
                 "maximum_healthy_false_selection_rate": 0.10,
                 "minimum_faulty_coverage": 0.70,
+                "abstention_threshold_feasible": (
+                    threshold_feasible
+                ),
             },
         )
 

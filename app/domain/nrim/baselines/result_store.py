@@ -66,12 +66,17 @@ def build_result_markdown(
     result: BaselineEvaluationResult,
 ) -> str:
     config_json = json.dumps(result.configuration, indent=2, sort_keys=True)
+    threshold_display = (
+        str(result.abstention_threshold)
+        if result.abstention_threshold is not None
+        else "disabled (no feasible validation threshold)"
+    )
 
     lines = [
         f"# Evaluation Result: {result.baseline.value}",
         "",
         f"**Benchmark Fingerprint:** `{result.benchmark_fingerprint}`",
-        f"**Abstention Threshold:** `{result.abstention_threshold}`",
+        f"**Abstention Threshold:** `{threshold_display}`",
         "",
         "## Metrics",
         "",

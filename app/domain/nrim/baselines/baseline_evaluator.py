@@ -25,6 +25,10 @@ from .root_cause_baselines import (
 )
 
 
+class NoFeasibleThresholdError(ValueError):
+    """Raised when validation constraints admit no threshold."""
+
+
 def load_json(path: str | Path) -> dict[str, Any]:
     with Path(path).open(
         "r",
@@ -161,7 +165,7 @@ def choose_abstention_threshold(
                 (metrics.mrr, metrics.faulty_coverage, -threshold, threshold))
 
     if not feasible_candidates:
-        raise ValueError(
+        raise NoFeasibleThresholdError(
             "No feasible threshold found satisfying the specified constraints.")
 
     feasible_candidates.sort(reverse=True)
@@ -172,16 +176,20 @@ def evaluate_split(
     *,
     windows: list[dict[str, Any]],
     baseline: BaselineName,
-    abstention_threshold: float,
+    abstention_threshold: float | None,
     random_seed: int = 42,
 ):
+    minimum_top_score = (
+        abstention_threshold
+        if abstention_threshold is not None
+        else float("-inf")
+    )
+
     results = [
         evaluate_window(
             window=window,
             baseline=baseline,
-            minimum_top_score=(
-                abstention_threshold
-            ),
+            minimum_top_score=minimum_top_score,
             random_seed=random_seed,
         )
         for window in windows
