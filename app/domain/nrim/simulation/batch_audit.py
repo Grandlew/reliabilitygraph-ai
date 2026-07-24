@@ -7,6 +7,7 @@ from statistics import mean
 from typing import Any
 
 from .dataset_manifest import DatasetManifest
+from .models import FailureType
 from .quality_audit import (
     audit_observable_scenario,
     audit_root_cause_labels,
@@ -49,6 +50,20 @@ def audit_manifest(
         record["split"]
         for record in records
     )
+
+    failure_counts_by_split: dict[
+        str,
+        Counter[str],
+    ] = defaultdict(Counter)
+    healthy_counts_by_split: Counter[str] = Counter()
+
+    for record in records:
+        if record["healthy"]:
+            healthy_counts_by_split[record["split"]] += 1
+        else:
+            failure_counts_by_split[record["split"]][
+                record["failure_type"]
+            ] += 1
 
     topology_by_split: dict[
         str,
@@ -100,6 +115,51 @@ def audit_manifest(
                 "Failure-class imbalance exceeds 2:1."
             )
 
+    non_ood_pair_count = len(
+        {
+            record["pair_id"]
+            for record in records
+            if record["split"] != "ood_test"
+        }
+    )
+    required_classes = {
+        failure_type.value
+        for failure_type in FailureType
+        if failure_type != FailureType.HEALTHY
+    }
+
+    if non_ood_pair_count >= 12:
+        required_splits = [
+            split
+            for split in (
+                "train",
+                "validation",
+                "test",
+                "development_test",
+                "locked_test",
+                "semantic_challenge",
+            )
+            if split_counts[split] > 0
+        ]
+        for split in required_splits:
+            present = set(
+                failure_counts_by_split[split]
+            )
+            missing = sorted(required_classes - present)
+            if missing:
+                errors.append(
+                    f"{split} is missing fault classes: {missing}"
+                )
+
+            faulty_count = sum(
+                failure_counts_by_split[split].values()
+            )
+            if healthy_counts_by_split[split] != faulty_count:
+                errors.append(
+                    f"{split} does not preserve the 1:1 "
+                    "healthy/faulty counterfactual ratio."
+                )
+
     for record in records:
         observable = load_json(
             record["observable_path"]
@@ -132,6 +192,10 @@ def audit_manifest(
         "fault_class_counts": dict(
             failure_counts
         ),
+        "fault_class_counts_by_split": {
+            split: dict(counts)
+            for split, counts in failure_counts_by_split.items()
+        },
         "unique_topologies_by_split": {
             split: len(values)
             for split, values

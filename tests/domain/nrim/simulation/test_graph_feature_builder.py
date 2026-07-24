@@ -69,10 +69,15 @@ def test_missing_signal_has_missing_indicator() -> None:
         "system__disk__utilization__missing"
     )
 
-    assert all(
-        row[missing_index] == 1.0
-        for row in matrix
+    storage_index = node_ids.index(
+        "catchup_storage_1"
     )
+    service_index = node_ids.index(
+        "catchup_service_1"
+    )
+
+    assert matrix[storage_index][missing_index] == 1.0
+    assert matrix[service_index][missing_index] == 0.0
 
 
 def test_edge_rows_match_edges() -> None:

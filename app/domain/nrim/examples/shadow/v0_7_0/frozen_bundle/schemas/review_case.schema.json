@@ -1,0 +1,61 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "candidate_source": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Candidate Source",
+      "type": "string"
+    },
+    "case_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "created_at_utc": {
+      "format": "date-time",
+      "title": "Created At Utc",
+      "type": "string"
+    },
+    "deployment_pseudonym": {
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "Deployment Pseudonym",
+      "type": "string"
+    },
+    "prediction_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Prediction Ids",
+      "type": "array"
+    },
+    "requires_double_review": {
+      "title": "Requires Double Review",
+      "type": "boolean"
+    },
+    "review_window_end_utc": {
+      "format": "date-time",
+      "title": "Review Window End Utc",
+      "type": "string"
+    },
+    "review_window_start_utc": {
+      "format": "date-time",
+      "title": "Review Window Start Utc",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "deployment_pseudonym",
+    "review_window_start_utc",
+    "review_window_end_utc",
+    "prediction_ids",
+    "candidate_source",
+    "requires_double_review",
+    "created_at_utc"
+  ],
+  "title": "ReviewCase",
+  "type": "object"
+}

@@ -1,0 +1,56 @@
+{
+  "scenario_count": 168,
+  "split_counts": {
+    "train": 80,
+    "validation": 32,
+    "test": 32,
+    "ood_test": 24
+  },
+  "fault_class_counts": {
+    "storage_capacity_saturation": 21,
+    "storage_io_degradation": 21,
+    "cleanup_job_failure": 21,
+    "catchup_worker_failure": 21
+  },
+  "fault_class_counts_by_split": {
+    "train": {
+      "storage_capacity_saturation": 10,
+      "storage_io_degradation": 10,
+      "cleanup_job_failure": 10,
+      "catchup_worker_failure": 10
+    },
+    "validation": {
+      "storage_capacity_saturation": 4,
+      "storage_io_degradation": 4,
+      "cleanup_job_failure": 4,
+      "catchup_worker_failure": 4
+    },
+    "test": {
+      "storage_capacity_saturation": 4,
+      "storage_io_degradation": 4,
+      "cleanup_job_failure": 4,
+      "catchup_worker_failure": 4
+    },
+    "ood_test": {
+      "storage_capacity_saturation": 3,
+      "storage_io_degradation": 3,
+      "cleanup_job_failure": 3,
+      "catchup_worker_failure": 3
+    }
+  },
+  "unique_topologies_by_split": {
+    "train": 9,
+    "validation": 4,
+    "test": 4,
+    "ood_test": 3
+  },
+  "mean_missingness_by_class": {
+    "storage_capacity_saturation": 0.059087,
+    "healthy": 0.04913,
+    "storage_io_degradation": 0.046547,
+    "cleanup_job_failure": 0.047305,
+    "catchup_worker_failure": 0.043582
+  },
+  "errors": [],
+  "warnings": []
+}

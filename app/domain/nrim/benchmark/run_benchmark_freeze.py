@@ -12,6 +12,7 @@ from .dataset_fingerprint import (
     build_dataset_fingerprint,
 )
 from .dataset_loader import (
+    iter_window_records,
     load_model_ready_manifest,
     load_window_summaries,
 )
@@ -27,6 +28,7 @@ from .report_builder import (
     save_freeze_record,
 )
 from .shortcut_audit import (
+    run_root_cause_shortcut_audit,
     run_shortcut_audit,
 )
 
@@ -38,7 +40,7 @@ def main() -> None:
         nrim_dir
         / "examples"
         / "simulation"
-        / "day09_model_ready"
+        / "day09_model_ready_v2"
     )
 
     manifest_path = (
@@ -48,7 +50,7 @@ def main() -> None:
 
     output_root = (
         model_ready_root
-        / "benchmark_v0_1_0"
+        / "benchmark_v0_4_0"
     )
 
     manifest = load_model_ready_manifest(
@@ -72,6 +74,25 @@ def main() -> None:
     shortcut_results = run_shortcut_audit(
         summaries,
         target_name="future_incident",
+    )
+
+    loaded_windows = [
+        (str(record["split"]), window)
+        for record, window in iter_window_records(manifest)
+    ]
+    shortcut_results.extend(
+        run_root_cause_shortcut_audit(
+            training_windows=[
+                window
+                for split, window in loaded_windows
+                if split == "train"
+            ],
+            validation_windows=[
+                window
+                for split, window in loaded_windows
+                if split == "validation"
+            ],
+        )
     )
 
     findings.extend(
@@ -107,7 +128,7 @@ def main() -> None:
         benchmark_name=(
             "NRIM IPTV Reliability Benchmark"
         ),
-        benchmark_version="0.1.0",
+        benchmark_version="0.4.0",
         domain="iptv_synthetic",
         status=status,
         source_manifest_path=str(

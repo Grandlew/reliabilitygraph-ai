@@ -1,0 +1,21 @@
+{
+  "accessed_at": "2026-07-23T16:59:07.543883+00:00",
+  "commitment_sha256": "b0a5b115a4a50282cc3f1726855a82c5b4771d10be8c5f245fce29e192478cea",
+  "validation_acceptance": {
+    "scenario_false_selection_at_most_0_10": true,
+    "global_95_ucb_at_most_0_10": true,
+    "worst_confounder_point_at_most_0_10": true,
+    "worst_confounder_ucb_at_most_0_15": true,
+    "episode_recall_at_least_0_80": true,
+    "each_family_recall_at_least_0_70": true,
+    "median_delay_at_most_2h": true,
+    "p90_delay_at_most_4h": true,
+    "capacity_median_delay_at_most_4h": true,
+    "fragmentation_at_most_0_05": true,
+    "unsupported_safe_semantics": true,
+    "sequence_and_split_audit": true,
+    "inference_schema_has_no_context_features": true,
+    "stage2_frozen": true
+  },
+  "purpose": "single final v0.6 locked-test evaluation"
+}

@@ -15,7 +15,10 @@ class DatasetSplit(str, Enum):
     TRAIN = "train"
     VALIDATION = "validation"
     TEST = "test"
+    DEVELOPMENT_TEST = "development_test"
+    LOCKED_TEST = "locked_test"
     OOD_TEST = "ood_test"
+    SEMANTIC_CHALLENGE = "semantic_challenge"
 
 
 class MissingnessMode(str, Enum):
@@ -140,6 +143,10 @@ class ScenarioPlan(BaseModel):
         ge=0.20,
         le=0.80,
     )
+    fault_duration_hours: float | None = Field(
+        default=None,
+        gt=0.0,
+    )
 
     confounders: list[ConfounderType] = Field(
         default_factory=list
@@ -168,6 +175,10 @@ class ScenarioPlan(BaseModel):
             if self.fault_injection_fraction is not None:
                 raise ValueError(
                     "Healthy scenarios cannot have injection time."
+                )
+            if self.fault_duration_hours is not None:
+                raise ValueError(
+                    "Healthy scenarios cannot have fault duration."
                 )
 
         else:
@@ -265,8 +276,8 @@ def sample_environment(
             8.0,
         ),
         retention_days=retention_days,
-        scenario_duration_hours=rng.choice(
-            [24, 36, 48, 72]
+        scenario_duration_hours=(
+            48 if ood else 36
         ),
         sampling_interval_minutes=rng.choice(
             [5, 10, 15, 30]
@@ -317,6 +328,7 @@ def sample_missingness_plan(
                         "system.disk.io_latency",
                         "system.disk.io_errors",
                         "iptv.catchup.recording_failures",
+                        "iptv.catchup.service_availability",
                     ]
                 )
             ],

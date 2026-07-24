@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 from collections import Counter
+import hashlib
+from statistics import mean
 from typing import Callable
+
+from app.domain.nrim.baselines.root_cause_baselines import (
+    NODE_TYPE_CRITICALITY,
+)
 
 from .models import ShortcutResult, WindowSummary
 
@@ -287,6 +293,208 @@ def run_shortcut_audit(
                         "No strong validation shortcut "
                         "detected under this scalar audit."
                     )
+                ),
+            )
+        )
+
+    return results
+
+
+def _root_index(window: dict) -> int | None:
+    labels = [
+        int(value)
+        for value in window["targets"]["root_cause_node"]
+    ]
+    positives = [
+        index
+        for index, value in enumerate(labels)
+        if value == 1
+    ]
+    return positives[0] if len(positives) == 1 else None
+
+
+def _node_types(window: dict) -> list[str]:
+    names = list(window["node_feature_names"])
+    type_indices = [
+        (index, name.removeprefix("node_type__"))
+        for index, name in enumerate(names)
+        if name.startswith("node_type__")
+    ]
+    return [
+        next(
+            (
+                node_type
+                for index, node_type in type_indices
+                if float(row[index]) > 0.5
+            ),
+            "unknown",
+        )
+        for row in window["node_features"]
+    ]
+
+
+def _feature_values(
+    window: dict,
+    name: str,
+) -> list[float]:
+    names = list(window["node_feature_names"])
+    if name not in names:
+        return [0.0 for _ in window["node_ids"]]
+    index = names.index(name)
+    return [
+        float(row[index])
+        for row in window["node_features"]
+    ]
+
+
+def _identifier_bucket(value: str) -> int:
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+    return int(digest[:8], 16) % 8
+
+
+def run_root_cause_shortcut_audit(
+    *,
+    training_windows: list[dict],
+    validation_windows: list[dict],
+    suspicious_hits_at_1: float = 0.70,
+    suspicious_improvement: float = 0.15,
+) -> list[ShortcutResult]:
+    """Audit fixed and learned nuisance-only root-cause rankings."""
+    training_faulty = [
+        window
+        for window in training_windows
+        if _root_index(window) is not None
+    ]
+    validation_faulty = [
+        window
+        for window in validation_windows
+        if _root_index(window) is not None
+    ]
+    if not training_faulty or not validation_faulty:
+        raise ValueError(
+            "Root-cause shortcut audit requires faulty train "
+            "and validation windows."
+        )
+
+    root_types = Counter(
+        _node_types(window)[int(_root_index(window))]
+        for window in training_faulty
+    )
+    default_root_type = root_types.most_common(1)[0][0]
+    root_positions = Counter(
+        int(_root_index(window))
+        for window in training_faulty
+    )
+    default_position = root_positions.most_common(1)[0][0]
+    root_ids = Counter(
+        str(window["node_ids"][int(_root_index(window))])
+        for window in training_faulty
+    )
+
+    type_by_size: dict[int, Counter[str]] = {}
+    type_by_bucket: dict[int, Counter[str]] = {}
+    for window in training_faulty:
+        root_type = _node_types(window)[int(_root_index(window))]
+        type_by_size.setdefault(
+            len(window["node_ids"]),
+            Counter(),
+        )[root_type] += 1
+        bucket = _identifier_bucket(
+            str(window["source_scenario_id"])
+        )
+        type_by_bucket.setdefault(bucket, Counter())[root_type] += 1
+
+    baseline = mean(
+        1.0 / len(window["node_ids"])
+        for window in validation_faulty
+    )
+
+    def predicted_type(window: dict, source: str) -> str:
+        if source == "topology_size":
+            counts = type_by_size.get(len(window["node_ids"]))
+        else:
+            counts = type_by_bucket.get(
+                _identifier_bucket(
+                    str(window["source_scenario_id"])
+                )
+            )
+        return (
+            counts.most_common(1)[0][0]
+            if counts
+            else default_root_type
+        )
+
+    def top_index(window: dict, shortcut: str) -> int:
+        node_ids = [str(value) for value in window["node_ids"]]
+        node_types = _node_types(window)
+
+        if shortcut == "node_type":
+            scores = [
+                float(node_type == default_root_type)
+                for node_type in node_types
+            ]
+        elif shortcut == "static_criticality":
+            scores = [
+                NODE_TYPE_CRITICALITY.get(node_type, 0.0)
+                for node_type in node_types
+            ]
+        elif shortcut == "node_degree":
+            scores = _feature_values(window, "total_degree")
+        elif shortcut == "node_position":
+            scores = [
+                -abs(index - default_position)
+                for index in range(len(node_ids))
+            ]
+        elif shortcut == "node_identifier":
+            scores = [
+                float(root_ids[node_id])
+                for node_id in node_ids
+            ]
+        elif shortcut in {"topology_size", "scenario_identifier"}:
+            expected_type = predicted_type(window, shortcut)
+            scores = [
+                float(node_type == expected_type)
+                for node_type in node_types
+            ]
+        else:
+            raise ValueError(f"Unknown root-cause shortcut: {shortcut}")
+
+        return min(
+            range(len(node_ids)),
+            key=lambda index: (-scores[index], node_ids[index]),
+        )
+
+    results = []
+    for shortcut in (
+        "node_type",
+        "static_criticality",
+        "node_degree",
+        "node_position",
+        "node_identifier",
+        "topology_size",
+        "scenario_identifier",
+    ):
+        score = mean(
+            float(top_index(window, shortcut) == _root_index(window))
+            for window in validation_faulty
+        )
+        improvement = score - baseline
+        suspicious = (
+            score >= suspicious_hits_at_1
+            and improvement >= suspicious_improvement
+        )
+        results.append(
+            ShortcutResult(
+                shortcut_name=f"root_cause__{shortcut}",
+                target_name="root_cause_node",
+                baseline_score=round(baseline, 6),
+                shortcut_score=round(score, 6),
+                score_improvement=round(improvement, 6),
+                suspicious=suspicious,
+                explanation=(
+                    "Suspicious root-cause shortcut detected."
+                    if suspicious
+                    else "No blocking root-cause shortcut detected."
                 ),
             )
         )

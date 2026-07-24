@@ -39,6 +39,10 @@ def test_every_signal_has_missingness_feature() -> None:
             f"{safe_signal}__missing"
             in node_names
         )
+        assert (
+            f"{safe_signal}__applicable"
+            in node_names
+        )
 
 
 def test_feature_schema_contains_node_types() -> None:

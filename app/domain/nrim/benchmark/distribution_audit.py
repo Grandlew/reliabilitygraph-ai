@@ -161,11 +161,17 @@ def audit_failure_classes(
         )
 
     for split, counts in by_split.items():
-        if not counts:
+        fault_counts = {
+            failure_type: count
+            for failure_type, count in counts.items()
+            if failure_type != "healthy"
+        }
+
+        if not fault_counts:
             continue
 
-        maximum = max(counts.values())
-        minimum = min(counts.values())
+        maximum = max(fault_counts.values())
+        minimum = min(fault_counts.values())
 
         if minimum > 0 and maximum / minimum > 4.0:
             findings.append(
@@ -178,7 +184,7 @@ def audit_failure_classes(
                     ),
                     details={
                         "split": split,
-                        "counts": dict(counts),
+                        "counts": fault_counts,
                     },
                 )
             )

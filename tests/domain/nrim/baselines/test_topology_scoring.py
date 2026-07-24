@@ -78,5 +78,27 @@ def test_cycle_does_not_explode() -> None:
         maximum_hops=10,
     )
 
-    assert result["a"] < 10.0
-    assert result["b"] < 10.0
+    assert 0.0 <= result["a"] <= 1.0
+    assert 0.0 <= result["b"] <= 1.0
+
+
+def test_multiple_sources_add_bounded_topology_evidence() -> None:
+    result = propagate_scores(
+        initial_scores={
+            "symptom_a": 0.6,
+            "symptom_b": 0.4,
+            "dependency": 0.1,
+        },
+        adjacency={
+            "symptom_a": [("dependency", 1.0)],
+            "symptom_b": [("dependency", 1.0)],
+        },
+        propagation_decay=0.5,
+        aggregation_weight=0.5,
+        maximum_hops=1,
+    )
+
+    # Residual evidence is normalized across sources, preventing node
+    # degree from inflating the dependency score.
+    assert result["dependency"] == pytest.approx(0.2)
+import pytest

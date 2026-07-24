@@ -1,0 +1,109 @@
+{
+  "additionalProperties": false,
+  "description": "Observable workload context required by the frozen v0.6 policy.",
+  "properties": {
+    "average_bitrate_mbps": {
+      "exclusiveMinimum": 0.0,
+      "title": "Average Bitrate Mbps",
+      "type": "number"
+    },
+    "base_occupancy_fraction": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Base Occupancy Fraction",
+      "type": "number"
+    },
+    "catchup_recording_channels": {
+      "exclusiveMinimum": 0,
+      "title": "Catchup Recording Channels",
+      "type": "integer"
+    },
+    "collector_family": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Collector Family",
+      "type": "string"
+    },
+    "deployment_pseudonym": {
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "Deployment Pseudonym",
+      "type": "string"
+    },
+    "floor_count": {
+      "exclusiveMinimum": 0,
+      "title": "Floor Count",
+      "type": "integer"
+    },
+    "profile_version": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Profile Version",
+      "type": "string"
+    },
+    "redundant_middleware": {
+      "title": "Redundant Middleware",
+      "type": "boolean"
+    },
+    "retention_days": {
+      "exclusiveMinimum": 0,
+      "title": "Retention Days",
+      "type": "integer"
+    },
+    "room_count": {
+      "exclusiveMinimum": 0,
+      "title": "Room Count",
+      "type": "integer"
+    },
+    "schema_version": {
+      "default": "0.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "shared_storage": {
+      "title": "Shared Storage",
+      "type": "boolean"
+    },
+    "software_version": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Software Version",
+      "type": "string"
+    },
+    "valid_from_utc": {
+      "format": "date-time",
+      "title": "Valid From Utc",
+      "type": "string"
+    },
+    "valid_to_utc": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valid To Utc"
+    }
+  },
+  "required": [
+    "deployment_pseudonym",
+    "profile_version",
+    "valid_from_utc",
+    "software_version",
+    "room_count",
+    "floor_count",
+    "retention_days",
+    "base_occupancy_fraction",
+    "catchup_recording_channels",
+    "average_bitrate_mbps",
+    "shared_storage",
+    "redundant_middleware",
+    "collector_family"
+  ],
+  "title": "DeploymentProfile",
+  "type": "object"
+}

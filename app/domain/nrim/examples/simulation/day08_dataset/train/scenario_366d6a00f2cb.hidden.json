@@ -13,7 +13,7 @@
     "propagation_edge_ids": [],
     "simulator_version": "0.1.0",
     "labeling_version": "0.1.0",
-    "random_seed": 1626822915
+    "random_seed": 1768431873
   },
   "final_hidden_states": {
     "signal_source_1": {
@@ -115,6 +115,15 @@
       "latent_error_factor": 1.0,
       "caused_by_fault_id": null
     },
+    "middleware_2": {
+      "timestamp": "2026-07-18T00:00:00Z",
+      "node_id": "middleware_2",
+      "health_state": "healthy",
+      "latent_capacity_factor": 1.0,
+      "latent_latency_factor": 1.0,
+      "latent_error_factor": 1.0,
+      "caused_by_fault_id": null
+    },
     "distribution_switch_1": {
       "timestamp": "2026-07-18T00:00:00Z",
       "node_id": "distribution_switch_1",
@@ -150,96 +159,6 @@
       "latent_latency_factor": 1.0,
       "latent_error_factor": 1.0,
       "caused_by_fault_id": null
-    },
-    "distribution_switch_3": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "distribution_switch_3",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "smart_tv_group_3": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "smart_tv_group_3",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "distribution_switch_4": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "distribution_switch_4",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "smart_tv_group_4": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "smart_tv_group_4",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "distribution_switch_5": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "distribution_switch_5",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "smart_tv_group_5": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "smart_tv_group_5",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "distribution_switch_6": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "distribution_switch_6",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "smart_tv_group_6": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "smart_tv_group_6",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "distribution_switch_7": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "distribution_switch_7",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "smart_tv_group_7": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "smart_tv_group_7",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
     }
   },
   "propagation_records": [],
@@ -248,45 +167,42 @@
     "scenario_id": "scenario_366d6a00f2cb",
     "pair_id": "pair_3f3175471912",
     "environment": {
-      "environment_id": "environment_f04b2873278d",
-      "room_count": 180,
-      "floor_count": 7,
-      "redundant_middleware": false,
+      "environment_id": "environment_0516079d6376",
+      "room_count": 50,
+      "floor_count": 2,
+      "redundant_middleware": true,
       "shared_storage": false,
-      "base_occupancy_fraction": 0.4567707547886739,
-      "evening_peak_multiplier": 1.4733307258456,
-      "weekend_multiplier": 0.9799243441876035,
-      "catchup_recording_channels": 26,
-      "average_bitrate_mbps": 3.5876532469382756,
-      "retention_days": 5,
+      "base_occupancy_fraction": 0.6188799675067287,
+      "evening_peak_multiplier": 1.2294143590252642,
+      "weekend_multiplier": 1.0361864892240185,
+      "catchup_recording_channels": 46,
+      "average_bitrate_mbps": 7.324104829820854,
+      "retention_days": 10,
       "scenario_duration_hours": 36,
-      "sampling_interval_minutes": 30
+      "sampling_interval_minutes": 15
     },
     "failure_type": "healthy",
     "fault_severity": null,
     "fault_injection_fraction": null,
-    "confounders": [
-      "retention_increase",
-      "harmless_worker_restart"
-    ],
+    "confounders": [],
     "missingness": {
-      "mode": "independent",
-      "probability": 0.11533399913376598,
+      "mode": "none",
+      "probability": 0.0,
       "affected_signal_names": [],
       "outage_start_fraction": null,
       "outage_duration_fraction": null
     },
-    "topology_seed": 17567999,
-    "workload_seed": 1626822915,
-    "observation_seed": 694053701,
-    "fault_seed": 682531890,
-    "intended_split": null
+    "topology_seed": 1821917324,
+    "workload_seed": 1768431873,
+    "observation_seed": 1517925437,
+    "fault_seed": 833776165,
+    "intended_split": "train"
   },
   "missingness_report": {
-    "original_count": 569,
-    "retained_count": 500,
-    "removed_count": 69,
-    "removed_fraction": 0.121265,
-    "mode": "independent"
+    "original_count": 1134,
+    "retained_count": 1134,
+    "removed_count": 0,
+    "removed_fraction": 0.0,
+    "mode": "none"
   }
 }

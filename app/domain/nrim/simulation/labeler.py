@@ -15,8 +15,8 @@ def build_healthy_ground_truth(
     *,
     scenario_id: str,
     random_seed: int,
-    simulator_version: str = "0.1.0",
-    labeling_version: str = "0.1.0",
+    simulator_version: str = "0.4.0",
+    labeling_version: str = "0.2.0",
 ) -> ScenarioGroundTruth:
     return ScenarioGroundTruth(
         scenario_id=scenario_id,
@@ -26,6 +26,8 @@ def build_healthy_ground_truth(
         fault_id=None,
         injection_time=None,
         incident_onset_time=None,
+        recovery_time=None,
+        observable_impact_times=[],
         affected_service_node_ids=[],
         propagation_edge_ids=[],
         simulator_version=simulator_version,
@@ -41,9 +43,11 @@ def build_fault_ground_truth(
     propagation_records: list[PropagationRecord],
     affected_service_node_ids: list[str],
     incident_onset_time: datetime | None,
+    recovery_time: datetime | None = None,
+    observable_impact_times: list[datetime] | None = None,
     random_seed: int,
-    simulator_version: str = "0.1.0",
-    labeling_version: str = "0.1.0",
+    simulator_version: str = "0.4.0",
+    labeling_version: str = "0.2.0",
 ) -> ScenarioGroundTruth:
     return ScenarioGroundTruth(
         scenario_id=scenario_id,
@@ -53,6 +57,10 @@ def build_fault_ground_truth(
         fault_id=fault.fault_id,
         injection_time=fault.injection_time,
         incident_onset_time=incident_onset_time,
+        recovery_time=recovery_time,
+        observable_impact_times=sorted(
+            set(observable_impact_times or [])
+        ),
         affected_service_node_ids=sorted(
             set(affected_service_node_ids)
         ),

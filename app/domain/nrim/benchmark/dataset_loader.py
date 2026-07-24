@@ -104,13 +104,24 @@ def missing_feature_fraction(
     if not missing_indices or not matrix:
         return 0.0
 
-    values = [
-        float(row[index])
-        for row in matrix
-        for index in missing_indices
-    ]
+    values = []
+    for row in matrix:
+        for index in missing_indices:
+            missing_name = feature_names[index]
+            applicable_name = missing_name.removesuffix(
+                MISSING_FEATURE_SUFFIX
+            ) + "__applicable"
 
-    return sum(values) / len(values)
+            if applicable_name in feature_names:
+                applicable_index = feature_names.index(
+                    applicable_name
+                )
+                if float(row[applicable_index]) <= 0.5:
+                    continue
+
+            values.append(float(row[index]))
+
+    return sum(values) / len(values) if values else 0.0
 
 
 def summarize_window(

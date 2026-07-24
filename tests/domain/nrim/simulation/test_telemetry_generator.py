@@ -341,6 +341,77 @@ def test_catchup_generator_creates_recording_failure_metric() -> None:
     assert event.value >= 0
 
 
+def test_catchup_generator_emits_active_sessions_when_supplied() -> None:
+    topology, states, timestamp = make_states()
+
+    events = generate_catchup_service_telemetry(
+        topology=topology,
+        node_state=states["catchup_service_1"],
+        timestamp=timestamp,
+        recording_attempts=20,
+        active_sessions=30.0,
+        rng=random.Random(42),
+    )
+
+    active = next(
+        event
+        for event in events
+        if event.signal_name
+        == "iptv.session.active_count"
+    )
+    assert float(active.value) > 0.0
+    assert active.golden_signal == GoldenSignal.TRAFFIC
+    availability = next(
+        event
+        for event in events
+        if event.signal_name
+        == "iptv.catchup.service_availability"
+    )
+    assert 0.0 <= float(availability.value) <= 100.0
+
+
+def test_degraded_service_reduces_active_sessions() -> None:
+    topology, healthy, timestamp = make_states()
+    degraded = initialize_states(
+        topology=topology,
+        timestamp=timestamp,
+    )
+    degraded[
+        "catchup_service_1"
+    ].latent_error_factor = 10.0
+
+    healthy_events = generate_catchup_service_telemetry(
+        topology=topology,
+        node_state=healthy["catchup_service_1"],
+        timestamp=timestamp,
+        recording_attempts=20,
+        active_sessions=30.0,
+        rng=random.Random(42),
+    )
+    degraded_events = generate_catchup_service_telemetry(
+        topology=topology,
+        node_state=degraded["catchup_service_1"],
+        timestamp=timestamp,
+        recording_attempts=20,
+        active_sessions=30.0,
+        rng=random.Random(42),
+    )
+    healthy_active = next(
+        float(event.value)
+        for event in healthy_events
+        if event.signal_name
+        == "iptv.session.active_count"
+    )
+    degraded_active = next(
+        float(event.value)
+        for event in degraded_events
+        if event.signal_name
+        == "iptv.session.active_count"
+    )
+
+    assert degraded_active < healthy_active
+
+
 def test_catchup_failures_do_not_exceed_attempts() -> None:
     topology, states, timestamp = make_states()
 

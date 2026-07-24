@@ -82,3 +82,39 @@ def test_healthy_window_has_no_root_cause() -> None:
         targets["root_cause_node"]
     ) == 0
     assert targets["future_incident"] == 0
+
+
+def test_current_incident_requires_impact_in_observation_window() -> None:
+    boundary = make_boundary()
+    hidden = {
+        "ground_truth": {
+            "failure_type": "storage_io_degradation",
+            "root_cause_node_id": "storage_1",
+            "fault_id": "fault_1",
+            "injection_time": (
+                boundary.observation_start
+                - timedelta(hours=1)
+            ).isoformat(),
+            "incident_onset_time": (
+                boundary.observation_start
+                - timedelta(hours=1)
+            ).isoformat(),
+            "observable_impact_times": [
+                (
+                    boundary.prediction_end
+                    - timedelta(hours=1)
+                ).isoformat()
+            ],
+            "affected_service_node_ids": ["catchup_1"],
+        }
+    }
+
+    targets = build_window_targets(
+        node_ids=["storage_1", "catchup_1"],
+        hidden_scenario=hidden,
+        boundary=boundary,
+    )
+
+    assert targets["fault_present"] == 1
+    assert targets["current_incident"] == 0
+    assert targets["future_incident"] == 1

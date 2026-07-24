@@ -60,6 +60,30 @@ def test_audit_accepts_basic_clean_window() -> None:
     assert errors == []
 
 
+def test_audit_rejects_simulator_context_feature_name() -> None:
+    record = {
+        "window_id": "window_123abc",
+        "node_ids": ["node_1"],
+        "node_feature_names": [
+            "context__high_healthy_workload"
+        ],
+        "node_features": [[1.0]],
+        "edge_index": [],
+        "edge_features": [],
+        "targets": {
+            "root_cause_node": [0],
+            "affected_service_node": [0],
+        },
+    }
+
+    errors = audit_window_record(record)
+
+    assert any(
+        "Forbidden simulator" in error
+        for error in errors
+    )
+
+
 def test_window_identifier_cannot_encode_class() -> None:
     record = {
         "window_id": (

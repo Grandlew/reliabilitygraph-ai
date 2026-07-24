@@ -1,0 +1,3587 @@
+{
+  "benchmark_name": "NRIM Scenario-Clustered Risk-Controlled Temporal Episode Gate",
+  "benchmark_version": "0.5.0",
+  "protocol_version": "1.0.0",
+  "created_at": "2026-07-23T14:20:44.993337+00:00",
+  "release_status": "candidate",
+  "dataset_fingerprint": "bc0eca8e18e9befa17e11c806dbe47a71cf47e80cf712d2b9c690368a7e8daf5",
+  "reference_checkpoint_sha256": "3909770769f03c1bd62fb9a7e9d6f6cc7640861482566d5dcec1ed0526ac6457",
+  "reference_stage1": {
+    "threshold": 0.6464604789452578,
+    "window_level_feasible": false,
+    "reference_reproduced": true
+  },
+  "stage2_reference": {
+    "model": "learned_fusion",
+    "topology_retained": true,
+    "checkpoint_frozen": true,
+    "temporal_gate_changes_ranking": false
+  },
+  "sequence_audit": {
+    "scenario_count": 168,
+    "window_count": 2322,
+    "overlapping_window_pairs": 2152,
+    "cross_split_scenario_count": 0,
+    "duplicate_window_count": 0,
+    "non_monotonic_sequence_count": 0,
+    "leakage_free": true
+  },
+  "risk_assumptions": {
+    "decision_metric_unit": "scenario",
+    "independent_risk_unit": "topology_group",
+    "bootstrap_unit": "topology_group",
+    "confidence": 0.95,
+    "risk_bound": "one_sided_exact_clopper_pearson",
+    "overlapping_windows_independent": false,
+    "calibration_split": "validation",
+    "test_used_for_selection": false
+  },
+  "calibration": {
+    "feasible": false,
+    "objective": 0.5925,
+    "evaluated_configurations": 36,
+    "feasibility_failures": [
+      "global_risk_ucb",
+      "confounder_risk_ucb"
+    ],
+    "validation_metrics_without_shift_override": {
+      "scenario_count": 32,
+      "healthy_scenario_count": 16,
+      "healthy_independent_topology_count": 4,
+      "impact_scenario_count": 9,
+      "healthy_scenario_false_selection_rate": 0.1875,
+      "healthy_topology_false_selection_rate": 0.5,
+      "healthy_scenario_false_selection_ucb": 0.9023885371135857,
+      "risk_confidence": 0.95,
+      "false_episodes_per_100_healthy_scenario_hours": 0.7211538461538461,
+      "true_episode_count": 10,
+      "detected_episode_count": 8,
+      "incident_episode_recall": 0.8,
+      "median_detection_delay_hours": 2.0,
+      "mean_detection_delay_hours": 3.25,
+      "mean_fragmentation": 0,
+      "median_recovery_delay_hours": 2.0,
+      "confounder_risk": {
+        "temporary_latency_spike": {
+          "events": 0,
+          "trials": 2,
+          "scenario_count": 2,
+          "point_estimate": 0.0,
+          "cluster_point_estimate": 0.0,
+          "upper_confidence_bound": 0.776393202250021
+        },
+        "transient_recording_errors": {
+          "events": 0,
+          "trials": 2,
+          "scenario_count": 2,
+          "point_estimate": 0.0,
+          "cluster_point_estimate": 0.0,
+          "upper_confidence_bound": 0.776393202250021
+        },
+        "harmless_worker_restart+retention_increase": {
+          "events": 0,
+          "trials": 2,
+          "scenario_count": 2,
+          "point_estimate": 0.0,
+          "cluster_point_estimate": 0.0,
+          "upper_confidence_bound": 0.776393202250021
+        },
+        "temporary_latency_spike+transient_recording_errors": {
+          "events": 1,
+          "trials": 2,
+          "scenario_count": 2,
+          "point_estimate": 0.5,
+          "cluster_point_estimate": 0.5,
+          "upper_confidence_bound": 0.9746794344808964
+        },
+        "retention_increase": {
+          "events": 0,
+          "trials": 2,
+          "scenario_count": 2,
+          "point_estimate": 0.0,
+          "cluster_point_estimate": 0.0,
+          "upper_confidence_bound": 0.776393202250021
+        },
+        "none": {
+          "events": 0,
+          "trials": 2,
+          "scenario_count": 2,
+          "point_estimate": 0.0,
+          "cluster_point_estimate": 0.0,
+          "upper_confidence_bound": 0.776393202250021
+        },
+        "high_healthy_workload": {
+          "events": 1,
+          "trials": 2,
+          "scenario_count": 2,
+          "point_estimate": 0.5,
+          "cluster_point_estimate": 0.5,
+          "upper_confidence_bound": 0.9746794344808964
+        },
+        "high_healthy_workload+transient_recording_errors": {
+          "events": 1,
+          "trials": 2,
+          "scenario_count": 2,
+          "point_estimate": 0.5,
+          "cluster_point_estimate": 0.5,
+          "upper_confidence_bound": 0.9746794344808964
+        }
+      },
+      "failure_family_metrics": {
+        "catchup_worker_failure": {
+          "scenario_count": 4,
+          "true_episode_count": 5,
+          "detected_episode_count": 4,
+          "episode_recall": 0.8,
+          "median_detection_delay_hours": 2.0
+        },
+        "cleanup_job_failure": {
+          "scenario_count": 2,
+          "true_episode_count": 2,
+          "detected_episode_count": 1,
+          "episode_recall": 0.5,
+          "median_detection_delay_hours": 2.0
+        },
+        "storage_capacity_saturation": {
+          "scenario_count": 1,
+          "true_episode_count": 1,
+          "detected_episode_count": 1,
+          "episode_recall": 1.0,
+          "median_detection_delay_hours": 8.0
+        },
+        "storage_io_degradation": {
+          "scenario_count": 2,
+          "true_episode_count": 2,
+          "detected_episode_count": 2,
+          "episode_recall": 1.0,
+          "median_detection_delay_hours": 1.0
+        }
+      },
+      "topology_group_metrics": {
+        "topology_43ace99057bafb8f": {
+          "scenario_count": 8,
+          "healthy_false_selection_rate": 0.0,
+          "impact_scenario_detection_rate": 0.5
+        },
+        "topology_96252146e8bc8c55": {
+          "scenario_count": 8,
+          "healthy_false_selection_rate": 0.25,
+          "impact_scenario_detection_rate": 1.0
+        },
+        "topology_a735335dac5ba43d": {
+          "scenario_count": 8,
+          "healthy_false_selection_rate": 0.0,
+          "impact_scenario_detection_rate": 0.5
+        },
+        "topology_b9b832a25851c33e": {
+          "scenario_count": 8,
+          "healthy_false_selection_rate": 0.5,
+          "impact_scenario_detection_rate": 1.0
+        }
+      },
+      "worst_confounder_point_risk": 0.5,
+      "worst_confounder_ucb": 0.9746794344808964,
+      "unsupported_decision_count": 0,
+      "state_counts": {
+        "healthy": 351,
+        "suspect": 34,
+        "incident": 28,
+        "recovery": 3,
+        "unknown": 0,
+        "escalate": 0
+      },
+      "unsupported_safe_semantics_rate": 1.0,
+      "unsupported_unknown_rate": 0.0,
+      "unsupported_escalation_rate": 0.0
+    }
+  },
+  "selected_policy": {
+    "window_threshold": 0.6464604789452578,
+    "evidence_center": 0.5171683831562063,
+    "decay": 0.5,
+    "entry_threshold": 0.5,
+    "exit_threshold": 0.1,
+    "impact_weight": 0.5,
+    "recovery_weight": 0.5,
+    "minimum_suspect_windows": 3,
+    "minimum_incident_windows": 1,
+    "minimum_recovery_windows": 2,
+    "maximum_suspect_windows": 4,
+    "cooldown_windows": 1,
+    "severity_override_probability": 0.95,
+    "unsupported_escalation_probability": 0.8
+  },
+  "shift_sentinel": {
+    "fit_split": "train",
+    "axes": [
+      "topology",
+      "workload",
+      "telemetry",
+      "applicability",
+      "domain"
+    ],
+    "synthetic_shift_calibration_only": true,
+    "registered_id_support": {
+      "room_count": [
+        50,
+        250
+      ],
+      "retention_days": [
+        2,
+        14
+      ],
+      "scenario_missing_fraction": [
+        0.0,
+        0.15
+      ]
+    },
+    "operational_context_is_not_model_label": true,
+    "legacy_context_source": "scenario_plan.environment only; future manifests store these fields directly",
+    "support_threshold": 3.318625650482509,
+    "audit": {
+      "test": {
+        "scenario_count": 32,
+        "unsupported_scenario_count": 0,
+        "unsupported_scenario_rate": 0.0,
+        "labeled_ood_scenario_count": 0,
+        "labeled_ood_detection_rate": 0.0,
+        "axis_detection": {}
+      },
+      "train": {
+        "scenario_count": 80,
+        "unsupported_scenario_count": 1,
+        "unsupported_scenario_rate": 0.0125,
+        "labeled_ood_scenario_count": 0,
+        "labeled_ood_detection_rate": 0.0,
+        "axis_detection": {}
+      },
+      "validation": {
+        "scenario_count": 32,
+        "unsupported_scenario_count": 0,
+        "unsupported_scenario_rate": 0.0,
+        "labeled_ood_scenario_count": 0,
+        "labeled_ood_detection_rate": 0.0,
+        "axis_detection": {}
+      },
+      "ood_test": {
+        "scenario_count": 24,
+        "unsupported_scenario_count": 24,
+        "unsupported_scenario_rate": 1.0,
+        "labeled_ood_scenario_count": 24,
+        "labeled_ood_detection_rate": 1.0,
+        "axis_detection": {
+          "telemetry": {
+            "scenarios": 8,
+            "detected": 8,
+            "rate": 1.0
+          },
+          "workload": {
+            "scenarios": 24,
+            "detected": 24,
+            "rate": 1.0
+          }
+        }
+      }
+    }
+  },
+  "ablations": {
+    "A_independent_window": {
+      "validation": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 9,
+        "healthy_scenario_false_selection_rate": 0.625,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 3.3653846153846154,
+        "true_episode_count": 10,
+        "detected_episode_count": 10,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 1.0,
+        "mean_fragmentation": 0.2,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 4,
+            "true_episode_count": 5,
+            "detected_episode_count": 5,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 4.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_43ace99057bafb8f": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_96252146e8bc8c55": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_a735335dac5ba43d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.5,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_b9b832a25851c33e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 355,
+          "suspect": 0,
+          "incident": 61,
+          "recovery": 0,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "test": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 8,
+        "healthy_scenario_false_selection_rate": 0.5625,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 2.644230769230769,
+        "true_episode_count": 8,
+        "detected_episode_count": 8,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.75,
+        "mean_fragmentation": 0.125,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 1.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 2.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_0027bf9628b3ce8d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_3ec2f77c3680840a": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_65a24d27afa1d6d6": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ce9ec87fe8f09ebe": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 350,
+          "suspect": 0,
+          "incident": 66,
+          "recovery": 0,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "ood_test": {
+        "scenario_count": 24,
+        "healthy_scenario_count": 12,
+        "healthy_independent_topology_count": 3,
+        "impact_scenario_count": 11,
+        "healthy_scenario_false_selection_rate": 1.0,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 6.140350877192983,
+        "true_episode_count": 14,
+        "detected_episode_count": 14,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.0,
+        "mean_fragmentation": 0.21428571428571427,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 4,
+            "detected_episode_count": 4,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 3,
+            "true_episode_count": 5,
+            "detected_episode_count": 5,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_083289176e8835d2": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_23ca54e67f09621e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ff159274223f54d4": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 273,
+          "suspect": 0,
+          "incident": 177,
+          "recovery": 0,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      }
+    },
+    "B_hysteresis": {
+      "validation": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 9,
+        "healthy_scenario_false_selection_rate": 0.625,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 3.3653846153846154,
+        "true_episode_count": 10,
+        "detected_episode_count": 10,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 1.0,
+        "mean_fragmentation": 0.1,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 4,
+            "true_episode_count": 5,
+            "detected_episode_count": 5,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 4.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_43ace99057bafb8f": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_96252146e8bc8c55": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_a735335dac5ba43d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.5,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_b9b832a25851c33e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 330,
+          "suspect": 0,
+          "incident": 68,
+          "recovery": 18,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "test": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 8,
+        "healthy_scenario_false_selection_rate": 0.5625,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 2.644230769230769,
+        "true_episode_count": 8,
+        "detected_episode_count": 8,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.75,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 1.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 2.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_0027bf9628b3ce8d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_3ec2f77c3680840a": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_65a24d27afa1d6d6": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ce9ec87fe8f09ebe": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 327,
+          "suspect": 0,
+          "incident": 74,
+          "recovery": 15,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "ood_test": {
+        "scenario_count": 24,
+        "healthy_scenario_count": 12,
+        "healthy_independent_topology_count": 3,
+        "impact_scenario_count": 11,
+        "healthy_scenario_false_selection_rate": 1.0,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 5.921052631578948,
+        "true_episode_count": 14,
+        "detected_episode_count": 14,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.0,
+        "mean_fragmentation": 0.07142857142857142,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 4,
+            "detected_episode_count": 4,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 3,
+            "true_episode_count": 5,
+            "detected_episode_count": 5,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_083289176e8835d2": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_23ca54e67f09621e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ff159274223f54d4": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 212,
+          "suspect": 0,
+          "incident": 194,
+          "recovery": 44,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      }
+    },
+    "C_evidence_accumulator": {
+      "validation": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 9,
+        "healthy_scenario_false_selection_rate": 0.5625,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 2.1634615384615383,
+        "true_episode_count": 10,
+        "detected_episode_count": 9,
+        "incident_episode_recall": 0.9,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 2.2222222222222223,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 4,
+            "true_episode_count": 5,
+            "detected_episode_count": 4,
+            "episode_recall": 0.8,
+            "median_detection_delay_hours": 4.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 4.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_43ace99057bafb8f": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_96252146e8bc8c55": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_a735335dac5ba43d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_b9b832a25851c33e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 345,
+          "suspect": 0,
+          "incident": 64,
+          "recovery": 7,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "test": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 8,
+        "healthy_scenario_false_selection_rate": 0.5625,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 2.1634615384615383,
+        "true_episode_count": 8,
+        "detected_episode_count": 8,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.75,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 2.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_0027bf9628b3ce8d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_3ec2f77c3680840a": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_65a24d27afa1d6d6": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ce9ec87fe8f09ebe": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 332,
+          "suspect": 0,
+          "incident": 78,
+          "recovery": 6,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "ood_test": {
+        "scenario_count": 24,
+        "healthy_scenario_count": 12,
+        "healthy_independent_topology_count": 3,
+        "impact_scenario_count": 11,
+        "healthy_scenario_false_selection_rate": 1.0,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 4.605263157894737,
+        "true_episode_count": 14,
+        "detected_episode_count": 14,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.14285714285714285,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": null,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 4,
+            "detected_episode_count": 4,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 3,
+            "true_episode_count": 5,
+            "detected_episode_count": 5,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_083289176e8835d2": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_23ca54e67f09621e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ff159274223f54d4": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 184,
+          "suspect": 0,
+          "incident": 247,
+          "recovery": 19,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      }
+    },
+    "D_duration_states": {
+      "validation": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 9,
+        "healthy_scenario_false_selection_rate": 0.25,
+        "healthy_topology_false_selection_rate": 0.5,
+        "healthy_scenario_false_selection_ucb": 0.9023885371135857,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 0.9615384615384616,
+        "true_episode_count": 10,
+        "detected_episode_count": 7,
+        "incident_episode_recall": 0.7,
+        "median_detection_delay_hours": 2.0,
+        "mean_detection_delay_hours": 3.4285714285714284,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "transient_recording_errors": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 4,
+            "true_episode_count": 5,
+            "detected_episode_count": 3,
+            "episode_recall": 0.6,
+            "median_detection_delay_hours": 4.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 2.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 6.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 1.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_43ace99057bafb8f": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.0,
+            "impact_scenario_detection_rate": 0.5
+          },
+          "topology_96252146e8bc8c55": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_a735335dac5ba43d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.0,
+            "impact_scenario_detection_rate": 0.5
+          },
+          "topology_b9b832a25851c33e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 0.5,
+        "worst_confounder_ucb": 0.9746794344808964,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 362,
+          "suspect": 21,
+          "incident": 31,
+          "recovery": 2,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "test": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 8,
+        "healthy_scenario_false_selection_rate": 0.375,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 1.4423076923076923,
+        "true_episode_count": 8,
+        "detected_episode_count": 6,
+        "incident_episode_recall": 0.75,
+        "median_detection_delay_hours": 1.0,
+        "mean_detection_delay_hours": 2.0,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "high_healthy_workload": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 4.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 2.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_0027bf9628b3ce8d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_3ec2f77c3680840a": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_65a24d27afa1d6d6": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 0.5
+          },
+          "topology_ce9ec87fe8f09ebe": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 345,
+          "suspect": 23,
+          "incident": 46,
+          "recovery": 2,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "ood_test": {
+        "scenario_count": 24,
+        "healthy_scenario_count": 12,
+        "healthy_independent_topology_count": 3,
+        "impact_scenario_count": 11,
+        "healthy_scenario_false_selection_rate": 1.0,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 3.508771929824561,
+        "true_episode_count": 14,
+        "detected_episode_count": 13,
+        "incident_episode_recall": 0.9285714285714286,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.46153846153846156,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 4,
+            "detected_episode_count": 4,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 3,
+            "true_episode_count": 5,
+            "detected_episode_count": 4,
+            "episode_recall": 0.8,
+            "median_detection_delay_hours": 1.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_083289176e8835d2": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_23ca54e67f09621e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ff159274223f54d4": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 208,
+          "suspect": 35,
+          "incident": 195,
+          "recovery": 12,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      }
+    },
+    "E_scenario_risk_control": {
+      "validation": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 9,
+        "healthy_scenario_false_selection_rate": 0.1875,
+        "healthy_topology_false_selection_rate": 0.5,
+        "healthy_scenario_false_selection_ucb": 0.9023885371135857,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 0.7211538461538461,
+        "true_episode_count": 10,
+        "detected_episode_count": 8,
+        "incident_episode_recall": 0.8,
+        "median_detection_delay_hours": 2.0,
+        "mean_detection_delay_hours": 3.25,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "transient_recording_errors": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 4,
+            "true_episode_count": 5,
+            "detected_episode_count": 4,
+            "episode_recall": 0.8,
+            "median_detection_delay_hours": 2.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 2.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 8.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 1.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_43ace99057bafb8f": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.0,
+            "impact_scenario_detection_rate": 0.5
+          },
+          "topology_96252146e8bc8c55": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_a735335dac5ba43d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.0,
+            "impact_scenario_detection_rate": 0.5
+          },
+          "topology_b9b832a25851c33e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.5,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 0.5,
+        "worst_confounder_ucb": 0.9746794344808964,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 351,
+          "suspect": 34,
+          "incident": 28,
+          "recovery": 3,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "test": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 8,
+        "healthy_scenario_false_selection_rate": 0.25,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 0.9615384615384616,
+        "true_episode_count": 8,
+        "detected_episode_count": 5,
+        "incident_episode_recall": 0.625,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 1.6,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "high_healthy_workload": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 2,
+            "episode_recall": 0.6666666666666666,
+            "median_detection_delay_hours": 2.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 4.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_0027bf9628b3ce8d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_3ec2f77c3680840a": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_65a24d27afa1d6d6": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 0.25
+          },
+          "topology_ce9ec87fe8f09ebe": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 342,
+          "suspect": 38,
+          "incident": 34,
+          "recovery": 2,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "ood_test": {
+        "scenario_count": 24,
+        "healthy_scenario_count": 12,
+        "healthy_independent_topology_count": 3,
+        "impact_scenario_count": 11,
+        "healthy_scenario_false_selection_rate": 1.0,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 3.508771929824561,
+        "true_episode_count": 14,
+        "detected_episode_count": 12,
+        "incident_episode_recall": 0.8571428571428571,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 2.1666666666666665,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 2.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 4,
+            "detected_episode_count": 4,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 1.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 3,
+            "true_episode_count": 5,
+            "detected_episode_count": 3,
+            "episode_recall": 0.6,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_083289176e8835d2": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_23ca54e67f09621e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ff159274223f54d4": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 221,
+          "suspect": 70,
+          "incident": 141,
+          "recovery": 18,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      }
+    },
+    "F_shift_sentinel": {
+      "validation": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 9,
+        "healthy_scenario_false_selection_rate": 0.625,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 3.3653846153846154,
+        "true_episode_count": 10,
+        "detected_episode_count": 10,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 1.0,
+        "mean_fragmentation": 0.2,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 4,
+            "true_episode_count": 5,
+            "detected_episode_count": 5,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 4.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_43ace99057bafb8f": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_96252146e8bc8c55": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_a735335dac5ba43d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.5,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_b9b832a25851c33e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 355,
+          "suspect": 0,
+          "incident": 61,
+          "recovery": 0,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "test": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 8,
+        "healthy_scenario_false_selection_rate": 0.5625,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 2.644230769230769,
+        "true_episode_count": 8,
+        "detected_episode_count": 8,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.75,
+        "mean_fragmentation": 0.125,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 1.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 2.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_0027bf9628b3ce8d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.75,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_3ec2f77c3680840a": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_65a24d27afa1d6d6": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ce9ec87fe8f09ebe": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 350,
+          "suspect": 0,
+          "incident": 66,
+          "recovery": 0,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "ood_test": {
+        "scenario_count": 24,
+        "healthy_scenario_count": 12,
+        "healthy_independent_topology_count": 3,
+        "impact_scenario_count": 11,
+        "healthy_scenario_false_selection_rate": 1.0,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 6.140350877192983,
+        "true_episode_count": 14,
+        "detected_episode_count": 14,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.0,
+        "mean_fragmentation": 0.21428571428571427,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 4,
+            "detected_episode_count": 4,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 3,
+            "true_episode_count": 5,
+            "detected_episode_count": 5,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_083289176e8835d2": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_23ca54e67f09621e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ff159274223f54d4": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 450,
+        "state_counts": {
+          "healthy": 0,
+          "suspect": 0,
+          "incident": 0,
+          "recovery": 0,
+          "unknown": 273,
+          "escalate": 177
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.6066666666666667,
+        "unsupported_escalation_rate": 0.3933333333333333
+      }
+    },
+    "G_full_rtieg": {
+      "validation": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 9,
+        "healthy_scenario_false_selection_rate": 0.1875,
+        "healthy_topology_false_selection_rate": 0.5,
+        "healthy_scenario_false_selection_ucb": 0.9023885371135857,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 0.7211538461538461,
+        "true_episode_count": 10,
+        "detected_episode_count": 8,
+        "incident_episode_recall": 0.8,
+        "median_detection_delay_hours": 2.0,
+        "mean_detection_delay_hours": 3.25,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "transient_recording_errors": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 4,
+            "true_episode_count": 5,
+            "detected_episode_count": 4,
+            "episode_recall": 0.8,
+            "median_detection_delay_hours": 2.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 2.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 8.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 1.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_43ace99057bafb8f": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.0,
+            "impact_scenario_detection_rate": 0.5
+          },
+          "topology_96252146e8bc8c55": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_a735335dac5ba43d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.0,
+            "impact_scenario_detection_rate": 0.5
+          },
+          "topology_b9b832a25851c33e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.5,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 0.5,
+        "worst_confounder_ucb": 0.9746794344808964,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 351,
+          "suspect": 34,
+          "incident": 28,
+          "recovery": 3,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "test": {
+        "scenario_count": 32,
+        "healthy_scenario_count": 16,
+        "healthy_independent_topology_count": 4,
+        "impact_scenario_count": 8,
+        "healthy_scenario_false_selection_rate": 0.25,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 0.9615384615384616,
+        "true_episode_count": 8,
+        "detected_episode_count": 5,
+        "incident_episode_recall": 0.625,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 1.6,
+        "mean_fragmentation": 0,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 1,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.5,
+            "cluster_point_estimate": 0.5,
+            "upper_confidence_bound": 0.9746794344808964
+          },
+          "retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "high_healthy_workload": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "none": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 0,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 0.0,
+            "cluster_point_estimate": 0.0,
+            "upper_confidence_bound": 0.776393202250021
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 2,
+            "episode_recall": 0.6666666666666666,
+            "median_detection_delay_hours": 2.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 4.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 1,
+            "true_episode_count": 1,
+            "detected_episode_count": 1,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 1,
+            "episode_recall": 0.5,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_0027bf9628b3ce8d": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_3ec2f77c3680840a": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_65a24d27afa1d6d6": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 0.25
+          },
+          "topology_ce9ec87fe8f09ebe": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 0.25,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 0,
+        "state_counts": {
+          "healthy": 342,
+          "suspect": 38,
+          "incident": 34,
+          "recovery": 2,
+          "unknown": 0,
+          "escalate": 0
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.0,
+        "unsupported_escalation_rate": 0.0
+      },
+      "ood_test": {
+        "scenario_count": 24,
+        "healthy_scenario_count": 12,
+        "healthy_independent_topology_count": 3,
+        "impact_scenario_count": 11,
+        "healthy_scenario_false_selection_rate": 1.0,
+        "healthy_topology_false_selection_rate": 1.0,
+        "healthy_scenario_false_selection_ucb": 1.0,
+        "risk_confidence": 0.95,
+        "false_episodes_per_100_healthy_scenario_hours": 5.921052631578948,
+        "true_episode_count": 14,
+        "detected_episode_count": 14,
+        "incident_episode_recall": 1.0,
+        "median_detection_delay_hours": 0.0,
+        "mean_detection_delay_hours": 0.7142857142857143,
+        "mean_fragmentation": 0.21428571428571427,
+        "median_recovery_delay_hours": 2.0,
+        "confounder_risk": {
+          "temporary_latency_spike": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "harmless_worker_restart+retention_increase": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "high_healthy_workload+transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "none": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "transient_recording_errors": {
+            "events": 2,
+            "trials": 2,
+            "scenario_count": 2,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "temporary_latency_spike+transient_recording_errors": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          },
+          "retention_increase": {
+            "events": 1,
+            "trials": 1,
+            "scenario_count": 1,
+            "point_estimate": 1.0,
+            "cluster_point_estimate": 1.0,
+            "upper_confidence_bound": 1.0
+          }
+        },
+        "failure_family_metrics": {
+          "catchup_worker_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 3,
+            "detected_episode_count": 3,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "cleanup_job_failure": {
+            "scenario_count": 3,
+            "true_episode_count": 4,
+            "detected_episode_count": 4,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_capacity_saturation": {
+            "scenario_count": 3,
+            "true_episode_count": 5,
+            "detected_episode_count": 5,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          },
+          "storage_io_degradation": {
+            "scenario_count": 2,
+            "true_episode_count": 2,
+            "detected_episode_count": 2,
+            "episode_recall": 1.0,
+            "median_detection_delay_hours": 0.0
+          }
+        },
+        "topology_group_metrics": {
+          "topology_083289176e8835d2": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_23ca54e67f09621e": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          },
+          "topology_ff159274223f54d4": {
+            "scenario_count": 8,
+            "healthy_false_selection_rate": 1.0,
+            "impact_scenario_detection_rate": 1.0
+          }
+        },
+        "worst_confounder_point_risk": 1.0,
+        "worst_confounder_ucb": 1.0,
+        "unsupported_decision_count": 450,
+        "state_counts": {
+          "healthy": 0,
+          "suspect": 0,
+          "incident": 0,
+          "recovery": 0,
+          "unknown": 319,
+          "escalate": 131
+        },
+        "unsupported_safe_semantics_rate": 1.0,
+        "unsupported_unknown_rate": 0.7088888888888889,
+        "unsupported_escalation_rate": 0.2911111111111111
+      }
+    }
+  },
+  "paired_topology_bootstrap_vs_independent_window": {
+    "A_independent_window": {
+      "validation": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      },
+      "test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      },
+      "ood_test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      }
+    },
+    "B_hysteresis": {
+      "validation": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      },
+      "test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      },
+      "ood_test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      }
+    },
+    "C_evidence_accumulator": {
+      "validation": {
+        "mean": 0.03125,
+        "ci_lower": 0.0,
+        "ci_upper": 0.09375
+      },
+      "test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      },
+      "ood_test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      }
+    },
+    "D_duration_states": {
+      "validation": {
+        "mean": 0.25,
+        "ci_lower": 0.09375,
+        "ci_upper": 0.375
+      },
+      "test": {
+        "mean": 0.15625,
+        "ci_lower": -0.0625,
+        "ci_upper": 0.46875
+      },
+      "ood_test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      }
+    },
+    "E_scenario_risk_control": {
+      "validation": {
+        "mean": 0.28125,
+        "ci_lower": 0.09375,
+        "ci_upper": 0.375
+      },
+      "test": {
+        "mean": 0.21875,
+        "ci_lower": 0.0,
+        "ci_upper": 0.46875
+      },
+      "ood_test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      }
+    },
+    "F_shift_sentinel": {
+      "validation": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      },
+      "test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      },
+      "ood_test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      }
+    },
+    "G_full_rtieg": {
+      "validation": {
+        "mean": 0.28125,
+        "ci_lower": 0.09375,
+        "ci_upper": 0.375
+      },
+      "test": {
+        "mean": 0.21875,
+        "ci_lower": 0.0,
+        "ci_upper": 0.46875
+      },
+      "ood_test": {
+        "mean": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0
+      }
+    }
+  },
+  "acceptance": {
+    "reference_reproduction": {
+      "passed": true,
+      "detail": "threshold=0.646460478945, reference=0.646460478945"
+    },
+    "validation_global_risk_ucb": {
+      "passed": false,
+      "detail": "UCB=0.9024 <= 0.10"
+    },
+    "validation_confounder_risk_ucb": {
+      "passed": false,
+      "detail": "worst UCB=0.9747 <= 0.15"
+    },
+    "validation_episode_recall": {
+      "passed": true,
+      "detail": "recall=0.8000 >= 0.70"
+    },
+    "test_point_risk": {
+      "passed": false,
+      "detail": "risk=0.2500 <= 0.12"
+    },
+    "test_episode_recall": {
+      "passed": false,
+      "detail": "recall=0.6250 >= 0.70"
+    },
+    "ood_safe_semantics": {
+      "passed": true,
+      "detail": "all unsupported decisions are UNKNOWN or ESCALATE"
+    },
+    "temporal_stability": {
+      "passed": true,
+      "detail": "fewer healthy false episodes, no added fragmentation, and median delay <= 3 hours"
+    },
+    "stage2_preserved": {
+      "passed": true,
+      "detail": "learned-fusion weights frozen in checkpoint"
+    },
+    "split_and_shortcut_audits": {
+      "passed": true,
+      "detail": "sequence_leakage_free=True, prior_findings_clean=True"
+    }
+  },
+  "limitations": [
+    "The benchmark is entirely synthetic.",
+    "Small independent scenario cohorts can make exact finite-sample risk bounds inconclusive.",
+    "Support detection cannot guarantee semantic OOD detection or safe prediction.",
+    "Synthetic benchmark performance does not establish production performance."
+  ]
+}

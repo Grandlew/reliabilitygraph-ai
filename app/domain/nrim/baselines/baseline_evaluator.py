@@ -12,6 +12,11 @@ from .abstention import (
 from .feature_access import (
     true_root_cause_node_id,
 )
+from .incident_detector import (
+    IncidentDetectorModel,
+    incident_detection_score,
+)
+from .learned_fusion import RootCauseFusionModel
 from .models import (
     BaselineName,
     WindowRankingResult,
@@ -43,6 +48,10 @@ def evaluate_window(
     baseline: BaselineName,
     minimum_top_score: float,
     minimum_margin: float = 0.0,
+    incident_threshold: float | None = None,
+    incident_model: IncidentDetectorModel | None = None,
+    fusion_model: RootCauseFusionModel | None = None,
+    escalate_ood: bool = True,
     random_seed: int = 42,
 ) -> WindowRankingResult:
     start = time.perf_counter()
@@ -51,6 +60,7 @@ def evaluate_window(
         window=window,
         baseline=baseline,
         random_seed=random_seed,
+        fusion_model=fusion_model,
     )
 
     ranked_scores = rank_node_scores(
@@ -62,6 +72,37 @@ def evaluate_window(
         minimum_top_score=minimum_top_score,
         minimum_margin=minimum_margin,
     )
+    incident_score = incident_detection_score(
+        window,
+        model=incident_model,
+    )
+    true_incident = bool(
+        int(window["targets"]["current_incident"])
+    )
+    threshold_detected = (
+        True
+        if incident_threshold is None
+        else incident_score >= incident_threshold
+    )
+    ood_score = (
+        incident_model.ood_distance(window)
+        if incident_model is not None
+        else None
+    )
+    ood_detected = (
+        incident_model.is_out_of_distribution(window)
+        if incident_model is not None
+        else False
+    )
+    incident_escalated = (
+        escalate_ood
+        and ood_detected
+        and not threshold_detected
+    )
+    incident_detected = (
+        threshold_detected or incident_escalated
+    )
+    abstained = decision.abstain or not incident_detected
 
     true_node_id = true_root_cause_node_id(
         window
@@ -76,7 +117,7 @@ def evaluate_window(
 
     if (
         true_node_id is not None
-        and not decision.abstain
+        and not abstained
     ):
         true_rank = (
             ranked_node_ids.index(
@@ -97,7 +138,13 @@ def evaluate_window(
         ranked_node_ids=ranked_node_ids,
         true_root_cause_node_id=true_node_id,
         true_root_cause_rank=true_rank,
-        abstained=decision.abstain,
+        true_incident=true_incident,
+        incident_detected=incident_detected,
+        incident_score=incident_score,
+        ood_score=ood_score,
+        ood_detected=ood_detected,
+        incident_escalated=incident_escalated,
+        abstained=abstained,
         top_score=decision.top_score,
         score_margin=decision.score_margin,
         runtime_ms=runtime_ms,
@@ -123,12 +170,17 @@ def choose_abstention_threshold(
     maximum_healthy_false_selection_rate: float = 0.10,
     minimum_faulty_coverage: float = 0.70,
     random_seed: int = 42,
+    fusion_model: RootCauseFusionModel | None = None,
 ) -> float:
     # Evaluate base rankings for validation windows
     base_results = []
     for window in validation_windows:
         scores = run_baseline(
-            window=window, baseline=baseline, random_seed=random_seed)
+            window=window,
+            baseline=baseline,
+            random_seed=random_seed,
+            fusion_model=fusion_model,
+        )
         ranked = rank_node_scores(scores)
         base_results.append((window, ranked))
 
@@ -177,6 +229,10 @@ def evaluate_split(
     windows: list[dict[str, Any]],
     baseline: BaselineName,
     abstention_threshold: float | None,
+    incident_threshold: float | None = None,
+    incident_model: IncidentDetectorModel | None = None,
+    fusion_model: RootCauseFusionModel | None = None,
+    escalate_ood: bool = True,
     random_seed: int = 42,
 ):
     minimum_top_score = (
@@ -190,6 +246,10 @@ def evaluate_split(
             window=window,
             baseline=baseline,
             minimum_top_score=minimum_top_score,
+            incident_threshold=incident_threshold,
+            incident_model=incident_model,
+            fusion_model=fusion_model,
+            escalate_ood=escalate_ood,
             random_seed=random_seed,
         )
         for window in windows

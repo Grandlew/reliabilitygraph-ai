@@ -25,9 +25,29 @@ class ScenarioManifestRecord(BaseModel):
 
     room_count: int = Field(gt=0)
     floor_count: int = Field(gt=0)
+    retention_days: int | None = Field(default=None, gt=0)
+    base_occupancy_fraction: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+    )
+    catchup_recording_channels: int | None = Field(
+        default=None,
+        gt=0,
+    )
+    average_bitrate_mbps: float | None = Field(
+        default=None,
+        gt=0.0,
+    )
+    shared_storage: bool | None = None
+    redundant_middleware: bool | None = None
 
     fault_severity: float | None = None
     fault_injection_fraction: float | None = None
+    fault_duration_hours: float | None = Field(
+        default=None,
+        gt=0.0,
+    )
 
     confounders: list[str] = Field(
         default_factory=list

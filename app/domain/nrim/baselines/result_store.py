@@ -58,6 +58,8 @@ def metric_row(
         f"| {summary.mean_rank or 0.0:.3f} "
         f"| {summary.healthy_false_selection_rate:.4f} "
         f"| {summary.faulty_coverage:.4f} "
+        f"| {summary.incident_precision:.4f} "
+        f"| {summary.incident_recall:.4f} "
         f"| {summary.mean_runtime_ms:.4f} |"
     )
 
@@ -77,11 +79,12 @@ def build_result_markdown(
         "",
         f"**Benchmark Fingerprint:** `{result.benchmark_fingerprint}`",
         f"**Abstention Threshold:** `{threshold_display}`",
+        f"**Incident Threshold:** `{result.incident_threshold}`",
         "",
         "## Metrics",
         "",
-        "| Split | MRR | Hits@1 | Hits@3 | Mean Rank | Healthy False-Selection | Faulty Coverage | Mean Runtime (ms) |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
+        "| Split | MRR | Hits@1 | Hits@3 | Mean Rank | Healthy False-Selection | Faulty Coverage | Incident Precision | Incident Recall | Mean Runtime (ms) |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |",
         metric_row(split="Validation", summary=result.validation),
         metric_row(split="Test", summary=result.test),
         metric_row(split="OOD Test", summary=result.ood_test),

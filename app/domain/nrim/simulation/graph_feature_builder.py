@@ -9,6 +9,7 @@ from typing import Any
 from .feature_schema import (
     EDGE_TYPES,
     NODE_TYPES,
+    SIGNAL_APPLICABLE_NODE_TYPES,
     SIGNAL_NAMES,
     FeatureSchema,
 )
@@ -226,8 +227,10 @@ def build_node_feature_matrix(
         ].append(event)
 
     changes_by_node: dict[str, int] = defaultdict(int)
+    global_change_count = 0
 
     for event in context_events:
+        global_change_count += 1
         node_id = event.get("component_node_id")
 
         if node_id:
@@ -263,19 +266,32 @@ def build_node_feature_matrix(
         )
         row["recent_change_event_count"] = float(
             changes_by_node[node_id]
+            + global_change_count
         )
-
         for signal_name in SIGNAL_NAMES:
+            applicable = (
+                node_type
+                in SIGNAL_APPLICABLE_NODE_TYPES[
+                    signal_name
+                ]
+            )
+            safe_signal = signal_name.replace(
+                ".",
+                "__",
+            )
+            row[f"{safe_signal}__applicable"] = float(
+                applicable
+            )
+
+            if not applicable:
+                row[f"{safe_signal}__missing"] = 0.0
+                continue
+
             statistics = build_signal_statistics(
                 events=telemetry_by_node_signal[
                     (node_id, signal_name)
                 ],
                 cutoff=cutoff,
-            )
-
-            safe_signal = signal_name.replace(
-                ".",
-                "__",
             )
 
             for statistic, value in (

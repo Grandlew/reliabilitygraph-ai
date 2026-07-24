@@ -120,6 +120,9 @@ def build_fault(
         severity=float(plan.fault_severity),
         parameters={
             "fault_seed": plan.fault_seed,
+            "fault_duration_hours": (
+                plan.fault_duration_hours
+            ),
         },
     )
 

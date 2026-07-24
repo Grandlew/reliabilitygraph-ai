@@ -214,6 +214,8 @@ def build_scenario(
         if edge.edge_type == SimulationEdgeType.STORES_ON
     }
     incident_onset_time = None
+    fault_recovery_time = None
+    observable_impact_times: list[datetime] = []
     affected_service_ids: set[str] = set()
 
     current_time = start_time
@@ -248,9 +250,25 @@ def build_scenario(
         )
 
     fault_injected = False
+    fault_active = False
+    configured_duration_hours = (
+        float(
+            scenario_fault.parameters.get(
+                "fault_duration_hours"
+            )
+        )
+        if (
+            scenario_fault is not None
+            and scenario_fault.parameters.get(
+                "fault_duration_hours"
+            )
+            is not None
+        )
+        else None
+    )
 
     while current_time <= end_time:
-        workload_at_time(
+        workload = workload_at_time(
             timestamp=current_time,
             room_count=topology.room_count,
             regime=regime,
@@ -277,6 +295,22 @@ def build_scenario(
 
             propagation_records.extend(new_records)
             fault_injected = True
+            fault_active = True
+
+        if (
+            scenario_fault is not None
+            and fault_active
+            and configured_duration_hours is not None
+            and current_time
+            >= scenario_fault.injection_time
+            + timedelta(hours=configured_duration_hours)
+        ):
+            states = initialize_states(
+                topology=topology,
+                timestamp=current_time,
+            )
+            fault_active = False
+            fault_recovery_time = current_time
 
         channels_per_storage = (
             regime.catchup_recording_channels
@@ -287,7 +321,7 @@ def build_scenario(
             storage_state = states[storage_node.node_id]
             growth_multiplier = 1.0
 
-            if scenario_fault is not None and fault_injected:
+            if scenario_fault is not None and fault_active:
                 if (
                     scenario_fault.failure_type
                     == FailureType.STORAGE_CAPACITY_SATURATION
@@ -360,11 +394,20 @@ def build_scenario(
 
         for service_node in catchup_service_nodes:
             catchup_state = states[service_node.node_id]
+            expected_sessions = (
+                float(
+                    workload[
+                        "active_catchup_sessions"
+                    ]
+                )
+                / len(catchup_service_nodes)
+            )
             catchup_events = generate_catchup_service_telemetry(
                 topology=topology,
                 node_state=catchup_state,
                 timestamp=current_time,
                 recording_attempts=attempts_per_service,
+                active_sessions=expected_sessions,
                 rng=telemetry_rng,
             )
             telemetry_events.extend(
@@ -377,10 +420,38 @@ def build_scenario(
                 )
             )
 
-            current_failures = int(catchup_events[0].value)
+            current_failures = int(
+                next(
+                    event.value
+                    for event in catchup_events
+                    if event.signal_name
+                    == "iptv.catchup.recording_failures"
+                )
+            )
+            observed_sessions = float(
+                next(
+                    event.value
+                    for event in catchup_events
+                    if event.signal_name
+                    == "iptv.session.active_count"
+                )
+            )
 
-            if current_failures > 0:
+            fault_attributable_impact = (
+                scenario_fault is not None
+                and fault_active
+                and catchup_state.health_state
+                != HealthState.HEALTHY
+                and (
+                    current_failures > 0
+                    or observed_sessions
+                    < expected_sessions * 0.85
+                )
+            )
+
+            if fault_attributable_impact:
                 affected_service_ids.add(service_node.node_id)
+                observable_impact_times.append(current_time)
 
                 if incident_onset_time is None:
                     incident_onset_time = current_time
@@ -406,6 +477,8 @@ def build_scenario(
                 affected_service_ids
             ),
             incident_onset_time=incident_onset_time,
+            recovery_time=fault_recovery_time,
+            observable_impact_times=observable_impact_times,
             random_seed=regime.random_seed,
         )
 

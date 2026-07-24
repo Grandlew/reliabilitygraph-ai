@@ -1,32 +1,56 @@
 {
-  "scenario_count": 50,
+  "scenario_count": 96,
   "split_counts": {
-    "train": 28,
-    "test": 4,
-    "validation": 8,
-    "ood_test": 10
+    "train": 48,
+    "validation": 16,
+    "test": 16,
+    "ood_test": 16
   },
   "fault_class_counts": {
-    "storage_io_degradation": 10,
-    "cleanup_job_failure": 8,
-    "storage_capacity_saturation": 3,
-    "catchup_worker_failure": 4
+    "storage_capacity_saturation": 12,
+    "storage_io_degradation": 12,
+    "cleanup_job_failure": 12,
+    "catchup_worker_failure": 12
+  },
+  "fault_class_counts_by_split": {
+    "train": {
+      "storage_capacity_saturation": 6,
+      "storage_io_degradation": 6,
+      "cleanup_job_failure": 6,
+      "catchup_worker_failure": 6
+    },
+    "validation": {
+      "storage_capacity_saturation": 2,
+      "storage_io_degradation": 2,
+      "cleanup_job_failure": 2,
+      "catchup_worker_failure": 2
+    },
+    "test": {
+      "storage_capacity_saturation": 2,
+      "storage_io_degradation": 2,
+      "cleanup_job_failure": 2,
+      "catchup_worker_failure": 2
+    },
+    "ood_test": {
+      "storage_capacity_saturation": 2,
+      "storage_io_degradation": 2,
+      "cleanup_job_failure": 2,
+      "catchup_worker_failure": 2
+    }
   },
   "unique_topologies_by_split": {
-    "train": 14,
+    "train": 6,
+    "validation": 2,
     "test": 2,
-    "validation": 4,
-    "ood_test": 5
+    "ood_test": 2
   },
   "mean_missingness_by_class": {
-    "storage_io_degradation": 0.073025,
-    "healthy": 0.074462,
-    "cleanup_job_failure": 0.062989,
-    "storage_capacity_saturation": 0.02181,
-    "catchup_worker_failure": 0.140493
+    "storage_capacity_saturation": 0.029378,
+    "healthy": 0.066497,
+    "storage_io_degradation": 0.07747,
+    "cleanup_job_failure": 0.073679,
+    "catchup_worker_failure": 0.085462
   },
   "errors": [],
-  "warnings": [
-    "Failure-class imbalance exceeds 2:1."
-  ]
+  "warnings": []
 }

@@ -232,6 +232,10 @@ class ScenarioGroundTruth(BaseModel):
 
     injection_time: datetime | None
     incident_onset_time: datetime | None
+    recovery_time: datetime | None = None
+    observable_impact_times: list[datetime] = Field(
+        default_factory=list
+    )
 
     affected_service_node_ids: list[str] = Field(default_factory=list)
     propagation_edge_ids: list[str] = Field(default_factory=list)
@@ -249,6 +253,8 @@ class ScenarioGroundTruth(BaseModel):
                 self.fault_id,
                 self.injection_time,
                 self.incident_onset_time,
+                self.recovery_time,
+                self.observable_impact_times,
                 self.affected_service_node_ids,
                 self.propagation_edge_ids
             ]):

@@ -50,17 +50,37 @@ def build_window_targets(
         else None
     )
 
-    current_incident = bool(
-        incident_onset is not None
-        and incident_onset
+    impact_times = sorted(
+        parse_timestamp(str(value))
+        for value in ground_truth.get(
+            "observable_impact_times",
+            [],
+        )
+    )
+    recovery_raw = ground_truth.get(
+        "recovery_time"
+    )
+    recovery_time = (
+        parse_timestamp(str(recovery_raw))
+        if recovery_raw
+        else None
+    )
+    # Backward compatibility for older generated scenarios.
+    if not impact_times and incident_onset is not None:
+        impact_times = [incident_onset]
+
+    current_incident = any(
+        boundary.observation_start
+        <= impact_time
         <= boundary.observation_cutoff
+        for impact_time in impact_times
     )
 
-    future_incident = bool(
-        incident_onset is not None
-        and boundary.observation_cutoff
-        < incident_onset
+    future_incident = any(
+        boundary.observation_cutoff
+        < impact_time
         <= boundary.prediction_end
+        for impact_time in impact_times
     )
 
     if incident_onset is None:
@@ -70,13 +90,24 @@ def build_window_targets(
         time_to_incident_hours = 0.0
         time_to_incident_mask = 1.0
     else:
+        next_impacts = [
+            impact_time
+            for impact_time in impact_times
+            if impact_time > boundary.observation_cutoff
+        ]
         time_to_incident_hours = (
-            incident_onset
-            - boundary.observation_cutoff
-        ).total_seconds() / 3600.0
+            (
+                min(next_impacts)
+                - boundary.observation_cutoff
+            ).total_seconds()
+            / 3600.0
+            if next_impacts
+            else None
+        )
 
         time_to_incident_mask = float(
-            incident_onset
+            bool(next_impacts)
+            and min(next_impacts)
             <= boundary.prediction_end
         )
 
@@ -112,6 +143,19 @@ def build_window_targets(
         "root_cause_node": root_cause_labels,
         "current_incident": int(
             current_incident
+        ),
+        "fault_present": int(
+            ground_truth.get("fault_id") is not None
+            and ground_truth.get("injection_time") is not None
+            and parse_timestamp(
+                str(ground_truth["injection_time"])
+            )
+            <= boundary.observation_cutoff
+            and (
+                recovery_time is None
+                or boundary.observation_cutoff
+                < recovery_time
+            )
         ),
         "future_incident": int(
             future_incident

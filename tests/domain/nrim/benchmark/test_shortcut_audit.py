@@ -3,6 +3,7 @@ from app.domain.nrim.benchmark.models import (
 )
 from app.domain.nrim.benchmark.shortcut_audit import (
     balanced_accuracy,
+    run_root_cause_shortcut_audit,
     run_shortcut_audit,
 )
 
@@ -81,3 +82,53 @@ def test_shortcut_audit_detects_node_count_leakage() -> None:
     )
 
     assert node_count_result.suspicious is True
+
+
+def make_root_cause_window(
+    scenario_id: str,
+    root_index: int,
+) -> dict:
+    return {
+        "source_scenario_id": scenario_id,
+        "node_ids": ["service", "storage", "client"],
+        "node_feature_names": [
+            "node_type__catchup_service",
+            "node_type__catchup_storage",
+            "node_type__smart_tv_group",
+            "total_degree",
+        ],
+        "node_features": [
+            [1.0, 0.0, 0.0, 2.0],
+            [0.0, 1.0, 0.0, 1.0],
+            [0.0, 0.0, 1.0, 1.0],
+        ],
+        "targets": {
+            "root_cause_node": [
+                int(index == root_index)
+                for index in range(3)
+            ]
+        },
+    }
+
+
+def test_root_cause_shortcut_detects_node_type_leakage() -> None:
+    training = [
+        make_root_cause_window(f"train_{index}", 1)
+        for index in range(10)
+    ]
+    validation = [
+        make_root_cause_window(f"validation_{index}", 1)
+        for index in range(10)
+    ]
+
+    results = run_root_cause_shortcut_audit(
+        training_windows=training,
+        validation_windows=validation,
+    )
+
+    node_type = next(
+        result
+        for result in results
+        if result.shortcut_name == "root_cause__node_type"
+    )
+    assert node_type.suspicious is True

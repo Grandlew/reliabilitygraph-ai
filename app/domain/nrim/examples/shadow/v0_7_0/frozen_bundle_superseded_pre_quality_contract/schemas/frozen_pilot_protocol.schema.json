@@ -1,0 +1,157 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "automatic_remediation_enabled": {
+      "default": false,
+      "title": "Automatic Remediation Enabled",
+      "type": "boolean"
+    },
+    "bundle_public_key_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Bundle Public Key Sha256",
+      "type": "string"
+    },
+    "deployment_pseudonyms": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 5,
+      "title": "Deployment Pseudonyms",
+      "type": "array"
+    },
+    "exclusion_criteria": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Exclusion Criteria",
+      "type": "array"
+    },
+    "feature_schema_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Feature Schema Hash",
+      "type": "string"
+    },
+    "hypotheses": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Hypotheses",
+      "type": "array"
+    },
+    "inclusion_criteria": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Inclusion Criteria",
+      "type": "array"
+    },
+    "metric_definitions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Metric Definitions",
+      "type": "array"
+    },
+    "minimum_adjudicated_incidents": {
+      "default": 30,
+      "minimum": 30,
+      "title": "Minimum Adjudicated Incidents",
+      "type": "integer"
+    },
+    "minimum_healthy_deployment_hours": {
+      "default": 3000.0,
+      "minimum": 3000.0,
+      "title": "Minimum Healthy Deployment Hours",
+      "type": "number"
+    },
+    "minimum_silent_weeks": {
+      "default": 8.0,
+      "minimum": 8.0,
+      "title": "Minimum Silent Weeks",
+      "type": "number"
+    },
+    "model_bundle_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Model Bundle Hash",
+      "type": "string"
+    },
+    "no_pilot_tuning": {
+      "default": true,
+      "title": "No Pilot Tuning",
+      "type": "boolean"
+    },
+    "path_retention_rules": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Path Retention Rules",
+      "type": "array"
+    },
+    "planned_end_utc": {
+      "format": "date-time",
+      "title": "Planned End Utc",
+      "type": "string"
+    },
+    "planned_start_utc": {
+      "format": "date-time",
+      "title": "Planned Start Utc",
+      "type": "string"
+    },
+    "policy_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Policy Hash",
+      "type": "string"
+    },
+    "predictions_hidden_from_frontline": {
+      "default": true,
+      "title": "Predictions Hidden From Frontline",
+      "type": "boolean"
+    },
+    "protocol_name": {
+      "default": "NRIM v0.7 Prospective Shadow Evidence",
+      "title": "Protocol Name",
+      "type": "string"
+    },
+    "protocol_version": {
+      "default": "0.7.0",
+      "title": "Protocol Version",
+      "type": "string"
+    },
+    "registered_at_utc": {
+      "format": "date-time",
+      "title": "Registered At Utc",
+      "type": "string"
+    },
+    "stop_conditions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Stop Conditions",
+      "type": "array"
+    },
+    "topology_family_count": {
+      "minimum": 5,
+      "title": "Topology Family Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "registered_at_utc",
+    "planned_start_utc",
+    "planned_end_utc",
+    "deployment_pseudonyms",
+    "topology_family_count",
+    "model_bundle_hash",
+    "bundle_public_key_sha256",
+    "feature_schema_hash",
+    "policy_hash",
+    "hypotheses",
+    "metric_definitions",
+    "inclusion_criteria",
+    "exclusion_criteria",
+    "path_retention_rules",
+    "stop_conditions"
+  ],
+  "title": "FrozenPilotProtocol",
+  "type": "object"
+}

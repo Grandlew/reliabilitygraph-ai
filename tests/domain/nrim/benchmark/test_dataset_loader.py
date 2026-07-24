@@ -83,3 +83,18 @@ def test_missing_fraction_uses_masks_only() -> None:
     )
 
     assert result == 0.5
+
+
+def test_missing_fraction_excludes_non_applicable_signals() -> None:
+    result = missing_feature_fraction(
+        feature_names=[
+            "value__applicable",
+            "value__missing",
+        ],
+        matrix=[
+            [1.0, 1.0],
+            [0.0, 0.0],
+        ],
+    )
+
+    assert result == 1.0

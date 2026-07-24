@@ -40,9 +40,25 @@ def hits_at_k(
 def summarize_ranking_results(
     results: list[WindowRankingResult],
 ) -> RankingMetricSummary:
+    uses_incident_stage = any(
+        result.true_incident is not None
+        for result in results
+    )
     faulty_results = [
-        r for r in results if r.true_root_cause_node_id is not None]
-    healthy_results = [r for r in results if r.true_root_cause_node_id is None]
+        result
+        for result in results
+        if (
+            bool(result.true_incident)
+            if uses_incident_stage
+            else result.true_root_cause_node_id is not None
+        )
+    ]
+    faulty_ids = {id(result) for result in faulty_results}
+    healthy_results = [
+        result
+        for result in results
+        if id(result) not in faulty_ids
+    ]
 
     # Faulty window metrics
     mrr_values = []
@@ -68,6 +84,19 @@ def summarize_ranking_results(
 
     # Healthy window metrics
     healthy_abstained_count = sum(1 for r in healthy_results if r.abstained)
+    true_positives = sum(
+        bool(result.true_incident)
+        and bool(result.incident_detected)
+        for result in results
+    )
+    predicted_positives = sum(
+        bool(result.incident_detected)
+        for result in results
+    )
+    actual_positives = sum(
+        bool(result.true_incident)
+        for result in results
+    )
 
     return RankingMetricSummary(
         window_count=len(results),
@@ -96,5 +125,30 @@ def summarize_ranking_results(
         mean_runtime_ms=(
             mean([r.runtime_ms for r in results])
             if results else 0.0
-        )
+        ),
+        incident_precision=(
+            true_positives / predicted_positives
+            if predicted_positives
+            else 0.0
+        ),
+        incident_recall=(
+            true_positives / actual_positives
+            if actual_positives
+            else 0.0
+        ),
+        ood_detection_rate=(
+            sum(result.ood_detected for result in results)
+            / len(results)
+            if results
+            else 0.0
+        ),
+        incident_escalation_rate=(
+            sum(
+                result.incident_escalated
+                for result in results
+            )
+            / len(results)
+            if results
+            else 0.0
+        ),
     )

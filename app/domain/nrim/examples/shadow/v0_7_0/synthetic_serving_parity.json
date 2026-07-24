@@ -1,0 +1,50 @@
+{
+  "case_count": 5,
+  "cases": [
+    {
+      "actual_feature_hash": "66e221b4b18a3d7b99dd27d6ff3d140b6d191784dbe3afc98ff0653ad1e01ff7",
+      "expected_feature_hash": "66e221b4b18a3d7b99dd27d6ff3d140b6d191784dbe3afc98ff0653ad1e01ff7",
+      "first_differences": [],
+      "matches": true,
+      "snapshot_hash": "c6fa90223945bdc1a49eaeb75718451a0e1d036e63eaf4a97616d2f3a4c9aa57",
+      "window_id": "window_7fbfd628b360499d"
+    },
+    {
+      "actual_feature_hash": "b91fef2654bff6732c8eb70930ff359635213d7918848a823c8920572eb6b5d4",
+      "expected_feature_hash": "b91fef2654bff6732c8eb70930ff359635213d7918848a823c8920572eb6b5d4",
+      "first_differences": [],
+      "matches": true,
+      "snapshot_hash": "5c3215a330fee416fd830c201209e951cc6179706d8e49219100aa0e5330f194",
+      "window_id": "window_93fb93662e2daa79"
+    },
+    {
+      "actual_feature_hash": "557c1af795e92c2bbb8585db76263269af44505602e2b878cc4a069ca12bcd20",
+      "expected_feature_hash": "557c1af795e92c2bbb8585db76263269af44505602e2b878cc4a069ca12bcd20",
+      "first_differences": [],
+      "matches": true,
+      "snapshot_hash": "754b931f6fc4d29ea6a6bae25056257bc33ac72c080238728b822fa0c9c3baac",
+      "window_id": "window_f27fec2de4016164"
+    },
+    {
+      "actual_feature_hash": "643cc8177e2b5ad9e508bc169cfeabd80111e080d3f9e5afb46342a757d6df95",
+      "expected_feature_hash": "643cc8177e2b5ad9e508bc169cfeabd80111e080d3f9e5afb46342a757d6df95",
+      "first_differences": [],
+      "matches": true,
+      "snapshot_hash": "2a816fbdd20d5a8282f4dafa624eda047a367ccb9e9eaef68a7cad9cb9984d74",
+      "window_id": "window_cf1f14b9695219a4"
+    },
+    {
+      "actual_feature_hash": "266ba8014a069652c09a5988dd44cf3648371b4803e5d6bbd17846af80a0a62d",
+      "expected_feature_hash": "266ba8014a069652c09a5988dd44cf3648371b4803e5d6bbd17846af80a0a62d",
+      "first_differences": [],
+      "matches": true,
+      "snapshot_hash": "2f1b092dc8347b92d9984ef48c06f23934fe6bee9616abbb37003bfe2241bb26",
+      "window_id": "window_56885dee14a3fe92"
+    }
+  ],
+  "gate": "synthetic_serving_feature_parity",
+  "locked_test_read": false,
+  "matching_case_count": 5,
+  "parity_fraction": 1.0,
+  "truth_note": "Development-only synthetic parity is necessary but does not establish real telemetry availability or semantic parity."
+}

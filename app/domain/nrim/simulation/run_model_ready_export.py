@@ -21,14 +21,14 @@ def main() -> None:
         base_dir.parent
         / "examples"
         / "simulation"
-        / "day08_dataset"
+        / "day08_dataset_v2"
     )
 
     day09_root = (
         base_dir.parent
         / "examples"
         / "simulation"
-        / "day09_model_ready"
+        / "day09_model_ready_v2"
     )
 
     specification = TemporalWindowSpecification(

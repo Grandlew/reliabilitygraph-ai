@@ -1,0 +1,21 @@
+{
+  "bundle_manifest_sha256": "16ae7247d499037b8cf1e59ad39531386a99ed376144f7d1117addbff7b571fb",
+  "bundle_sha256": "b5624cab169c498f06863e1138874cb328951f314ecd89acd8a72979e39a2123",
+  "feature_schema_sha256": "b2cb5de814d319934e80f4eb9d474ac2831fed9b8db18077cc61d56185c6e9e7",
+  "policy_sha256": "f78e0bb65a39364b53cf5888d24455158090d056a6fd31a90df116f7fb85c036",
+  "public_key_sha256": "961afa1f05957e8158e76c44719333cf348c1d688e8d45a3950a7d11f06271d7",
+  "schema_files": {
+    "deployment_profile": "9ea630bb5d8d0315ad8f12587d3d3dcedb13d2b4d8ff046dcfcb61ea5ed159e3",
+    "frozen_pilot_protocol": "239d30d6583323fc4a8e9e29658f2bdce69b7dc57416a0fcc38ddc2902550fc8",
+    "incident_adjudication": "054e94fe2ebf3f3a94a8624094f5bca9d3bec2ea81a2e4ae191f7e1fb639d57e",
+    "operational_event": "fe58132190eaf2700186a55f1dd266494c5cf668d7ce8294c4b42307f2ed65d1",
+    "prediction_envelope": "a6d6a276bf89a76a8d4418664462583aeb3a7d060ad589baa817abaf8953f75c",
+    "review_case": "8c33d33250b2f3bd8d73b7b7d3e54c7ffa5422e9c5eb7806266deca558495434",
+    "serving_snapshot": "83cfab0704c1c01e85bfb4a0b4f4cb1aa012674ac8a468273956f555cf0cb196",
+    "telemetry_observation": "16747ee6c69fdd82a2484849c66ef721fc98ba94ebc7709ca6ffc6879cfa83e8",
+    "topology_component": "4b0559a00a052581a5d65bd74990867419b060f75214d276fc81c66cabf9a338",
+    "topology_edge": "3a0afb4b175d6501d144db8aa582e3ca2fc02fb214e09b29f485f642dc378c00"
+  },
+  "source_benchmark_sha256": "7c1a78131522ae248675eedd77a7b2f3f350f2fc082acee3353a4b869ffe130e",
+  "truth_status": "frozen_candidate_bundle_for_prospective_shadow_evaluation"
+}

@@ -13,6 +13,7 @@ class BaselineName(str, Enum):
     ERROR_EVIDENCE = "error_evidence"
     TOPOLOGY_PROPAGATION = "topology_propagation"
     HYBRID_ENGINEERING = "hybrid_engineering"
+    LEARNED_FUSION = "learned_fusion"
 
 
 class NodeScore(BaseModel):
@@ -40,6 +41,17 @@ class WindowRankingResult(BaseModel):
         default=None,
         ge=1,
     )
+
+    true_incident: bool | None = None
+    incident_detected: bool | None = None
+    incident_score: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+    )
+    ood_score: float | None = Field(default=None, ge=0.0)
+    ood_detected: bool = False
+    incident_escalated: bool = False
 
     abstained: bool = False
     top_score: float
@@ -113,6 +125,26 @@ class RankingMetricSummary(BaseModel):
     )
 
     mean_runtime_ms: float = Field(ge=0.0)
+    incident_precision: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+    )
+    incident_recall: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+    )
+    ood_detection_rate: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+    )
+    incident_escalation_rate: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+    )
 
 
 class BaselineEvaluationResult(BaseModel):
@@ -123,6 +155,8 @@ class BaselineEvaluationResult(BaseModel):
     )
 
     abstention_threshold: float | None = None
+    incident_threshold: float | None = None
+    incident_threshold_feasible: bool = False
 
     validation: RankingMetricSummary
     test: RankingMetricSummary

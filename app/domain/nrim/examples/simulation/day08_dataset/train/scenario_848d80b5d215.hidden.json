@@ -13,7 +13,7 @@
     "propagation_edge_ids": [],
     "simulator_version": "0.1.0",
     "labeling_version": "0.1.0",
-    "random_seed": 1640526435
+    "random_seed": 1920935263
   },
   "final_hidden_states": {
     "signal_source_1": {
@@ -73,6 +73,24 @@
     "catchup_storage_1": {
       "timestamp": "2026-07-18T00:00:00Z",
       "node_id": "catchup_storage_1",
+      "health_state": "healthy",
+      "latent_capacity_factor": 1.0,
+      "latent_latency_factor": 1.0,
+      "latent_error_factor": 1.0,
+      "caused_by_fault_id": null
+    },
+    "catchup_service_2": {
+      "timestamp": "2026-07-18T00:00:00Z",
+      "node_id": "catchup_service_2",
+      "health_state": "healthy",
+      "latent_capacity_factor": 1.0,
+      "latent_latency_factor": 1.0,
+      "latent_error_factor": 1.0,
+      "caused_by_fault_id": null
+    },
+    "catchup_storage_2": {
+      "timestamp": "2026-07-18T00:00:00Z",
+      "node_id": "catchup_storage_2",
       "health_state": "healthy",
       "latent_capacity_factor": 1.0,
       "latent_latency_factor": 1.0,
@@ -141,42 +159,6 @@
       "latent_latency_factor": 1.0,
       "latent_error_factor": 1.0,
       "caused_by_fault_id": null
-    },
-    "distribution_switch_3": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "distribution_switch_3",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "smart_tv_group_3": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "smart_tv_group_3",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "distribution_switch_4": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "distribution_switch_4",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "smart_tv_group_4": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "smart_tv_group_4",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
     }
   },
   "propagation_records": [],
@@ -185,24 +167,26 @@
     "scenario_id": "scenario_848d80b5d215",
     "pair_id": "pair_78a7ec6430a6",
     "environment": {
-      "environment_id": "environment_201df67a547f",
-      "room_count": 180,
-      "floor_count": 4,
+      "environment_id": "environment_0516079d6376",
+      "room_count": 50,
+      "floor_count": 2,
       "redundant_middleware": true,
-      "shared_storage": true,
-      "base_occupancy_fraction": 0.6733837627599966,
-      "evening_peak_multiplier": 1.3006598226328736,
-      "weekend_multiplier": 1.0415443090833572,
-      "catchup_recording_channels": 62,
-      "average_bitrate_mbps": 5.272577231228738,
-      "retention_days": 14,
-      "scenario_duration_hours": 48,
+      "shared_storage": false,
+      "base_occupancy_fraction": 0.6188799675067287,
+      "evening_peak_multiplier": 1.2294143590252642,
+      "weekend_multiplier": 1.0361864892240185,
+      "catchup_recording_channels": 46,
+      "average_bitrate_mbps": 7.324104829820854,
+      "retention_days": 10,
+      "scenario_duration_hours": 36,
       "sampling_interval_minutes": 15
     },
     "failure_type": "healthy",
     "fault_severity": null,
     "fault_injection_fraction": null,
-    "confounders": [],
+    "confounders": [
+      "transient_recording_errors"
+    ],
     "missingness": {
       "mode": "none",
       "probability": 0.0,
@@ -210,15 +194,15 @@
       "outage_start_fraction": null,
       "outage_duration_fraction": null
     },
-    "topology_seed": 865489411,
-    "workload_seed": 1640526435,
-    "observation_seed": 60356611,
-    "fault_seed": 5034567,
-    "intended_split": null
+    "topology_seed": 1821917324,
+    "workload_seed": 1920935263,
+    "observation_seed": 743065621,
+    "fault_seed": 1972421821,
+    "intended_split": "train"
   },
   "missingness_report": {
-    "original_count": 757,
-    "retained_count": 757,
+    "original_count": 1135,
+    "retained_count": 1135,
     "removed_count": 0,
     "removed_fraction": 0.0,
     "mode": "none"

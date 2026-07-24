@@ -1,0 +1,72 @@
+{
+  "scenario_count": 2000,
+  "split_counts": {
+    "train": 640,
+    "validation": 480,
+    "development_test": 240,
+    "locked_test": 240,
+    "ood_test": 240,
+    "semantic_challenge": 160
+  },
+  "fault_class_counts": {
+    "storage_capacity_saturation": 250,
+    "storage_io_degradation": 250,
+    "cleanup_job_failure": 250,
+    "catchup_worker_failure": 250
+  },
+  "fault_class_counts_by_split": {
+    "train": {
+      "storage_capacity_saturation": 80,
+      "storage_io_degradation": 80,
+      "cleanup_job_failure": 80,
+      "catchup_worker_failure": 80
+    },
+    "validation": {
+      "storage_capacity_saturation": 60,
+      "storage_io_degradation": 60,
+      "cleanup_job_failure": 60,
+      "catchup_worker_failure": 60
+    },
+    "development_test": {
+      "storage_capacity_saturation": 30,
+      "storage_io_degradation": 30,
+      "cleanup_job_failure": 30,
+      "catchup_worker_failure": 30
+    },
+    "locked_test": {
+      "storage_capacity_saturation": 30,
+      "storage_io_degradation": 30,
+      "cleanup_job_failure": 30,
+      "catchup_worker_failure": 30
+    },
+    "ood_test": {
+      "storage_capacity_saturation": 30,
+      "storage_io_degradation": 30,
+      "cleanup_job_failure": 30,
+      "catchup_worker_failure": 30
+    },
+    "semantic_challenge": {
+      "storage_capacity_saturation": 20,
+      "storage_io_degradation": 20,
+      "cleanup_job_failure": 20,
+      "catchup_worker_failure": 20
+    }
+  },
+  "unique_topologies_by_split": {
+    "train": 80,
+    "validation": 60,
+    "development_test": 30,
+    "locked_test": 30,
+    "ood_test": 30,
+    "semantic_challenge": 20
+  },
+  "mean_missingness_by_class": {
+    "storage_capacity_saturation": 0.057606,
+    "healthy": 0.052019,
+    "storage_io_degradation": 0.051651,
+    "cleanup_job_failure": 0.053267,
+    "catchup_worker_failure": 0.045553
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -56,7 +56,9 @@ def make_window(
                 if healthy
                 else "storage_io_degradation"
             ),
-            "current_incident": 0,
+            "current_incident": int(
+                not healthy
+            ),
             "future_incident": int(
                 not healthy
             ),

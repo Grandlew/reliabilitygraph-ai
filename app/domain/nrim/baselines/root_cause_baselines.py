@@ -332,6 +332,13 @@ def hybrid_engineering_baseline(
             name
             for name in accessor.feature_names
             if name.endswith("__missing")
+            and accessor.get(
+                row,
+                name.removesuffix("__missing")
+                + "__applicable",
+                default=1.0,
+            )
+            > 0.5
         ]
 
         missing_fraction = (
@@ -412,6 +419,7 @@ def run_baseline(
     window: dict[str, Any],
     baseline: BaselineName,
     random_seed: int = 42,
+    fusion_model: Any | None = None,
 ) -> list[NodeScore]:
     if baseline == BaselineName.RANDOM:
         return random_baseline(
@@ -443,6 +451,18 @@ def run_baseline(
     if baseline == BaselineName.HYBRID_ENGINEERING:
         return hybrid_engineering_baseline(
             window=window
+        )
+
+    if baseline == BaselineName.LEARNED_FUSION:
+        if fusion_model is None:
+            raise ValueError(
+                "Learned fusion baseline requires a fitted model."
+            )
+        from .learned_fusion import learned_fusion_scores
+
+        return learned_fusion_scores(
+            window=window,
+            model=fusion_model,
         )
 
     raise ValueError(

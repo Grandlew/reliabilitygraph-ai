@@ -19,7 +19,7 @@ def main() -> None:
         base_dir.parent
         / "examples"
         / "simulation"
-        / "day08_dataset"
+        / "day08_dataset_v2"
     )
 
     manifest = generate_dataset(
@@ -32,8 +32,8 @@ def main() -> None:
             0,
             tzinfo=timezone.utc,
         ),
-        environment_count=20,
-        ood_environment_count=5,
+        environment_count=72,
+        ood_environment_count=12,
         generation_seed=42,
     )
 

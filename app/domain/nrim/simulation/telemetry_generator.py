@@ -86,11 +86,18 @@ def generate_storage_telemetry(
 ) -> list[CanonicalTelemetryEvent]:
     events: list[CanonicalTelemetryEvent] = []
 
+    effective_utilization = (
+        storage_utilization
+        / max(
+            0.10,
+            node_state.latent_capacity_factor,
+        )
+    )
     observed_utilization = max(
         0.0,
         min(
             100.0,
-            storage_utilization
+            effective_utilization
             + rng.gauss(0.0, 0.35),
         ),
     )
@@ -159,6 +166,7 @@ def generate_catchup_service_telemetry(
     node_state: HiddenNodeState,
     timestamp: datetime,
     recording_attempts: int,
+    active_sessions: float | None = None,
     rng: random.Random,
 ) -> list[CanonicalTelemetryEvent]:
     failure_probability = min(
@@ -172,7 +180,7 @@ def generate_catchup_service_telemetry(
         if rng.random() < failure_probability
     )
 
-    return [
+    events = [
         CanonicalTelemetryEvent(
             deployment_id=topology.topology_id,
             component_node_id=node_state.node_id,
@@ -191,3 +199,81 @@ def generate_catchup_service_telemetry(
             baseline_status=BaselineStatus.UNKNOWN,
         )
     ]
+    if active_sessions is not None:
+        if active_sessions < 0.0:
+            raise ValueError(
+                "active_sessions must be non-negative"
+            )
+        health_availability = max(
+            0.05,
+            min(
+                1.0,
+                1.0
+                - 0.85
+                * (
+                    1.0
+                    - 1.0
+                    / max(
+                        1.0,
+                        node_state.latent_error_factor,
+                    )
+                ),
+            ),
+        )
+        observed_sessions = max(
+            0.0,
+            active_sessions
+            * health_availability
+            + rng.gauss(
+                0.0,
+                max(0.25, active_sessions * 0.02),
+            ),
+        )
+        events.append(
+            CanonicalTelemetryEvent(
+                deployment_id=topology.topology_id,
+                component_node_id=node_state.node_id,
+                service_node_ids=[node_state.node_id],
+                observed_at=timestamp,
+                ingested_at=timestamp,
+                signal_type=TelemetrySignalType.METRIC,
+                signal_name="iptv.session.active_count",
+                value=round(observed_sessions, 3),
+                unit="sessions",
+                collection_source="nrim_simulator",
+                quality=_quality_from_rng(rng),
+                golden_signal=GoldenSignal.TRAFFIC,
+                baseline_status=BaselineStatus.UNKNOWN,
+            )
+        )
+        observed_availability = max(
+            0.0,
+            min(
+                100.0,
+                100.0 * health_availability
+                + rng.gauss(0.0, 0.35),
+            ),
+        )
+        events.append(
+            CanonicalTelemetryEvent(
+                deployment_id=topology.topology_id,
+                component_node_id=node_state.node_id,
+                service_node_ids=[node_state.node_id],
+                observed_at=timestamp,
+                ingested_at=timestamp,
+                signal_type=TelemetrySignalType.METRIC,
+                signal_name=(
+                    "iptv.catchup.service_availability"
+                ),
+                value=round(
+                    observed_availability,
+                    3,
+                ),
+                unit="percent",
+                collection_source="nrim_simulator",
+                quality=_quality_from_rng(rng),
+                golden_signal=GoldenSignal.TRAFFIC,
+                baseline_status=BaselineStatus.UNKNOWN,
+            )
+        )
+    return events

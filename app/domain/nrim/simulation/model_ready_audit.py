@@ -25,6 +25,20 @@ ADDITIONAL_FORBIDDEN_KEYS = {
     "fault_seed",
 }
 
+FORBIDDEN_INFERENCE_FEATURE_TOKENS = {
+    "context__",
+    "confounder",
+    "environment_id",
+    "pair_id",
+    "scenario_id",
+    "failure_type",
+    "fault_type",
+    "topology_seed",
+    "workload_seed",
+    "observation_seed",
+    "fault_seed",
+}
+
 
 def load_json(path: str | Path) -> dict[str, Any]:
     with Path(path).open(
@@ -109,6 +123,23 @@ def audit_window_record(
         "node_features",
         [],
     )
+    feature_names = [
+        str(name)
+        for name in record.get(
+            "node_feature_names",
+            [],
+        )
+    ]
+    for feature_name in feature_names:
+        lowered = feature_name.lower()
+        if any(
+            token in lowered
+            for token in FORBIDDEN_INFERENCE_FEATURE_TOKENS
+        ):
+            errors.append(
+                "Forbidden simulator or target annotation appears in "
+                f"node feature name: {feature_name}."
+            )
 
     if len(node_ids) != len(node_features):
         errors.append(

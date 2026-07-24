@@ -1,0 +1,657 @@
+{
+  "$defs": {
+    "Applicability": {
+      "enum": [
+        "observed",
+        "missing",
+        "not_applicable"
+      ],
+      "title": "Applicability",
+      "type": "string"
+    },
+    "ComponentType": {
+      "enum": [
+        "signal_source",
+        "gateway",
+        "streamer",
+        "middleware",
+        "database",
+        "catchup_service",
+        "catchup_storage",
+        "epg_service",
+        "core_switch",
+        "distribution_switch",
+        "smart_tv_group"
+      ],
+      "title": "ComponentType",
+      "type": "string"
+    },
+    "DataQualityState": {
+      "enum": [
+        "accepted",
+        "degraded",
+        "blocked"
+      ],
+      "title": "DataQualityState",
+      "type": "string"
+    },
+    "DependencyType": {
+      "enum": [
+        "depends_on",
+        "sends_to",
+        "authenticates_with",
+        "stores_on",
+        "serves",
+        "connected_to"
+      ],
+      "title": "DependencyType",
+      "type": "string"
+    },
+    "DeploymentProfile": {
+      "additionalProperties": false,
+      "description": "Observable workload context required by the frozen v0.6 policy.",
+      "properties": {
+        "average_bitrate_mbps": {
+          "exclusiveMinimum": 0.0,
+          "title": "Average Bitrate Mbps",
+          "type": "number"
+        },
+        "base_occupancy_fraction": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Base Occupancy Fraction",
+          "type": "number"
+        },
+        "catchup_recording_channels": {
+          "exclusiveMinimum": 0,
+          "title": "Catchup Recording Channels",
+          "type": "integer"
+        },
+        "collector_family": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Collector Family",
+          "type": "string"
+        },
+        "deployment_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Deployment Pseudonym",
+          "type": "string"
+        },
+        "floor_count": {
+          "exclusiveMinimum": 0,
+          "title": "Floor Count",
+          "type": "integer"
+        },
+        "profile_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Profile Version",
+          "type": "string"
+        },
+        "redundant_middleware": {
+          "title": "Redundant Middleware",
+          "type": "boolean"
+        },
+        "retention_days": {
+          "exclusiveMinimum": 0,
+          "title": "Retention Days",
+          "type": "integer"
+        },
+        "room_count": {
+          "exclusiveMinimum": 0,
+          "title": "Room Count",
+          "type": "integer"
+        },
+        "schema_version": {
+          "default": "0.7.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "shared_storage": {
+          "title": "Shared Storage",
+          "type": "boolean"
+        },
+        "software_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Software Version",
+          "type": "string"
+        },
+        "valid_from_utc": {
+          "format": "date-time",
+          "title": "Valid From Utc",
+          "type": "string"
+        },
+        "valid_to_utc": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To Utc"
+        }
+      },
+      "required": [
+        "deployment_pseudonym",
+        "profile_version",
+        "valid_from_utc",
+        "software_version",
+        "room_count",
+        "floor_count",
+        "retention_days",
+        "base_occupancy_fraction",
+        "catchup_recording_channels",
+        "average_bitrate_mbps",
+        "shared_storage",
+        "redundant_middleware",
+        "collector_family"
+      ],
+      "title": "DeploymentProfile",
+      "type": "object"
+    },
+    "DirectionSemantics": {
+      "enum": [
+        "source_to_destination",
+        "destination_depends_on_source",
+        "bidirectional"
+      ],
+      "title": "DirectionSemantics",
+      "type": "string"
+    },
+    "MetricName": {
+      "enum": [
+        "system.disk.utilization",
+        "system.disk.io_latency",
+        "system.disk.io_errors",
+        "iptv.catchup.recording_failures",
+        "system.process.restart_count",
+        "iptv.session.active_count",
+        "iptv.catchup.service_availability"
+      ],
+      "title": "MetricName",
+      "type": "string"
+    },
+    "MetricUnit": {
+      "enum": [
+        "percent",
+        "milliseconds",
+        "errors_per_interval",
+        "failures_per_interval",
+        "restarts_per_interval",
+        "sessions"
+      ],
+      "title": "MetricUnit",
+      "type": "string"
+    },
+    "ObservationQuality": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "quarantined"
+      ],
+      "title": "ObservationQuality",
+      "type": "string"
+    },
+    "OperationalEvent": {
+      "additionalProperties": false,
+      "description": "Observable operational event; no simulator/audit category is accepted.",
+      "properties": {
+        "component_pseudonym": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 12,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Component Pseudonym"
+        },
+        "deployment_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Deployment Pseudonym",
+          "type": "string"
+        },
+        "event_time_utc": {
+          "format": "date-time",
+          "title": "Event Time Utc",
+          "type": "string"
+        },
+        "ingestion_time_utc": {
+          "format": "date-time",
+          "title": "Ingestion Time Utc",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "0.7.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "signal_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Signal Name",
+          "type": "string"
+        },
+        "source_sequence_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source Sequence Id",
+          "type": "string"
+        },
+        "topology_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Topology Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "deployment_pseudonym",
+        "signal_name",
+        "event_time_utc",
+        "ingestion_time_utc",
+        "source_sequence_id",
+        "topology_version"
+      ],
+      "title": "OperationalEvent",
+      "type": "object"
+    },
+    "SnapshotMode": {
+      "enum": [
+        "prospective",
+        "late_data_replay",
+        "golden_replay"
+      ],
+      "title": "SnapshotMode",
+      "type": "string"
+    },
+    "TelemetryObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/Applicability"
+        },
+        "collector_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Collector Id",
+          "type": "string"
+        },
+        "component_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Component Pseudonym",
+          "type": "string"
+        },
+        "component_type": {
+          "$ref": "#/$defs/ComponentType"
+        },
+        "deployment_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Deployment Pseudonym",
+          "type": "string"
+        },
+        "event_time_utc": {
+          "format": "date-time",
+          "title": "Event Time Utc",
+          "type": "string"
+        },
+        "ingestion_time_utc": {
+          "format": "date-time",
+          "title": "Ingestion Time Utc",
+          "type": "string"
+        },
+        "metric_name": {
+          "$ref": "#/$defs/MetricName"
+        },
+        "metric_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Metric Value"
+        },
+        "quality": {
+          "$ref": "#/$defs/ObservationQuality"
+        },
+        "schema_version": {
+          "default": "0.7.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_sequence_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source Sequence Id",
+          "type": "string"
+        },
+        "topology_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Topology Version",
+          "type": "string"
+        },
+        "unit": {
+          "$ref": "#/$defs/MetricUnit"
+        }
+      },
+      "required": [
+        "deployment_pseudonym",
+        "component_pseudonym",
+        "component_type",
+        "metric_name",
+        "unit",
+        "applicability",
+        "quality",
+        "event_time_utc",
+        "ingestion_time_utc",
+        "collector_id",
+        "source_sequence_id",
+        "topology_version"
+      ],
+      "title": "TelemetryObservation",
+      "type": "object"
+    },
+    "TopologyComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "component_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Component Pseudonym",
+          "type": "string"
+        },
+        "component_type": {
+          "$ref": "#/$defs/ComponentType"
+        },
+        "deployment_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Deployment Pseudonym",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "0.7.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_system": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "topology_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Topology Version",
+          "type": "string"
+        },
+        "valid_from_utc": {
+          "format": "date-time",
+          "title": "Valid From Utc",
+          "type": "string"
+        },
+        "valid_to_utc": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To Utc"
+        }
+      },
+      "required": [
+        "deployment_pseudonym",
+        "component_pseudonym",
+        "component_type",
+        "valid_from_utc",
+        "topology_version",
+        "source_system"
+      ],
+      "title": "TopologyComponent",
+      "type": "object"
+    },
+    "TopologyEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "dependency_type": {
+          "$ref": "#/$defs/DependencyType"
+        },
+        "deployment_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Deployment Pseudonym",
+          "type": "string"
+        },
+        "destination_component": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Destination Component",
+          "type": "string"
+        },
+        "direction_semantics": {
+          "$ref": "#/$defs/DirectionSemantics"
+        },
+        "propagation_delay_minutes": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Propagation Delay Minutes",
+          "type": "integer"
+        },
+        "propagation_strength": {
+          "default": 1.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Propagation Strength",
+          "type": "number"
+        },
+        "schema_version": {
+          "default": "0.7.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_component": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Source Component",
+          "type": "string"
+        },
+        "source_system": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "topology_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Topology Version",
+          "type": "string"
+        },
+        "valid_from_utc": {
+          "format": "date-time",
+          "title": "Valid From Utc",
+          "type": "string"
+        },
+        "valid_to_utc": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To Utc"
+        }
+      },
+      "required": [
+        "deployment_pseudonym",
+        "source_component",
+        "destination_component",
+        "dependency_type",
+        "direction_semantics",
+        "valid_from_utc",
+        "topology_version",
+        "source_system"
+      ],
+      "title": "TopologyEdge",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "as_of_ingestion_time_utc": {
+      "format": "date-time",
+      "title": "As Of Ingestion Time Utc",
+      "type": "string"
+    },
+    "available_observation_count": {
+      "minimum": 0,
+      "title": "Available Observation Count",
+      "type": "integer"
+    },
+    "components": {
+      "items": {
+        "$ref": "#/$defs/TopologyComponent"
+      },
+      "minItems": 1,
+      "title": "Components",
+      "type": "array"
+    },
+    "data_quality_state": {
+      "$ref": "#/$defs/DataQualityState"
+    },
+    "data_quality_warnings": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Data Quality Warnings",
+      "type": "array"
+    },
+    "decision_cutoff_utc": {
+      "format": "date-time",
+      "title": "Decision Cutoff Utc",
+      "type": "string"
+    },
+    "deployment_pseudonym": {
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "Deployment Pseudonym",
+      "type": "string"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/TopologyEdge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "expected_observation_count": {
+      "minimum": 0,
+      "title": "Expected Observation Count",
+      "type": "integer"
+    },
+    "mode": {
+      "$ref": "#/$defs/SnapshotMode",
+      "default": "prospective"
+    },
+    "observation_start_utc": {
+      "format": "date-time",
+      "title": "Observation Start Utc",
+      "type": "string"
+    },
+    "observations": {
+      "items": {
+        "$ref": "#/$defs/TelemetryObservation"
+      },
+      "title": "Observations",
+      "type": "array"
+    },
+    "operational_events": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/OperationalEvent"
+      },
+      "title": "Operational Events",
+      "type": "array"
+    },
+    "profile": {
+      "$ref": "#/$defs/DeploymentProfile"
+    },
+    "schema_version": {
+      "default": "0.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "supersedes_prediction_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes Prediction Id"
+    },
+    "topology_version": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Topology Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "deployment_pseudonym",
+    "observation_start_utc",
+    "decision_cutoff_utc",
+    "as_of_ingestion_time_utc",
+    "topology_version",
+    "profile",
+    "components",
+    "edges",
+    "observations",
+    "data_quality_state",
+    "expected_observation_count",
+    "available_observation_count"
+  ],
+  "title": "ServingSnapshot",
+  "type": "object"
+}

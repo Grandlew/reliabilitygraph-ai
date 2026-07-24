@@ -52,8 +52,34 @@ SIGNAL_NAMES = [
     "iptv.catchup.recording_failures",
     "system.process.restart_count",
     "iptv.session.active_count",
+    "iptv.catchup.service_availability",
 ]
 
+SIGNAL_APPLICABLE_NODE_TYPES = {
+    "system.disk.utilization": {
+        "catchup_storage",
+    },
+    "system.disk.io_latency": {
+        "catchup_storage",
+    },
+    "system.disk.io_errors": {
+        "catchup_storage",
+    },
+    "iptv.catchup.recording_failures": {
+        "catchup_service",
+    },
+    "system.process.restart_count": {
+        "middleware",
+        "catchup_service",
+    },
+    "iptv.session.active_count": {
+        "middleware",
+        "catchup_service",
+    },
+    "iptv.catchup.service_availability": {
+        "catchup_service",
+    },
+}
 
 SIGNAL_STATISTICS = [
     "latest",
@@ -115,7 +141,6 @@ def build_node_feature_definitions() -> list[FeatureDefinition]:
             ),
         ]
     )
-
     for signal_name in SIGNAL_NAMES:
         safe_signal = signal_name.replace(".", "__")
 
@@ -143,11 +168,53 @@ def build_node_feature_definitions() -> list[FeatureDefinition]:
 
         definitions.append(
             FeatureDefinition(
+                name=f"{safe_signal}__applicable",
+                value_type=FeatureValueType.BINARY,
+                default_value=0.0,
+                description=(
+                    f"Whether {signal_name} applies to the node type."
+                ),
+            )
+        )
+
+        for history_statistic, description in (
+            (
+                "robust_z",
+                "Causal deviation from the prior-window median and MAD.",
+            ),
+            (
+                "delta",
+                "Change from the latest prior window.",
+            ),
+            (
+                "persistence_count",
+                "Consecutive windows with elevated causal deviation.",
+            ),
+        ):
+            definitions.append(
+                FeatureDefinition(
+                    name=(
+                        f"history__{safe_signal}"
+                        f"__{history_statistic}"
+                    ),
+                    value_type=(
+                        FeatureValueType.COUNT
+                        if history_statistic
+                        == "persistence_count"
+                        else FeatureValueType.CONTINUOUS
+                    ),
+                    default_value=0.0,
+                    description=description,
+                )
+            )
+
+        definitions.append(
+            FeatureDefinition(
                 name=f"{safe_signal}__missing",
                 value_type=FeatureValueType.BINARY,
-                default_value=1.0,
+                default_value=0.0,
                 description=(
-                    f"Missingness indicator for {signal_name}."
+                    f"Applicable but unobserved indicator for {signal_name}."
                 ),
             )
         )
@@ -196,7 +263,7 @@ def build_edge_feature_definitions() -> list[FeatureDefinition]:
 
 
 class FeatureSchema(BaseModel):
-    schema_version: str = "0.1.0"
+    schema_version: str = "0.4.1"
     node_features: list[FeatureDefinition]
     edge_features: list[FeatureDefinition]
 

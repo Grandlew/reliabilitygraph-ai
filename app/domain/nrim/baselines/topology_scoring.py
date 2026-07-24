@@ -18,6 +18,22 @@ FORWARD_PROPAGATION_EDGE_TYPES = {
     "sends_to",
 }
 
+EDGE_TYPE_COMPATIBILITY = {
+    "depends_on": 1.00,
+    "stores_on": 1.00,
+    "serves": 0.80,
+    "sends_to": 0.70,
+    "connected_to": 0.45,
+}
+
+DIAGNOSTIC_REVERSE_COMPATIBILITY = {
+    "depends_on": 0.35,
+    "stores_on": 0.55,
+    "serves": 0.30,
+    "sends_to": 0.25,
+    "connected_to": 0.35,
+}
+
 
 def edge_type_from_row(
     *,
@@ -55,7 +71,7 @@ def build_propagation_adjacency(
     edge_index: list[list[int]],
     edge_features: list[list[float]],
     edge_feature_names: list[str],
-) -> dict[str, list[tuple[str, float]]]:
+) -> dict[str, list[tuple[str, float, str]]]:
     if len(edge_index) != len(edge_features):
         raise ValueError(
             "Edge index and edge features differ."
@@ -119,7 +135,12 @@ def build_propagation_adjacency(
             0.0,
             min(
                 1.0,
-                strength * delay_discount,
+                strength
+                * delay_discount
+                * EDGE_TYPE_COMPATIBILITY.get(
+                    edge_type or "",
+                    0.0,
+                ),
             ),
         )
 
@@ -128,6 +149,17 @@ def build_propagation_adjacency(
                 (
                     target_id,
                     effective_strength,
+                    edge_type,
+                )
+            )
+            adjacency[target_id].append(
+                (
+                    source_id,
+                    effective_strength
+                    * DIAGNOSTIC_REVERSE_COMPATIBILITY[
+                        edge_type
+                    ],
+                    f"{edge_type}__diagnostic_reverse",
                 )
             )
 
@@ -136,6 +168,17 @@ def build_propagation_adjacency(
                 (
                     source_id,
                     effective_strength,
+                    edge_type,
+                )
+            )
+            adjacency[source_id].append(
+                (
+                    target_id,
+                    effective_strength
+                    * DIAGNOSTIC_REVERSE_COMPATIBILITY[
+                        edge_type
+                    ],
+                    f"{edge_type}__diagnostic_reverse",
                 )
             )
 
@@ -147,39 +190,91 @@ def propagate_scores(
     initial_scores: dict[str, float],
     adjacency: dict[
         str,
-        list[tuple[str, float]],
+        list[tuple[str, float] | tuple[str, float, str]],
     ],
     propagation_decay: float = 0.65,
     maximum_hops: int = 3,
+    aggregation_weight: float = 0.50,
 ) -> dict[str, float]:
-
-    final_scores = initial_scores.copy()
     if maximum_hops <= 0:
-        return final_scores
+        return initial_scores.copy()
+    if not 0.0 <= propagation_decay <= 1.0:
+        raise ValueError("propagation_decay must be between zero and one")
+    if not 0.0 <= aggregation_weight <= 1.0:
+        raise ValueError("aggregation_weight must be between zero and one")
 
-    # Queue entries: (source_node_id, current_node_id, current_score, hops_left)
-    queue = deque()
-    for node_id, score in initial_scores.items():
-        if score > 0:
-            queue.append((node_id, node_id, score, maximum_hops))
+    strongest_path: dict[tuple[str, str], float] = {}
 
-    while queue:
-        source, current, score, hops = queue.popleft()
-
-        if hops <= 0:
+    for source, source_score in initial_scores.items():
+        if source_score <= 0.0:
             continue
 
-        neighbors = adjacency.get(current, [])
-        for neighbor_id, weight in neighbors:
-            # Attenuate
-            propagated_value = score * weight * propagation_decay
+        queue = deque(
+            [
+                (
+                    source,
+                    float(source_score),
+                    maximum_hops,
+                    frozenset({source}),
+                )
+            ]
+        )
 
-            if propagated_value > final_scores.get(neighbor_id, 0.0):
-                final_scores[neighbor_id] = propagated_value
-                # Continue propagation from this neighbor
-                queue.append((source, neighbor_id, propagated_value, hops - 1))
+        while queue:
+            current, score, hops, path = queue.popleft()
+            if hops <= 0:
+                continue
 
-    return final_scores
+            for edge in adjacency.get(current, []):
+                neighbor_id = edge[0]
+                edge_weight = edge[1]
+                if neighbor_id in path:
+                    continue
+
+                # Propagate only evidence that is not already explained by
+                # the destination's local score. This makes topology a
+                # residual signal instead of a monotonic copy of anomaly.
+                destination_local = float(
+                    initial_scores.get(neighbor_id, 0.0)
+                )
+                propagated = (
+                    max(0.0, score - destination_local)
+                    * max(0.0, min(1.0, edge_weight))
+                    * propagation_decay
+                )
+                key = (source, neighbor_id)
+                if propagated <= strongest_path.get(key, 0.0):
+                    continue
+
+                strongest_path[key] = propagated
+                queue.append(
+                    (
+                        neighbor_id,
+                        propagated,
+                        hops - 1,
+                        path | {neighbor_id},
+                    )
+                )
+
+    incoming: dict[str, list[float]] = defaultdict(list)
+    for (source, target), value in strongest_path.items():
+        if source != target:
+            incoming[target].append(value)
+
+    return {
+        node_id: min(
+            1.0,
+            max(0.0, float(local_score))
+            + aggregation_weight
+            * (
+                sum(incoming[node_id])
+                / len(incoming[node_id])
+                if incoming[node_id]
+                else 0.0
+            ),
+        )
+        for node_id, local_score in initial_scores.items()
+    }
 
 
 def topology_propagation_baseline(
@@ -188,6 +283,7 @@ def topology_propagation_baseline(
     local_scores: list[NodeScore],
     propagation_decay: float = 0.65,
     maximum_hops: int = 3,
+    aggregation_weight: float = 0.50,
 ) -> list[NodeScore]:
     node_ids = [
         str(node_id)
@@ -215,6 +311,7 @@ def topology_propagation_baseline(
         adjacency=adjacency,
         propagation_decay=propagation_decay,
         maximum_hops=maximum_hops,
+        aggregation_weight=aggregation_weight,
     )
 
     local_by_id = {

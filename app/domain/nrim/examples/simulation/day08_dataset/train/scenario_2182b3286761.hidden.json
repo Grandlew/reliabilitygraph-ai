@@ -6,20 +6,18 @@
     "scenario_kind": "single_fault",
     "failure_type": "catchup_worker_failure",
     "root_cause_node_id": "catchup_service_1",
-    "fault_id": "fault_89890a53cd8949e6ac814f350e40312d",
-    "injection_time": "2026-07-19T17:30:58.766300Z",
-    "incident_onset_time": "2026-07-18T18:10:00Z",
+    "fault_id": "fault_8a41049bb9034f7d81f07b560775e010",
+    "injection_time": "2026-07-18T18:46:53.161335Z",
+    "incident_onset_time": "2026-07-18T06:30:00Z",
     "affected_service_node_ids": [
-      "catchup_service_1",
-      "catchup_service_2"
+      "catchup_service_1"
     ],
     "propagation_edge_ids": [
-      "sim_edge_8275cc15a46a4ad5b642a1fc00bd6913",
-      "sim_edge_caaee6054fc5415dacc46428afb3a00d"
+      "sim_edge_7cbc317e79a843b2ac946773a746c8bb"
     ],
     "simulator_version": "0.1.0",
     "labeling_version": "0.1.0",
-    "random_seed": 289614339
+    "random_seed": 1585701897
   },
   "final_hidden_states": {
     "signal_source_1": {
@@ -55,8 +53,8 @@
       "health_state": "degraded",
       "latent_capacity_factor": 1.0,
       "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.5510114251751674,
-      "caused_by_fault_id": "fault_89890a53cd8949e6ac814f350e40312d"
+      "latent_error_factor": 1.582448447542196,
+      "caused_by_fault_id": "fault_8a41049bb9034f7d81f07b560775e010"
     },
     "database_1": {
       "timestamp": "2026-07-18T00:00:00Z",
@@ -73,30 +71,12 @@
       "health_state": "critical",
       "latent_capacity_factor": 1.0,
       "latent_latency_factor": 1.0,
-      "latent_error_factor": 8.346819002335568,
-      "caused_by_fault_id": "fault_89890a53cd8949e6ac814f350e40312d"
+      "latent_error_factor": 8.765979300562613,
+      "caused_by_fault_id": "fault_8a41049bb9034f7d81f07b560775e010"
     },
     "catchup_storage_1": {
       "timestamp": "2026-07-18T00:00:00Z",
       "node_id": "catchup_storage_1",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "catchup_service_2": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "catchup_service_2",
-      "health_state": "healthy",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.0,
-      "caused_by_fault_id": null
-    },
-    "catchup_storage_2": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "catchup_storage_2",
       "health_state": "healthy",
       "latent_capacity_factor": 1.0,
       "latent_latency_factor": 1.0,
@@ -120,15 +100,6 @@
       "latent_latency_factor": 1.0,
       "latent_error_factor": 1.0,
       "caused_by_fault_id": null
-    },
-    "middleware_2": {
-      "timestamp": "2026-07-18T00:00:00Z",
-      "node_id": "middleware_2",
-      "health_state": "degraded",
-      "latent_capacity_factor": 1.0,
-      "latent_latency_factor": 1.0,
-      "latent_error_factor": 1.5510114251751674,
-      "caused_by_fault_id": "fault_89890a53cd8949e6ac814f350e40312d"
     },
     "distribution_switch_1": {
       "timestamp": "2026-07-18T00:00:00Z",
@@ -207,28 +178,20 @@
     {
       "source_node_id": "catchup_service_1",
       "target_node_id": "middleware_1",
-      "edge_id": "sim_edge_8275cc15a46a4ad5b642a1fc00bd6913",
-      "fault_id": "fault_89890a53cd8949e6ac814f350e40312d",
-      "propagation_started_at": "2026-07-19T17:40:00Z",
-      "effect_strength": 0.5510114251751675
-    },
-    {
-      "source_node_id": "catchup_service_1",
-      "target_node_id": "middleware_2",
-      "edge_id": "sim_edge_caaee6054fc5415dacc46428afb3a00d",
-      "fault_id": "fault_89890a53cd8949e6ac814f350e40312d",
-      "propagation_started_at": "2026-07-19T17:40:00Z",
-      "effect_strength": 0.5510114251751675
+      "edge_id": "sim_edge_7cbc317e79a843b2ac946773a746c8bb",
+      "fault_id": "fault_8a41049bb9034f7d81f07b560775e010",
+      "propagation_started_at": "2026-07-18T19:00:00Z",
+      "effect_strength": 0.582448447542196
     }
   ],
   "fault": {
-    "fault_id": "fault_89890a53cd8949e6ac814f350e40312d",
+    "fault_id": "fault_8a41049bb9034f7d81f07b560775e010",
     "failure_type": "catchup_worker_failure",
     "target_node_id": "catchup_service_1",
-    "injection_time": "2026-07-19T17:30:58.766300Z",
-    "severity": 0.7346819002335567,
+    "injection_time": "2026-07-18T18:46:53.161335Z",
+    "severity": 0.7765979300562613,
     "parameters": {
-      "fault_seed": 615859270
+      "fault_seed": 1253183441
     },
     "reversible": true,
     "expected_affected_service_types": []
@@ -237,42 +200,44 @@
     "scenario_id": "scenario_2182b3286761",
     "pair_id": "pair_9d8bd1142d4e",
     "environment": {
-      "environment_id": "environment_c8bc96f73a09",
+      "environment_id": "environment_877a0804a7e8",
       "room_count": 120,
       "floor_count": 4,
-      "redundant_middleware": true,
-      "shared_storage": false,
-      "base_occupancy_fraction": 0.6982535415178442,
-      "evening_peak_multiplier": 1.2625900502599068,
-      "weekend_multiplier": 1.1007542909475825,
+      "redundant_middleware": false,
+      "shared_storage": true,
+      "base_occupancy_fraction": 0.763703216728261,
+      "evening_peak_multiplier": 1.5793320278994991,
+      "weekend_multiplier": 1.219293692622763,
       "catchup_recording_channels": 34,
-      "average_bitrate_mbps": 4.551532408400405,
-      "retention_days": 7,
-      "scenario_duration_hours": 72,
-      "sampling_interval_minutes": 10
+      "average_bitrate_mbps": 3.191400235903987,
+      "retention_days": 2,
+      "scenario_duration_hours": 36,
+      "sampling_interval_minutes": 30
     },
     "failure_type": "catchup_worker_failure",
-    "fault_severity": 0.7346819002335567,
-    "fault_injection_fraction": 0.576615610725894,
-    "confounders": [],
+    "fault_severity": 0.7765979300562613,
+    "fault_injection_fraction": 0.5217064917811871,
+    "confounders": [
+      "high_healthy_workload"
+    ],
     "missingness": {
       "mode": "independent",
-      "probability": 0.1374887650316162,
+      "probability": 0.09456587949481632,
       "affected_signal_names": [],
       "outage_start_fraction": null,
       "outage_duration_fraction": null
     },
-    "topology_seed": 1323866823,
-    "workload_seed": 289614339,
-    "observation_seed": 966100166,
-    "fault_seed": 615859270,
-    "intended_split": null
+    "topology_seed": 136523551,
+    "workload_seed": 1585701897,
+    "observation_seed": 2031560800,
+    "fault_seed": 1253183441,
+    "intended_split": "train"
   },
   "missingness_report": {
-    "original_count": 3393,
-    "retained_count": 2916,
-    "removed_count": 477,
-    "removed_fraction": 0.140584,
+    "original_count": 287,
+    "retained_count": 256,
+    "removed_count": 31,
+    "removed_fraction": 0.108014,
     "mode": "independent"
   }
 }
