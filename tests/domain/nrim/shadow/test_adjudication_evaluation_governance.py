@@ -25,6 +25,7 @@ from app.domain.nrim.shadow.contracts import (
 )
 from app.domain.nrim.shadow.evaluation import (
     HealthyExposure,
+    IncidentCase,
     ProspectiveMetricsEngine,
     cohen_kappa,
     exact_poisson_rate_upper,
@@ -334,6 +335,48 @@ def test_metrics_report_nonzero_uncertainty_when_no_false_episodes() -> None:
         report["alert_burden"]["D"]["conservative_upper_95"]
         > 0.0
     )
+
+
+def test_operational_recall_does_not_drop_unsupported_incidents() -> None:
+    detected = IncidentCase(
+        incident_id="supported",
+        deployment_pseudonym=DEPLOYMENT,
+        failure_family="storage",
+        severity=IncidentSeverity.HIGH,
+        onset_utc=START,
+        recovery_utc=START + timedelta(hours=1),
+        in_support=True,
+        data_quality_blocked=False,
+        detections={"F": START, "S": START, "D": START},
+        fragments={"F": 0, "S": 0, "D": 0},
+        confirmed_root_component=ROOT,
+        stage2_top_k=(ROOT,),
+        ranking_available=True,
+        engineer_top3_useful=None,
+    )
+    unsupported = IncidentCase(
+        incident_id="unsupported",
+        deployment_pseudonym=DEPLOYMENT,
+        failure_family="storage",
+        severity=IncidentSeverity.HIGH,
+        onset_utc=START,
+        recovery_utc=START + timedelta(hours=1),
+        in_support=False,
+        data_quality_blocked=True,
+        detections={"F": None, "S": None, "D": None},
+        fragments={"F": 0, "S": 0, "D": 0},
+        confirmed_root_component=ROOT,
+        stage2_top_k=(),
+        ranking_available=False,
+        engineer_top3_useful=None,
+    )
+    result = ProspectiveMetricsEngine(
+        decision_interval_hours=1.0
+    )._detection((detected, unsupported), "D")
+    assert result["included_incident_count"] == 2
+    assert result["in_support_incident_count"] == 1
+    assert result["episode_recall"] == 0.5
+    assert result["conditional_in_support_recall"] == 1.0
 
 
 def test_synthetic_results_can_never_promote_release() -> None:

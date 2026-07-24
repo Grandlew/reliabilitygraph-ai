@@ -145,6 +145,125 @@ def exact_poisson_rate_upper(
     return high / exposure
 
 
+def exact_poisson_rate_lower(
+    *,
+    events: int,
+    exposure: float,
+    confidence: float = 0.95,
+) -> float:
+    """One-sided exact Poisson lower rate under the Poisson model."""
+
+    if events < 0 or exposure <= 0.0:
+        raise ValueError("Events must be nonnegative and exposure positive")
+    if not 0.0 < confidence < 1.0:
+        raise ValueError("Confidence must be between zero and one")
+    if events == 0:
+        return 0.0
+    target = confidence
+    low = 0.0
+    high = float(events)
+    while _poisson_cdf(events - 1, high) > target:
+        high *= 2.0
+    for _ in range(100):
+        midpoint = (low + high) / 2.0
+        if _poisson_cdf(events - 1, midpoint) > target:
+            low = midpoint
+        else:
+            high = midpoint
+    return high / exposure
+
+
+def exact_binomial_recall_lower(
+    *,
+    detected: int,
+    trials: int,
+    confidence: float = 0.95,
+) -> float | None:
+    if trials == 0:
+        return None
+    misses = trials - detected
+    return 1.0 - exact_binomial_upper_bound(
+        events=misses,
+        trials=trials,
+        confidence=confidence,
+    ).upper_confidence_bound
+
+
+def _random_effects_rate_sensitivity(
+    rows: Sequence[tuple[int, float]],
+) -> dict[str, float] | None:
+    """Approximate random-effects sensitivity on log Poisson rates.
+
+    A 0.5 continuity correction is explicit because zero-event deployments
+    otherwise have undefined log rates. This is a heterogeneity sensitivity,
+    never a substitute for the exact deployment intervals.
+    """
+
+    if len(rows) < 10:
+        return None
+    log_rates = [
+        math.log((events + 0.5) / exposure)
+        for events, exposure in rows
+    ]
+    variances = [1.0 / (events + 0.5) for events, _ in rows]
+    fixed_weights = [1.0 / value for value in variances]
+    total_weight = sum(fixed_weights)
+    fixed_mean = sum(
+        weight * value
+        for weight, value in zip(
+            fixed_weights,
+            log_rates,
+            strict=True,
+        )
+    ) / total_weight
+    q = sum(
+        weight * (value - fixed_mean) ** 2
+        for weight, value in zip(
+            fixed_weights,
+            log_rates,
+            strict=True,
+        )
+    )
+    denominator = total_weight - (
+        sum(weight**2 for weight in fixed_weights) / total_weight
+    )
+    tau_squared = max(
+        0.0,
+        (q - (len(rows) - 1)) / denominator,
+    )
+    random_weights = [
+        1.0 / (variance + tau_squared)
+        for variance in variances
+    ]
+    random_total = sum(random_weights)
+    pooled_log_rate = sum(
+        weight * value
+        for weight, value in zip(
+            random_weights,
+            log_rates,
+            strict=True,
+        )
+    ) / random_total
+    standard_error = math.sqrt(1.0 / random_total)
+    i_squared = (
+        max(0.0, (q - (len(rows) - 1)) / q)
+        if q > 0.0
+        else 0.0
+    )
+    return {
+        "deployment_count": float(len(rows)),
+        "pooled_rate_per_100_hours": 100.0
+        * math.exp(pooled_log_rate),
+        "lower_95_per_100_hours": 100.0
+        * math.exp(pooled_log_rate - 1.959963984540054 * standard_error),
+        "upper_95_per_100_hours": 100.0
+        * math.exp(pooled_log_rate + 1.959963984540054 * standard_error),
+        "tau_squared_log_rate": tau_squared,
+        "i_squared": i_squared,
+        "continuity_correction_events": 0.5,
+    }
+
+
 def _cluster_bootstrap(
     *,
     rows_by_deployment: Mapping[str, Sequence[Any]],
@@ -203,6 +322,35 @@ def cohen_kappa(pairs: Sequence[tuple[str, str]]) -> float | None:
     if expected >= 1.0:
         return 1.0 if observed >= 1.0 else 0.0
     return (observed - expected) / (1.0 - expected)
+
+
+def agreement_assessment(
+    pairs: Sequence[tuple[str, str]],
+    *,
+    minimum_pairs: int = 20,
+) -> dict[str, Any]:
+    if len(pairs) < minimum_pairs:
+        return {
+            "status": "not_reportable_preregistered_reason",
+            "reason": "insufficient_double_review_sample",
+            "pair_count": len(pairs),
+            "kappa": None,
+        }
+    left_categories = {left for left, _ in pairs}
+    right_categories = {right for _, right in pairs}
+    if len(left_categories) < 2 or len(right_categories) < 2:
+        return {
+            "status": "not_reportable_preregistered_reason",
+            "reason": "degenerate_category_prevalence",
+            "pair_count": len(pairs),
+            "kappa": None,
+        }
+    return {
+        "status": "interpretable",
+        "reason": None,
+        "pair_count": len(pairs),
+        "kappa": cohen_kappa(pairs),
+    }
 
 
 def _latest_adjudications(
@@ -347,19 +495,25 @@ class ProspectiveMetricsEngine:
         incidents: Sequence[IncidentCase],
         policy: str,
     ) -> dict[str, Any]:
-        in_support = [
+        included = list(incidents)
+        conditionally_evaluable = [
             item
-            for item in incidents
+            for item in included
             if item.in_support and not item.data_quality_blocked
         ]
         detected = [
-            item for item in in_support if item.detections[policy] is not None
+            item for item in included if item.detections[policy] is not None
         ]
-        misses = len(in_support) - len(detected)
-        recall = len(detected) / len(in_support) if in_support else None
+        conditional_detected = [
+            item
+            for item in conditionally_evaluable
+            if item.detections[policy] is not None
+        ]
+        misses = len(included) - len(detected)
+        recall = len(detected) / len(included) if included else None
         miss_bound = exact_binomial_upper_bound(
             events=misses,
-            trials=len(in_support),
+            trials=len(included),
         )
         delays = [
             (
@@ -371,7 +525,7 @@ class ProspectiveMetricsEngine:
         ]
         severe = [
             item
-            for item in in_support
+            for item in included
             if item.severity
             in {IncidentSeverity.HIGH, IncidentSeverity.CRITICAL}
         ]
@@ -379,9 +533,9 @@ class ProspectiveMetricsEngine:
             item.detections[policy] is not None for item in severe
         )
         by_family = {}
-        for family in sorted({item.failure_family for item in in_support}):
+        for family in sorted({item.failure_family for item in included}):
             rows = [
-                item for item in in_support if item.failure_family == family
+                item for item in included if item.failure_family == family
             ]
             by_family[family] = {
                 "incident_count": len(rows),
@@ -394,7 +548,7 @@ class ProspectiveMetricsEngine:
                 ),
             }
         grouped: dict[str, list[IncidentCase]] = defaultdict(list)
-        for item in in_support:
+        for item in included:
             grouped[item.deployment_pseudonym].append(item)
 
         def recall_stat(rows: Sequence[IncidentCase]) -> float:
@@ -406,25 +560,45 @@ class ProspectiveMetricsEngine:
             )
 
         return {
-            "in_support_incident_count": len(in_support),
+            "included_incident_count": len(included),
+            "in_support_incident_count": len(conditionally_evaluable),
+            "unsupported_or_data_blocked_incident_count": (
+                len(included) - len(conditionally_evaluable)
+            ),
             "detected_incident_count": len(detected),
             "episode_recall": recall,
+            "episode_recall_denominator": (
+                "all included adjudicated incident episodes"
+            ),
             "episode_recall_exact_lower_95": (
                 1.0 - miss_bound.upper_confidence_bound
-                if in_support
+                if included
+                else None
+            ),
+            "conditional_in_support_recall": (
+                len(conditional_detected) / len(conditionally_evaluable)
+                if conditionally_evaluable
                 else None
             ),
             "severe_incident_count": len(severe),
             "severe_recall": (
                 severe_detected / len(severe) if severe else None
             ),
+            "severe_recall_exact_lower_95": (
+                exact_binomial_recall_lower(
+                    detected=severe_detected,
+                    trials=len(severe),
+                )
+                if severe
+                else None
+            ),
             "median_delay_hours": (
                 median(delays) if delays else None
             ),
             "p90_delay_hours": _quantile(delays, 0.90),
             "mean_extra_fragments": (
-                mean(item.fragments[policy] for item in in_support)
-                if in_support
+                mean(item.fragments[policy] for item in included)
+                if included
                 else None
             ),
             "failure_families": by_family,
@@ -455,10 +629,9 @@ class ProspectiveMetricsEngine:
             if hours
             else None
         )
-        grouped = {
-            item.deployment_pseudonym: [item]
-            for item in exposures
-        }
+        grouped: dict[str, list[HealthyExposure]] = defaultdict(list)
+        for item in exposures:
+            grouped[item.deployment_pseudonym].append(item)
 
         def rate_stat(rows: Sequence[HealthyExposure]) -> float:
             total_hours = sum(item.healthy_hours for item in rows)
@@ -477,14 +650,35 @@ class ProspectiveMetricsEngine:
             statistic=rate_stat,
             seed=self.bootstrap_seed + 1,
         )
-        by_deployment = {
-            item.deployment_pseudonym: (
-                100.0
-                * item.nonactionable_episodes[policy]
-                / item.healthy_hours
+        deployment_rows = {}
+        for deployment, rows in sorted(grouped.items()):
+            deployment_hours = sum(item.healthy_hours for item in rows)
+            deployment_events = sum(
+                item.nonactionable_episodes[policy] for item in rows
             )
-            for item in exposures
-        }
+            deployment_rows[deployment] = {
+                "healthy_hours": deployment_hours,
+                "nonactionable_episode_count": deployment_events,
+                "episodes_per_100_healthy_hours": (
+                    100.0 * deployment_events / deployment_hours
+                ),
+                "exact_lower_95_per_100_hours": (
+                    100.0
+                    * exact_poisson_rate_lower(
+                        events=deployment_events,
+                        exposure=deployment_hours,
+                        confidence=0.975,
+                    )
+                ),
+                "exact_upper_95_per_100_hours": (
+                    100.0
+                    * exact_poisson_rate_upper(
+                        events=deployment_events,
+                        exposure=deployment_hours,
+                        confidence=0.975,
+                    )
+                ),
+            }
         bootstrap_upper = bootstrap["upper_95"]
         conservative_upper = (
             max(
@@ -502,16 +696,53 @@ class ProspectiveMetricsEngine:
             "poisson_model_upper_95": poisson_upper,
             "deployment_cluster_bootstrap": bootstrap,
             "conservative_upper_95": conservative_upper,
-            "by_deployment": by_deployment,
-            "maximum_deployment_concentration_ratio": (
-                max(by_deployment.values()) / rate
-                if by_deployment and rate and rate > 0.0
-                else 0.0
-            ),
+            "by_deployment": deployment_rows,
+            "heterogeneity": {
+                "deployment_intervals_complete": all(
+                    row["healthy_hours"] > 0.0
+                    and row["exact_upper_95_per_100_hours"] is not None
+                    for row in deployment_rows.values()
+                ),
+                "minimum_exposure_hours_for_rate_ratio": 100.0,
+                "minimum_exposure_rule_applied": True,
+                "maximum_rate_ratio_above_minimum_exposure": (
+                    max(
+                        row["episodes_per_100_healthy_hours"] / rate
+                        for row in deployment_rows.values()
+                        if row["healthy_hours"] >= 100.0
+                    )
+                    if rate
+                    and any(
+                        row["healthy_hours"] >= 100.0
+                        for row in deployment_rows.values()
+                    )
+                    else None
+                ),
+                "inference_status": (
+                    "random_effects_sensitivity"
+                    if len(deployment_rows) >= 10
+                    else "feasibility_only"
+                ),
+                "random_effects_sensitivity": (
+                    _random_effects_rate_sensitivity(
+                        [
+                            (
+                                int(row["nonactionable_episode_count"]),
+                                float(row["healthy_hours"]),
+                            )
+                            for row in deployment_rows.values()
+                        ]
+                    )
+                ),
+                "assumption_note": (
+                    "Exact deployment intervals condition on Poisson counts. "
+                    "The random-effects result uses a documented 0.5-event "
+                    "continuity correction and is sensitivity analysis only."
+                ),
+            },
         }
 
-    @staticmethod
-    def _ranking(incidents: Sequence[IncidentCase]) -> dict[str, Any]:
+    def _ranking(self, incidents: Sequence[IncidentCase]) -> dict[str, Any]:
         eligible = [
             item
             for item in incidents
@@ -541,6 +772,38 @@ class ProspectiveMetricsEngine:
             for item in eligible
             if item.engineer_top3_useful is not None
         ]
+        grouped: dict[str, list[IncidentCase]] = defaultdict(list)
+        for item in eligible:
+            grouped[item.deployment_pseudonym].append(item)
+
+        def ranking_stat(
+            rows: Sequence[IncidentCase],
+            metric: str,
+        ) -> float:
+            available = [item for item in rows if item.ranking_available]
+            if metric == "coverage":
+                return len(available) / len(rows) if rows else 0.0
+            values = []
+            for item in available:
+                try:
+                    rank = (
+                        item.stage2_top_k.index(
+                            item.confirmed_root_component
+                        )
+                        + 1
+                    )
+                except ValueError:
+                    rank = None
+                if metric == "mrr":
+                    values.append(1.0 / rank if rank else 0.0)
+                elif metric == "hits1":
+                    values.append(float(rank == 1))
+                else:
+                    values.append(
+                        float(rank is not None and rank <= 3)
+                    )
+            return mean(values) if values else 0.0
+
         return {
             "eligible_confirmed_incidents": len(eligible),
             "ranked_incidents": len(ranked),
@@ -555,6 +818,22 @@ class ProspectiveMetricsEngine:
                 if useful
                 else None
             ),
+            "deployment_stratified_uncertainty": {
+                metric: _cluster_bootstrap(
+                    rows_by_deployment=grouped,
+                    statistic=(
+                        lambda rows, selected=metric: ranking_stat(
+                            rows,
+                            selected,
+                        )
+                    ),
+                    seed=self.bootstrap_seed + offset,
+                )
+                for offset, metric in enumerate(
+                    ("mrr", "hits1", "hits3", "coverage"),
+                    start=10,
+                )
+            },
         }
 
     @staticmethod
@@ -787,6 +1066,8 @@ class ProspectiveMetricsEngine:
         adjudications: Sequence[IncidentAdjudication],
         healthy_exposures: Sequence[HealthyExposure],
         human_utility_cases: Sequence[HumanUtilityCase] = (),
+        human_utility_analysis_design: str | None = None,
+        automation_bias_assessed: bool = False,
         agreement_pairs_impact: Sequence[tuple[str, str]] = (),
         agreement_pairs_cause: Sequence[tuple[str, str]] = (),
     ) -> dict[str, Any]:
@@ -799,7 +1080,7 @@ class ProspectiveMetricsEngine:
             for policy in POLICIES
         }
         return {
-            "metric_protocol_version": "0.7.0",
+            "metric_protocol_version": "0.7.1-oelr",
             "independent_unit": (
                 "deployment_cluster_and_adjudicated_incident_episode"
             ),
@@ -816,9 +1097,23 @@ class ProspectiveMetricsEngine:
             ),
             "adjudication": {
                 "final_incident_count": len(incidents),
-                "impact_kappa": cohen_kappa(agreement_pairs_impact),
-                "cause_family_kappa": cohen_kappa(
+                "impact_agreement": agreement_assessment(
+                    agreement_pairs_impact
+                ),
+                "cause_family_agreement": agreement_assessment(
                     agreement_pairs_cause
+                ),
+                "agreement_assessment_status": (
+                    "interpretable"
+                    if agreement_assessment(
+                        agreement_pairs_impact
+                    )["status"]
+                    == "interpretable"
+                    and agreement_assessment(
+                        agreement_pairs_cause
+                    )["status"]
+                    == "interpretable"
+                    else "not_reportable_preregistered_reason"
                 ),
                 "confirmed_fraction": (
                     sum(
@@ -831,5 +1126,9 @@ class ProspectiveMetricsEngine:
                     else None
                 ),
             },
-            "human_utility": self._human_utility(human_utility_cases),
+            "human_utility": {
+                **self._human_utility(human_utility_cases),
+                "analysis_design": human_utility_analysis_design,
+                "automation_bias_assessed": automation_bias_assessed,
+            },
         }

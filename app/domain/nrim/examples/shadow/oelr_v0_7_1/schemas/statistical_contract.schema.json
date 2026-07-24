@@ -1,0 +1,324 @@
+{
+  "$defs": {
+    "EstimandName": {
+      "enum": [
+        "incident_recall",
+        "severe_recall",
+        "alert_burden",
+        "root_cause_ranking",
+        "support_safety",
+        "path_attribution",
+        "human_utility"
+      ],
+      "title": "EstimandName",
+      "type": "string"
+    },
+    "EstimandSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "adjudication_status": {
+          "maxLength": 512,
+          "minLength": 3,
+          "title": "Adjudication Status",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "bound_direction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ThresholdDirection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "bound_threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bound Threshold"
+        },
+        "confidence": {
+          "default": 0.95,
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "coverage_denominator_reported": {
+          "default": true,
+          "title": "Coverage Denominator Reported",
+          "type": "boolean"
+        },
+        "denominator": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Denominator",
+          "type": "string"
+        },
+        "evidence_phase": {
+          "$ref": "#/$defs/EvidencePhase"
+        },
+        "inclusion_rule": {
+          "maxLength": 2000,
+          "minLength": 10,
+          "title": "Inclusion Rule",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/InferenceIntent"
+        },
+        "minimum_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Minimum Count",
+          "type": "integer"
+        },
+        "name": {
+          "$ref": "#/$defs/EstimandName"
+        },
+        "point_direction": {
+          "$ref": "#/$defs/ThresholdDirection"
+        },
+        "point_metric": {
+          "maxLength": 256,
+          "minLength": 3,
+          "title": "Point Metric",
+          "type": "string"
+        },
+        "point_threshold": {
+          "title": "Point Threshold",
+          "type": "number"
+        },
+        "primary_unit": {
+          "maxLength": 256,
+          "minLength": 3,
+          "title": "Primary Unit",
+          "type": "string"
+        },
+        "subgroup_minimum_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Subgroup Minimum Count",
+          "type": "integer"
+        },
+        "target_population": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Target Population",
+          "type": "string"
+        },
+        "uncertainty_methods": {
+          "items": {
+            "$ref": "#/$defs/UncertaintyMethod"
+          },
+          "title": "Uncertainty Methods",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "evidence_phase",
+        "target_population",
+        "primary_unit",
+        "denominator",
+        "inclusion_rule",
+        "adjudication_status",
+        "point_metric",
+        "point_direction",
+        "point_threshold",
+        "intent",
+        "uncertainty_methods",
+        "assumptions"
+      ],
+      "title": "EstimandSpec",
+      "type": "object"
+    },
+    "EvidencePhase": {
+      "enum": [
+        "real_replay",
+        "silent_shadow",
+        "operator_advisory",
+        "operational_candidate"
+      ],
+      "title": "EvidencePhase",
+      "type": "string"
+    },
+    "InferenceIntent": {
+      "enum": [
+        "descriptive",
+        "confirmatory"
+      ],
+      "title": "InferenceIntent",
+      "type": "string"
+    },
+    "NegativeSamplingDesign": {
+      "additionalProperties": false,
+      "properties": {
+        "design_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Design Id",
+          "type": "string"
+        },
+        "double_review_rule": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Double Review Rule",
+          "type": "string"
+        },
+        "minimum_inclusion_probability": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Minimum Inclusion Probability",
+          "type": "number"
+        },
+        "preserve_unresolved_labels": {
+          "default": true,
+          "title": "Preserve Unresolved Labels",
+          "type": "boolean"
+        },
+        "record_inclusion_probabilities": {
+          "default": true,
+          "title": "Record Inclusion Probabilities",
+          "type": "boolean"
+        },
+        "review_all_known_incidents": {
+          "default": true,
+          "title": "Review All Known Incidents",
+          "type": "boolean"
+        },
+        "review_all_nrim_positive_episodes": {
+          "default": true,
+          "title": "Review All Nrim Positive Episodes",
+          "type": "boolean"
+        },
+        "seed_commitment_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Seed Commitment Sha256",
+          "type": "string"
+        },
+        "strata": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Strata",
+          "type": "array"
+        }
+      },
+      "required": [
+        "design_id",
+        "seed_commitment_sha256",
+        "strata",
+        "minimum_inclusion_probability",
+        "double_review_rule"
+      ],
+      "title": "NegativeSamplingDesign",
+      "type": "object"
+    },
+    "ThresholdDirection": {
+      "enum": [
+        "at_least",
+        "at_most"
+      ],
+      "title": "ThresholdDirection",
+      "type": "string"
+    },
+    "UncertaintyMethod": {
+      "enum": [
+        "exact_binomial_one_sided",
+        "exact_poisson_one_sided",
+        "deployment_cluster_sensitivity",
+        "deployment_stratified_bootstrap",
+        "paired_rollout_aware",
+        "exact_deployment_intervals",
+        "random_effects_sensitivity"
+      ],
+      "title": "UncertaintyMethod",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "alpha": {
+      "default": 0.05,
+      "exclusiveMaximum": 0.5,
+      "exclusiveMinimum": 0.0,
+      "title": "Alpha",
+      "type": "number"
+    },
+    "estimands": {
+      "items": {
+        "$ref": "#/$defs/EstimandSpec"
+      },
+      "title": "Estimands",
+      "type": "array"
+    },
+    "minimum_adjudicated_incidents": {
+      "default": 30,
+      "minimum": 30,
+      "title": "Minimum Adjudicated Incidents",
+      "type": "integer"
+    },
+    "minimum_deployments_for_cluster_claim": {
+      "default": 10,
+      "minimum": 10,
+      "title": "Minimum Deployments For Cluster Claim",
+      "type": "integer"
+    },
+    "minimum_healthy_deployment_hours": {
+      "default": 3000.0,
+      "minimum": 3000.0,
+      "title": "Minimum Healthy Deployment Hours",
+      "type": "number"
+    },
+    "minimum_independent_deployments": {
+      "default": 5,
+      "minimum": 5,
+      "title": "Minimum Independent Deployments",
+      "type": "integer"
+    },
+    "minimum_severe_incidents": {
+      "default": 14,
+      "minimum": 1,
+      "title": "Minimum Severe Incidents",
+      "type": "integer"
+    },
+    "minimum_silent_weeks": {
+      "default": 8.0,
+      "minimum": 8.0,
+      "title": "Minimum Silent Weeks",
+      "type": "number"
+    },
+    "minimum_topology_families": {
+      "default": 5,
+      "minimum": 5,
+      "title": "Minimum Topology Families",
+      "type": "integer"
+    },
+    "sampling_design": {
+      "$ref": "#/$defs/NegativeSamplingDesign"
+    }
+  },
+  "required": [
+    "estimands",
+    "sampling_design"
+  ],
+  "title": "StatisticalContract",
+  "type": "object"
+}

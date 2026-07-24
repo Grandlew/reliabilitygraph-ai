@@ -1,0 +1,604 @@
+{
+  "$defs": {
+    "EstimandName": {
+      "enum": [
+        "incident_recall",
+        "severe_recall",
+        "alert_burden",
+        "root_cause_ranking",
+        "support_safety",
+        "path_attribution",
+        "human_utility"
+      ],
+      "title": "EstimandName",
+      "type": "string"
+    },
+    "EstimandSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "adjudication_status": {
+          "maxLength": 512,
+          "minLength": 3,
+          "title": "Adjudication Status",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "bound_direction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ThresholdDirection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "bound_threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bound Threshold"
+        },
+        "confidence": {
+          "default": 0.95,
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.5,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "coverage_denominator_reported": {
+          "default": true,
+          "title": "Coverage Denominator Reported",
+          "type": "boolean"
+        },
+        "denominator": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Denominator",
+          "type": "string"
+        },
+        "evidence_phase": {
+          "$ref": "#/$defs/EvidencePhase"
+        },
+        "inclusion_rule": {
+          "maxLength": 2000,
+          "minLength": 10,
+          "title": "Inclusion Rule",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/InferenceIntent"
+        },
+        "minimum_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Minimum Count",
+          "type": "integer"
+        },
+        "name": {
+          "$ref": "#/$defs/EstimandName"
+        },
+        "point_direction": {
+          "$ref": "#/$defs/ThresholdDirection"
+        },
+        "point_metric": {
+          "maxLength": 256,
+          "minLength": 3,
+          "title": "Point Metric",
+          "type": "string"
+        },
+        "point_threshold": {
+          "title": "Point Threshold",
+          "type": "number"
+        },
+        "primary_unit": {
+          "maxLength": 256,
+          "minLength": 3,
+          "title": "Primary Unit",
+          "type": "string"
+        },
+        "subgroup_minimum_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Subgroup Minimum Count",
+          "type": "integer"
+        },
+        "target_population": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Target Population",
+          "type": "string"
+        },
+        "uncertainty_methods": {
+          "items": {
+            "$ref": "#/$defs/UncertaintyMethod"
+          },
+          "title": "Uncertainty Methods",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "evidence_phase",
+        "target_population",
+        "primary_unit",
+        "denominator",
+        "inclusion_rule",
+        "adjudication_status",
+        "point_metric",
+        "point_direction",
+        "point_threshold",
+        "intent",
+        "uncertainty_methods",
+        "assumptions"
+      ],
+      "title": "EstimandSpec",
+      "type": "object"
+    },
+    "EvidencePhase": {
+      "enum": [
+        "real_replay",
+        "silent_shadow",
+        "operator_advisory",
+        "operational_candidate"
+      ],
+      "title": "EvidencePhase",
+      "type": "string"
+    },
+    "InferenceIntent": {
+      "enum": [
+        "descriptive",
+        "confirmatory"
+      ],
+      "title": "InferenceIntent",
+      "type": "string"
+    },
+    "NegativeSamplingDesign": {
+      "additionalProperties": false,
+      "properties": {
+        "design_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Design Id",
+          "type": "string"
+        },
+        "double_review_rule": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Double Review Rule",
+          "type": "string"
+        },
+        "minimum_inclusion_probability": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Minimum Inclusion Probability",
+          "type": "number"
+        },
+        "preserve_unresolved_labels": {
+          "default": true,
+          "title": "Preserve Unresolved Labels",
+          "type": "boolean"
+        },
+        "record_inclusion_probabilities": {
+          "default": true,
+          "title": "Record Inclusion Probabilities",
+          "type": "boolean"
+        },
+        "review_all_known_incidents": {
+          "default": true,
+          "title": "Review All Known Incidents",
+          "type": "boolean"
+        },
+        "review_all_nrim_positive_episodes": {
+          "default": true,
+          "title": "Review All Nrim Positive Episodes",
+          "type": "boolean"
+        },
+        "seed_commitment_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Seed Commitment Sha256",
+          "type": "string"
+        },
+        "strata": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Strata",
+          "type": "array"
+        }
+      },
+      "required": [
+        "design_id",
+        "seed_commitment_sha256",
+        "strata",
+        "minimum_inclusion_probability",
+        "double_review_rule"
+      ],
+      "title": "NegativeSamplingDesign",
+      "type": "object"
+    },
+    "SeparationOfDuties": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_custodian": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Evidence Custodian",
+          "type": "string"
+        },
+        "operations_owner": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Operations Owner",
+          "type": "string"
+        },
+        "privacy_owner": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Privacy Owner",
+          "type": "string"
+        },
+        "protocol_owner": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Protocol Owner",
+          "type": "string"
+        },
+        "release_authority": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Release Authority",
+          "type": "string"
+        },
+        "review_lead": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Review Lead",
+          "type": "string"
+        },
+        "security_owner": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Security Owner",
+          "type": "string"
+        }
+      },
+      "required": [
+        "protocol_owner",
+        "evidence_custodian",
+        "review_lead",
+        "release_authority",
+        "operations_owner",
+        "privacy_owner",
+        "security_owner"
+      ],
+      "title": "SeparationOfDuties",
+      "type": "object"
+    },
+    "StatisticalContract": {
+      "additionalProperties": false,
+      "properties": {
+        "alpha": {
+          "default": 0.05,
+          "exclusiveMaximum": 0.5,
+          "exclusiveMinimum": 0.0,
+          "title": "Alpha",
+          "type": "number"
+        },
+        "estimands": {
+          "items": {
+            "$ref": "#/$defs/EstimandSpec"
+          },
+          "title": "Estimands",
+          "type": "array"
+        },
+        "minimum_adjudicated_incidents": {
+          "default": 30,
+          "minimum": 30,
+          "title": "Minimum Adjudicated Incidents",
+          "type": "integer"
+        },
+        "minimum_deployments_for_cluster_claim": {
+          "default": 10,
+          "minimum": 10,
+          "title": "Minimum Deployments For Cluster Claim",
+          "type": "integer"
+        },
+        "minimum_healthy_deployment_hours": {
+          "default": 3000.0,
+          "minimum": 3000.0,
+          "title": "Minimum Healthy Deployment Hours",
+          "type": "number"
+        },
+        "minimum_independent_deployments": {
+          "default": 5,
+          "minimum": 5,
+          "title": "Minimum Independent Deployments",
+          "type": "integer"
+        },
+        "minimum_severe_incidents": {
+          "default": 14,
+          "minimum": 1,
+          "title": "Minimum Severe Incidents",
+          "type": "integer"
+        },
+        "minimum_silent_weeks": {
+          "default": 8.0,
+          "minimum": 8.0,
+          "title": "Minimum Silent Weeks",
+          "type": "number"
+        },
+        "minimum_topology_families": {
+          "default": 5,
+          "minimum": 5,
+          "title": "Minimum Topology Families",
+          "type": "integer"
+        },
+        "sampling_design": {
+          "$ref": "#/$defs/NegativeSamplingDesign"
+        }
+      },
+      "required": [
+        "estimands",
+        "sampling_design"
+      ],
+      "title": "StatisticalContract",
+      "type": "object"
+    },
+    "StopRule": {
+      "additionalProperties": false,
+      "properties": {
+        "accountable_role": {
+          "maxLength": 128,
+          "minLength": 3,
+          "title": "Accountable Role",
+          "type": "string"
+        },
+        "automatic_pause": {
+          "title": "Automatic Pause",
+          "type": "boolean"
+        },
+        "code": {
+          "pattern": "^[A-Z][A-Z0-9_]{2,63}$",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Description",
+          "type": "string"
+        },
+        "preserve_evidence": {
+          "default": true,
+          "title": "Preserve Evidence",
+          "type": "boolean"
+        },
+        "recovery_acceptance": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Recovery Acceptance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "description",
+        "accountable_role",
+        "automatic_pause",
+        "recovery_acceptance"
+      ],
+      "title": "StopRule",
+      "type": "object"
+    },
+    "ThresholdDirection": {
+      "enum": [
+        "at_least",
+        "at_most"
+      ],
+      "title": "ThresholdDirection",
+      "type": "string"
+    },
+    "UncertaintyMethod": {
+      "enum": [
+        "exact_binomial_one_sided",
+        "exact_poisson_one_sided",
+        "deployment_cluster_sensitivity",
+        "deployment_stratified_bootstrap",
+        "paired_rollout_aware",
+        "exact_deployment_intervals",
+        "random_effects_sensitivity"
+      ],
+      "title": "UncertaintyMethod",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "automatic_remediation_enabled": {
+      "default": false,
+      "title": "Automatic Remediation Enabled",
+      "type": "boolean"
+    },
+    "bundle_public_key_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Bundle Public Key Sha256",
+      "type": "string"
+    },
+    "collector_contract_hashes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 5,
+      "title": "Collector Contract Hashes",
+      "type": "object"
+    },
+    "deployment_pseudonyms": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 5,
+      "title": "Deployment Pseudonyms",
+      "type": "array"
+    },
+    "dress_rehearsal_plan_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Dress Rehearsal Plan Sha256",
+      "type": "string"
+    },
+    "duties": {
+      "$ref": "#/$defs/SeparationOfDuties"
+    },
+    "external_anchor_expectation_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "External Anchor Expectation Sha256",
+      "type": "string"
+    },
+    "feature_schema_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Feature Schema Hash",
+      "type": "string"
+    },
+    "historical_replay_plan_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Historical Replay Plan Sha256",
+      "type": "string"
+    },
+    "model_bundle_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Model Bundle Hash",
+      "type": "string"
+    },
+    "model_or_policy_tuning_allowed": {
+      "default": false,
+      "title": "Model Or Policy Tuning Allowed",
+      "type": "boolean"
+    },
+    "outcomes_inspected_before_registration": {
+      "default": false,
+      "title": "Outcomes Inspected Before Registration",
+      "type": "boolean"
+    },
+    "path_retention_rules": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "title": "Path Retention Rules",
+      "type": "array"
+    },
+    "planned_end_utc": {
+      "format": "date-time",
+      "title": "Planned End Utc",
+      "type": "string"
+    },
+    "planned_start_utc": {
+      "format": "date-time",
+      "title": "Planned Start Utc",
+      "type": "string"
+    },
+    "policy_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Policy Hash",
+      "type": "string"
+    },
+    "predictions_hidden_from_frontline": {
+      "default": true,
+      "title": "Predictions Hidden From Frontline",
+      "type": "boolean"
+    },
+    "protocol_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Protocol Id",
+      "type": "string"
+    },
+    "registered_at_utc": {
+      "format": "date-time",
+      "title": "Registered At Utc",
+      "type": "string"
+    },
+    "review_workflow_plan_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Review Workflow Plan Sha256",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.7.1-oelr",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "statistical_contract": {
+      "$ref": "#/$defs/StatisticalContract"
+    },
+    "stop_rules": {
+      "items": {
+        "$ref": "#/$defs/StopRule"
+      },
+      "minItems": 8,
+      "title": "Stop Rules",
+      "type": "array"
+    },
+    "target_phase": {
+      "$ref": "#/$defs/EvidencePhase"
+    },
+    "topology_contract_hashes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 5,
+      "title": "Topology Contract Hashes",
+      "type": "object"
+    },
+    "topology_family_count": {
+      "minimum": 5,
+      "title": "Topology Family Count",
+      "type": "integer"
+    },
+    "watermark_policy_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Watermark Policy Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "protocol_id",
+    "registered_at_utc",
+    "target_phase",
+    "planned_start_utc",
+    "planned_end_utc",
+    "deployment_pseudonyms",
+    "topology_family_count",
+    "model_bundle_hash",
+    "bundle_public_key_sha256",
+    "feature_schema_hash",
+    "policy_hash",
+    "watermark_policy_hash",
+    "historical_replay_plan_sha256",
+    "dress_rehearsal_plan_sha256",
+    "review_workflow_plan_sha256",
+    "external_anchor_expectation_sha256",
+    "collector_contract_hashes",
+    "topology_contract_hashes",
+    "statistical_contract",
+    "stop_rules",
+    "path_retention_rules",
+    "duties"
+  ],
+  "title": "OELRProtocol",
+  "type": "object"
+}

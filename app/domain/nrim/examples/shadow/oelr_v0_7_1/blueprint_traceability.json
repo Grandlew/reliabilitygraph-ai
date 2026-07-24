@@ -1,0 +1,77 @@
+{
+  "schema_version": "0.7.1-oelr",
+  "source_recommendation": "NRIM_v0.7_Next_Improvement_Recommendation.docx",
+  "traceability": [
+    {
+      "recommendation": "versioned evidence maturity states",
+      "implementation": "app/domain/nrim/shadow/release.py",
+      "verification": "tests/domain/nrim/shadow/test_oelr_protocol_and_release.py"
+    },
+    {
+      "recommendation": "statistical analysis-plan compiler",
+      "implementation": "app/domain/nrim/shadow/protocol_compiler.py",
+      "verification": "tests/domain/nrim/shadow/test_oelr_protocol_and_release.py"
+    },
+    {
+      "recommendation": "collector semantic acceptance",
+      "implementation": "app/domain/nrim/shadow/semantic_acceptance.py",
+      "verification": "tests/domain/nrim/shadow/test_semantic_topology_acceptance.py"
+    },
+    {
+      "recommendation": "topology provenance and mutation testing",
+      "implementation": "app/domain/nrim/shadow/topology_acceptance.py",
+      "verification": "tests/domain/nrim/shadow/test_semantic_topology_acceptance.py"
+    },
+    {
+      "recommendation": "independent evidence trust",
+      "implementation": "app/domain/nrim/shadow/evidence_anchor.py",
+      "verification": "tests/domain/nrim/shadow/test_evidence_anchor_sampling_readiness.py"
+    },
+    {
+      "recommendation": "production storage qualification",
+      "implementation": "app/domain/nrim/shadow/storage_qualification.py",
+      "verification": "tests/domain/nrim/shadow/test_evidence_anchor_sampling_readiness.py"
+    },
+    {
+      "recommendation": "unbiased adjudication sampling",
+      "implementation": "app/domain/nrim/shadow/sampling.py; app/domain/nrim/shadow/adjudication.py",
+      "verification": "tests/domain/nrim/shadow/test_evidence_anchor_sampling_readiness.py; tests/domain/nrim/shadow/test_adjudication_evaluation_governance.py"
+    },
+    {
+      "recommendation": "exact and deployment-aware statistical evaluation",
+      "implementation": "app/domain/nrim/shadow/evaluation.py",
+      "verification": "tests/domain/nrim/shadow/test_oelr_protocol_and_release.py; tests/domain/nrim/shadow/test_adjudication_evaluation_governance.py"
+    },
+    {
+      "recommendation": "historical replay and dress-rehearsal readiness",
+      "implementation": "app/domain/nrim/shadow/readiness.py",
+      "verification": "tests/domain/nrim/shadow/test_evidence_anchor_sampling_readiness.py"
+    },
+    {
+      "recommendation": "privacy-safe durable evidence records",
+      "implementation": "app/domain/nrim/shadow/store.py",
+      "verification": "tests/domain/nrim/shadow/test_evidence_anchor_sampling_readiness.py; tests/domain/nrim/shadow/test_contracts_and_privacy.py"
+    },
+    {
+      "recommendation": "versioned exchange schemas",
+      "implementation": "app/domain/nrim/shadow/oelr_schema_export.py",
+      "verification": "app/domain/nrim/examples/shadow/oelr_v0_7_1/schemas"
+    },
+    {
+      "recommendation": "auditable software-test provenance",
+      "implementation": "app/domain/nrim/shadow/test_evidence.py",
+      "verification": "app/domain/nrim/examples/shadow/oelr_v0_7_1/test-results/test_evidence_manifest.json"
+    }
+  ],
+  "not_claimed": [
+    "real collector acceptance",
+    "real topology acceptance",
+    "independent production evidence custody",
+    "historical replay completion",
+    "dress rehearsal completion",
+    "silent pilot efficacy",
+    "human utility",
+    "production readiness",
+    "world-class performance"
+  ]
+}

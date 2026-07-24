@@ -11,6 +11,7 @@ from .contracts import (
     IncidentSeverity,
 )
 from .hashing import canonical_hash
+from .sampling import SamplingSelection
 from .store import AppendOnlyEvidenceStore
 
 
@@ -123,6 +124,40 @@ class AdjudicationService:
     def case(self, case_id: str) -> ReviewCase:
         events = self._events(case_id)
         return ReviewCase.model_validate(events[0]["payload"])
+
+    def register_sampling_assignment(
+        self,
+        *,
+        case_id: str,
+        selection: SamplingSelection,
+        actor_pseudonym: str,
+    ) -> None:
+        self.case(case_id)
+        if selection.case_id != case_id:
+            raise ReviewWorkflowError(
+                "Sampling assignment names a different review case"
+            )
+        events = self._events(case_id)
+        if any(
+            item["event_type"] == "sampling_assignment_registered"
+            for item in events
+        ):
+            raise ReviewWorkflowError(
+                "Review case already has a sampling assignment"
+            )
+        payload = selection.model_dump(mode="json")
+        self.store.append_review_event(
+            event_id=self._event_id(
+                case_id=case_id,
+                event_type="sampling_assignment_registered",
+                actor=actor_pseudonym,
+                payload=payload,
+            ),
+            case_id=case_id,
+            event_type="sampling_assignment_registered",
+            actor_pseudonym=actor_pseudonym,
+            payload=payload,
+        )
 
     def submit_initial(
         self,
@@ -309,5 +344,18 @@ class AdjudicationService:
             "resolved": any(
                 item["event_type"] == "disagreement_resolved"
                 for item in events
+            ),
+            "sampling_assignment_registered": any(
+                item["event_type"] == "sampling_assignment_registered"
+                for item in events
+            ),
+            "inclusion_probability": next(
+                (
+                    item["payload"]["inclusion_probability"]
+                    for item in events
+                    if item["event_type"]
+                    == "sampling_assignment_registered"
+                ),
+                None,
             ),
         }

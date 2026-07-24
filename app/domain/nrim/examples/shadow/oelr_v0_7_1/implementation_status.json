@@ -1,0 +1,50 @@
+{
+  "as_of_date": "2026-07-24",
+  "schema_version": "0.7.1-oelr",
+  "candidate_state": "candidate",
+  "active_bundle_manifest_sha256": "07bfab9d935e205e9372121622d674f03ab51e81c65f0cd4e063387b7baa4fb9",
+  "bundle_modified_by_oelr": false,
+  "automatic_remediation_authorized": false,
+  "model_or_threshold_tuning_authorized": false,
+  "gates": {
+    "contracts_ready": {
+      "passed": false,
+      "reason": "Acceptance harnesses exist, but real collector/topology fixtures and privacy approval are absent."
+    },
+    "replay_ready": {
+      "passed": false,
+      "reason": "No preregistered real historical export, label inventory, or topology history was supplied."
+    },
+    "evidence_workflow_ready": {
+      "passed": false,
+      "reason": "The independently keyed adapter is tested, but independent retention-locked infrastructure and review usability evidence are absent."
+    },
+    "shadow_runtime_ready": {
+      "passed": false,
+      "reason": "No seven-day real dress rehearsal or independent read-only attestation has occurred."
+    },
+    "pilot_ready": {
+      "passed": false,
+      "reason": "No signed real pilot protocol, approvals, five deployments, or five topology-family commitments were supplied."
+    }
+  },
+  "implementation": {
+    "phase_specific_release_states": "complete",
+    "statistical_protocol_compiler": "complete",
+    "collector_semantic_acceptance_harness": "implemented_not_real_validated",
+    "topology_semantic_acceptance_harness": "implemented_not_real_validated",
+    "external_checkpoint_protocol": "complete",
+    "independent_anchor_infrastructure": "external_evidence_required",
+    "pilot_storage_qualification": "implemented_not_infrastructure_validated",
+    "signed_review_sampling": "complete",
+    "sampling_aware_adjudication": "complete",
+    "exact_and_clustered_evaluation": "complete",
+    "historical_replay_gate": "implemented_not_run",
+    "seven_day_dress_rehearsal_gate": "implemented_not_run",
+    "eight_week_silent_pilot": "external_evidence_required",
+    "advisory_human_utility_evaluation": "external_evidence_required",
+    "v0_8_model_training": "deferred_not_authorized"
+  },
+  "truth_status": "oelr_software_implemented_real_operational_validation_not_started"
+}
+

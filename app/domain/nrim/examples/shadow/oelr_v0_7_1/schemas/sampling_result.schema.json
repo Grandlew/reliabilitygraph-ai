@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "FrameSource": {
+      "enum": [
+        "known_operational_incident",
+        "nrim_positive_episode",
+        "healthy_hour_candidate"
+      ],
+      "title": "FrameSource",
+      "type": "string"
+    },
+    "SamplingSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "inclusion_probability": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Inclusion Probability",
+          "type": "number"
+        },
+        "selection_score_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Selection Score Sha256",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/FrameSource"
+        },
+        "stratum": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Stratum",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "source",
+        "stratum",
+        "inclusion_probability",
+        "selection_score_sha256"
+      ],
+      "title": "SamplingSelection",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "frame_count": {
+      "minimum": 0,
+      "title": "Frame Count",
+      "type": "integer"
+    },
+    "frame_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Frame Sha256",
+      "type": "string"
+    },
+    "inclusion_probability_record_fraction": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Inclusion Probability Record Fraction",
+      "type": "number"
+    },
+    "known_incident_coverage": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Known Incident Coverage",
+      "type": "number"
+    },
+    "nrim_positive_coverage": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Nrim Positive Coverage",
+      "type": "number"
+    },
+    "plan_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Plan Sha256",
+      "type": "string"
+    },
+    "selected": {
+      "items": {
+        "$ref": "#/$defs/SamplingSelection"
+      },
+      "title": "Selected",
+      "type": "array"
+    },
+    "selected_count": {
+      "minimum": 0,
+      "title": "Selected Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "plan_sha256",
+    "frame_sha256",
+    "selected",
+    "frame_count",
+    "selected_count",
+    "inclusion_probability_record_fraction",
+    "known_incident_coverage",
+    "nrim_positive_coverage"
+  ],
+  "title": "SamplingResult",
+  "type": "object"
+}

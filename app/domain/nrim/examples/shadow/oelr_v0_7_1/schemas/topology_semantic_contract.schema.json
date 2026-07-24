@@ -1,0 +1,156 @@
+{
+  "$defs": {
+    "ComponentType": {
+      "enum": [
+        "signal_source",
+        "gateway",
+        "streamer",
+        "middleware",
+        "database",
+        "catchup_service",
+        "catchup_storage",
+        "epg_service",
+        "core_switch",
+        "distribution_switch",
+        "smart_tv_group"
+      ],
+      "title": "ComponentType",
+      "type": "string"
+    },
+    "DependencyType": {
+      "enum": [
+        "depends_on",
+        "sends_to",
+        "authenticates_with",
+        "stores_on",
+        "serves",
+        "connected_to"
+      ],
+      "title": "DependencyType",
+      "type": "string"
+    },
+    "DirectionSemantics": {
+      "enum": [
+        "source_to_destination",
+        "destination_depends_on_source",
+        "bidirectional"
+      ],
+      "title": "DirectionSemantics",
+      "type": "string"
+    },
+    "EdgeSemanticRule": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_destination_types": {
+          "items": {
+            "$ref": "#/$defs/ComponentType"
+          },
+          "minItems": 1,
+          "title": "Allowed Destination Types",
+          "type": "array"
+        },
+        "allowed_source_types": {
+          "items": {
+            "$ref": "#/$defs/ComponentType"
+          },
+          "minItems": 1,
+          "title": "Allowed Source Types",
+          "type": "array"
+        },
+        "dependency_type": {
+          "$ref": "#/$defs/DependencyType"
+        },
+        "direction_semantics": {
+          "$ref": "#/$defs/DirectionSemantics"
+        },
+        "rationale": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "reversal_allowed": {
+          "default": false,
+          "title": "Reversal Allowed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dependency_type",
+        "direction_semantics",
+        "allowed_source_types",
+        "allowed_destination_types",
+        "rationale"
+      ],
+      "title": "EdgeSemanticRule",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "contract_version": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "deployment_pseudonym": {
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "Deployment Pseudonym",
+      "type": "string"
+    },
+    "edge_rules": {
+      "items": {
+        "$ref": "#/$defs/EdgeSemanticRule"
+      },
+      "minItems": 1,
+      "title": "Edge Rules",
+      "type": "array"
+    },
+    "endpoint_role_provenance": {
+      "maxLength": 1000,
+      "minLength": 10,
+      "title": "Endpoint Role Provenance",
+      "type": "string"
+    },
+    "inventory_source": {
+      "maxLength": 256,
+      "minLength": 3,
+      "title": "Inventory Source",
+      "type": "string"
+    },
+    "registered_change_cutoffs_utc": {
+      "default": [],
+      "items": {
+        "format": "date-time",
+        "type": "string"
+      },
+      "title": "Registered Change Cutoffs Utc",
+      "type": "array"
+    },
+    "validity_interval_provenance": {
+      "maxLength": 1000,
+      "minLength": 10,
+      "title": "Validity Interval Provenance",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_id",
+    "contract_version",
+    "deployment_pseudonym",
+    "inventory_source",
+    "endpoint_role_provenance",
+    "validity_interval_provenance",
+    "edge_rules"
+  ],
+  "title": "TopologySemanticContract",
+  "type": "object"
+}

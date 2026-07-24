@@ -1,0 +1,128 @@
+{
+  "$defs": {
+    "StorageBackendKind": {
+      "enum": [
+        "sqlite_test_adapter",
+        "postgresql",
+        "retention_locked_object_store",
+        "other_pilot_infrastructure"
+      ],
+      "title": "StorageBackendKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_control_review_passed": {
+      "title": "Access Control Review Passed",
+      "type": "boolean"
+    },
+    "backend_kind": {
+      "$ref": "#/$defs/StorageBackendKind"
+    },
+    "concurrent_append_passed": {
+      "title": "Concurrent Append Passed",
+      "type": "boolean"
+    },
+    "concurrent_process_count": {
+      "minimum": 2,
+      "title": "Concurrent Process Count",
+      "type": "integer"
+    },
+    "conflicting_duplicate_test_passed": {
+      "title": "Conflicting Duplicate Test Passed",
+      "type": "boolean"
+    },
+    "deletion_denial_test_passed": {
+      "title": "Deletion Denial Test Passed",
+      "type": "boolean"
+    },
+    "disaster_recovery_owner": {
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "Disaster Recovery Owner",
+      "type": "string"
+    },
+    "encrypted_backup_passed": {
+      "title": "Encrypted Backup Passed",
+      "type": "boolean"
+    },
+    "evidence_artifact_hashes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 5,
+      "title": "Evidence Artifact Hashes",
+      "type": "object"
+    },
+    "immutable_audit_export_passed": {
+      "title": "Immutable Audit Export Passed",
+      "type": "boolean"
+    },
+    "independently_administered": {
+      "title": "Independently Administered",
+      "type": "boolean"
+    },
+    "infrastructure_identity": {
+      "maxLength": 512,
+      "minLength": 3,
+      "title": "Infrastructure Identity",
+      "type": "string"
+    },
+    "qualification_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Qualification Id",
+      "type": "string"
+    },
+    "restore_test_passed": {
+      "title": "Restore Test Passed",
+      "type": "boolean"
+    },
+    "restored_chain_matches": {
+      "title": "Restored Chain Matches",
+      "type": "boolean"
+    },
+    "retention_lock_enabled": {
+      "title": "Retention Lock Enabled",
+      "type": "boolean"
+    },
+    "retention_policy_days": {
+      "exclusiveMinimum": 0,
+      "title": "Retention Policy Days",
+      "type": "integer"
+    },
+    "tested_at_utc": {
+      "format": "date-time",
+      "title": "Tested At Utc",
+      "type": "string"
+    },
+    "transaction_atomicity_test_passed": {
+      "title": "Transaction Atomicity Test Passed",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "qualification_id",
+    "tested_at_utc",
+    "backend_kind",
+    "infrastructure_identity",
+    "independently_administered",
+    "concurrent_process_count",
+    "concurrent_append_passed",
+    "conflicting_duplicate_test_passed",
+    "transaction_atomicity_test_passed",
+    "retention_lock_enabled",
+    "retention_policy_days",
+    "deletion_denial_test_passed",
+    "encrypted_backup_passed",
+    "restore_test_passed",
+    "restored_chain_matches",
+    "immutable_audit_export_passed",
+    "access_control_review_passed",
+    "disaster_recovery_owner",
+    "evidence_artifact_hashes"
+  ],
+  "title": "StorageQualificationEvidence",
+  "type": "object"
+}

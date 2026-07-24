@@ -20,6 +20,7 @@ from .contracts import (
     TopologyEdge,
 )
 from .hashing import canonical_hash, canonical_json
+from .privacy import assert_no_direct_identifiers
 
 
 class AppendOnlyViolation(RuntimeError):
@@ -754,6 +755,7 @@ class AppendOnlyEvidenceStore:
         ]
 
     def append_adjudication(self, value: IncidentAdjudication) -> bool:
+        assert_no_direct_identifiers(value.model_dump(mode="json"))
         payload = canonical_json(value)
         payload_hash = canonical_hash(value)
         with self._connection() as connection:
@@ -814,6 +816,7 @@ class AppendOnlyEvidenceStore:
         actor_pseudonym: str,
         payload: dict[str, Any],
     ) -> bool:
+        assert_no_direct_identifiers(payload)
         payload_hash = canonical_hash(payload)
         with self._connection() as connection:
             cursor = connection.execute(
@@ -873,3 +876,27 @@ class AppendOnlyEvidenceStore:
                 return False
             previous = expected
         return True
+
+    def prediction_chain_state(self) -> dict[str, Any]:
+        with self._connection() as connection:
+            row = connection.execute(
+                """
+                SELECT COUNT(*) AS evidence_count,
+                       COALESCE(
+                           (
+                               SELECT chain_hash FROM predictions
+                               ORDER BY rowid DESC LIMIT 1
+                           ),
+                           ?
+                       ) AS chain_head,
+                       MAX(decision_cutoff_utc) AS latest_cutoff_utc
+                FROM predictions
+                """,
+                ("0" * 64,),
+            ).fetchone()
+        return {
+            "evidence_count": int(row["evidence_count"]),
+            "chain_head": str(row["chain_head"]),
+            "latest_cutoff_utc": row["latest_cutoff_utc"],
+            "chain_valid": self.verify_prediction_chain(),
+        }

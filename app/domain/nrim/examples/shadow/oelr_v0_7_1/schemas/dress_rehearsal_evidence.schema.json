@@ -1,0 +1,123 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "emergency_stop_count": {
+      "minimum": 0,
+      "title": "Emergency Stop Count",
+      "type": "integer"
+    },
+    "ended_at_utc": {
+      "format": "date-time",
+      "title": "Ended At Utc",
+      "type": "string"
+    },
+    "envelope_reproduction_fraction": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Envelope Reproduction Fraction",
+      "type": "number"
+    },
+    "evidence_chain_continuity": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Evidence Chain Continuity",
+      "type": "number"
+    },
+    "evidence_envelope_completeness": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Evidence Envelope Completeness",
+      "type": "number"
+    },
+    "external_checkpoint_success_fraction": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "External Checkpoint Success Fraction",
+      "type": "number"
+    },
+    "predictions_hidden_from_frontline": {
+      "title": "Predictions Hidden From Frontline",
+      "type": "boolean"
+    },
+    "quarantine_attribution_fraction": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Quarantine Attribution Fraction",
+      "type": "number"
+    },
+    "read_only_boundary_passed": {
+      "title": "Read Only Boundary Passed",
+      "type": "boolean"
+    },
+    "real_data": {
+      "title": "Real Data",
+      "type": "boolean"
+    },
+    "registered_availability_floor": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Registered Availability Floor",
+      "type": "number"
+    },
+    "rehearsal_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Rehearsal Id",
+      "type": "string"
+    },
+    "restart_recovery_fraction": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Restart Recovery Fraction",
+      "type": "number"
+    },
+    "review_workflow_passed": {
+      "title": "Review Workflow Passed",
+      "type": "boolean"
+    },
+    "scheduled_cutoff_completion_fraction": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Scheduled Cutoff Completion Fraction",
+      "type": "number"
+    },
+    "schema_compliance": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Schema Compliance",
+      "type": "number"
+    },
+    "started_at_utc": {
+      "format": "date-time",
+      "title": "Started At Utc",
+      "type": "string"
+    },
+    "unsafe_stage2_count": {
+      "minimum": 0,
+      "title": "Unsafe Stage2 Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "rehearsal_id",
+    "started_at_utc",
+    "ended_at_utc",
+    "real_data",
+    "predictions_hidden_from_frontline",
+    "read_only_boundary_passed",
+    "schema_compliance",
+    "quarantine_attribution_fraction",
+    "envelope_reproduction_fraction",
+    "evidence_envelope_completeness",
+    "evidence_chain_continuity",
+    "external_checkpoint_success_fraction",
+    "scheduled_cutoff_completion_fraction",
+    "registered_availability_floor",
+    "unsafe_stage2_count",
+    "restart_recovery_fraction",
+    "review_workflow_passed",
+    "emergency_stop_count"
+  ],
+  "title": "DressRehearsalEvidence",
+  "type": "object"
+}

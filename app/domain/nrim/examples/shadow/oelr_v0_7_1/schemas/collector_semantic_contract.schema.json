@@ -1,0 +1,373 @@
+{
+  "$defs": {
+    "AggregationSemantics": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary_rule": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Boundary Rule",
+          "type": "string"
+        },
+        "denominator_semantics": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Denominator Semantics",
+          "type": "string"
+        },
+        "late_data_rule": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Late Data Rule",
+          "type": "string"
+        },
+        "numerator_semantics": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Numerator Semantics",
+          "type": "string"
+        },
+        "reset_behavior": {
+          "$ref": "#/$defs/ResetBehavior"
+        },
+        "source_sampling_interval_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Source Sampling Interval Seconds",
+          "type": "number"
+        },
+        "statistic": {
+          "$ref": "#/$defs/AggregationStatistic"
+        },
+        "target_window_seconds": {
+          "exclusiveMinimum": 0.0,
+          "title": "Target Window Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "statistic",
+        "source_sampling_interval_seconds",
+        "target_window_seconds",
+        "reset_behavior",
+        "numerator_semantics",
+        "denominator_semantics",
+        "boundary_rule",
+        "late_data_rule"
+      ],
+      "title": "AggregationSemantics",
+      "type": "object"
+    },
+    "AggregationStatistic": {
+      "enum": [
+        "last",
+        "mean",
+        "maximum",
+        "count",
+        "rate"
+      ],
+      "title": "AggregationStatistic",
+      "type": "string"
+    },
+    "Applicability": {
+      "enum": [
+        "observed",
+        "missing",
+        "not_applicable"
+      ],
+      "title": "Applicability",
+      "type": "string"
+    },
+    "ComponentType": {
+      "enum": [
+        "signal_source",
+        "gateway",
+        "streamer",
+        "middleware",
+        "database",
+        "catchup_service",
+        "catchup_storage",
+        "epg_service",
+        "core_switch",
+        "distribution_switch",
+        "smart_tv_group"
+      ],
+      "title": "ComponentType",
+      "type": "string"
+    },
+    "MetricName": {
+      "enum": [
+        "system.disk.utilization",
+        "system.disk.io_latency",
+        "system.disk.io_errors",
+        "iptv.catchup.recording_failures",
+        "system.process.restart_count",
+        "iptv.session.active_count",
+        "iptv.catchup.service_availability"
+      ],
+      "title": "MetricName",
+      "type": "string"
+    },
+    "MetricSemanticMapping": {
+      "additionalProperties": false,
+      "properties": {
+        "aggregation": {
+          "$ref": "#/$defs/AggregationSemantics"
+        },
+        "canonical_metric": {
+          "$ref": "#/$defs/MetricName"
+        },
+        "canonical_unit": {
+          "$ref": "#/$defs/MetricUnit"
+        },
+        "conversion_multiplier": {
+          "title": "Conversion Multiplier",
+          "type": "number"
+        },
+        "conversion_offset": {
+          "default": 0.0,
+          "title": "Conversion Offset",
+          "type": "number"
+        },
+        "conversion_provenance": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Conversion Provenance",
+          "type": "string"
+        },
+        "expected_source_unit": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Expected Source Unit",
+          "type": "string"
+        },
+        "source_metric_name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source Metric Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_metric_name",
+        "canonical_metric",
+        "expected_source_unit",
+        "canonical_unit",
+        "conversion_multiplier",
+        "aggregation",
+        "conversion_provenance"
+      ],
+      "title": "MetricSemanticMapping",
+      "type": "object"
+    },
+    "MetricUnit": {
+      "enum": [
+        "percent",
+        "milliseconds",
+        "errors_per_interval",
+        "failures_per_interval",
+        "restarts_per_interval",
+        "sessions"
+      ],
+      "title": "MetricUnit",
+      "type": "string"
+    },
+    "ObservationQuality": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "quarantined"
+      ],
+      "title": "ObservationQuality",
+      "type": "string"
+    },
+    "ResetBehavior": {
+      "enum": [
+        "gauge",
+        "interval_counter",
+        "monotonic_counter"
+      ],
+      "title": "ResetBehavior",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "applicability_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Applicability Field",
+      "type": "string"
+    },
+    "applicability_mapping": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Applicability"
+      },
+      "minProperties": 3,
+      "title": "Applicability Mapping",
+      "type": "object"
+    },
+    "approved_mapping_evidence": {
+      "maxLength": 1000,
+      "minLength": 10,
+      "title": "Approved Mapping Evidence",
+      "type": "string"
+    },
+    "clock_domain": {
+      "maxLength": 256,
+      "minLength": 3,
+      "title": "Clock Domain",
+      "type": "string"
+    },
+    "collector_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Collector Id",
+      "type": "string"
+    },
+    "component_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Component Field",
+      "type": "string"
+    },
+    "component_types": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ComponentType"
+      },
+      "minProperties": 1,
+      "title": "Component Types",
+      "type": "object"
+    },
+    "contract_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "contract_version": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "deployment_pseudonym": {
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "Deployment Pseudonym",
+      "type": "string"
+    },
+    "event_time_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Event Time Field",
+      "type": "string"
+    },
+    "event_timestamp_provenance": {
+      "maxLength": 1000,
+      "minLength": 10,
+      "title": "Event Timestamp Provenance",
+      "type": "string"
+    },
+    "ingestion_time_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Ingestion Time Field",
+      "type": "string"
+    },
+    "maximum_clock_skew_seconds": {
+      "minimum": 0.0,
+      "title": "Maximum Clock Skew Seconds",
+      "type": "number"
+    },
+    "maximum_ingestion_delay_seconds": {
+      "exclusiveMinimum": 0.0,
+      "title": "Maximum Ingestion Delay Seconds",
+      "type": "number"
+    },
+    "metric_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Metric Field",
+      "type": "string"
+    },
+    "metric_mappings": {
+      "items": {
+        "$ref": "#/$defs/MetricSemanticMapping"
+      },
+      "title": "Metric Mappings",
+      "type": "array"
+    },
+    "quality_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Quality Field",
+      "type": "string"
+    },
+    "quality_mapping": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ObservationQuality"
+      },
+      "minProperties": 3,
+      "title": "Quality Mapping",
+      "type": "object"
+    },
+    "sequence_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Sequence Field",
+      "type": "string"
+    },
+    "timestamp_precision_ms": {
+      "exclusiveMinimum": 0.0,
+      "title": "Timestamp Precision Ms",
+      "type": "number"
+    },
+    "topology_version_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Topology Version Field",
+      "type": "string"
+    },
+    "unit_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Unit Field",
+      "type": "string"
+    },
+    "value_field": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Value Field",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_id",
+    "contract_version",
+    "deployment_pseudonym",
+    "collector_id",
+    "metric_field",
+    "value_field",
+    "unit_field",
+    "event_time_field",
+    "ingestion_time_field",
+    "component_field",
+    "sequence_field",
+    "topology_version_field",
+    "quality_field",
+    "applicability_field",
+    "event_timestamp_provenance",
+    "clock_domain",
+    "timestamp_precision_ms",
+    "maximum_clock_skew_seconds",
+    "maximum_ingestion_delay_seconds",
+    "quality_mapping",
+    "applicability_mapping",
+    "metric_mappings",
+    "component_types",
+    "approved_mapping_evidence"
+  ],
+  "title": "CollectorSemanticContract",
+  "type": "object"
+}

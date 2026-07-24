@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "created_at_utc": {
+      "format": "date-time",
+      "title": "Created At Utc",
+      "type": "string"
+    },
+    "frame_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Frame Sha256",
+      "type": "string"
+    },
+    "healthy_target_per_stratum": {
+      "minimum": 1,
+      "title": "Healthy Target Per Stratum",
+      "type": "integer"
+    },
+    "plan_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "record_inclusion_probability": {
+      "default": true,
+      "title": "Record Inclusion Probability",
+      "type": "boolean"
+    },
+    "review_all_known_incidents": {
+      "default": true,
+      "title": "Review All Known Incidents",
+      "type": "boolean"
+    },
+    "review_all_nrim_positives": {
+      "default": true,
+      "title": "Review All Nrim Positives",
+      "type": "boolean"
+    },
+    "seed_commitment_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Seed Commitment Sha256",
+      "type": "string"
+    },
+    "strata": {
+      "default": [
+        "deployment",
+        "time_of_day",
+        "workload",
+        "support_state"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Strata",
+      "type": "array"
+    }
+  },
+  "required": [
+    "plan_id",
+    "created_at_utc",
+    "frame_sha256",
+    "seed_commitment_sha256",
+    "healthy_target_per_stratum"
+  ],
+  "title": "SamplingPlan",
+  "type": "object"
+}

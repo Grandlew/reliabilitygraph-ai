@@ -93,6 +93,14 @@ def default_protocol(
     feature_schema_hash: str,
     policy_hash: str,
 ) -> FrozenPilotProtocol:
+    """Build the legacy silent-only protocol.
+
+    New registrations should use ``protocol_compiler.OELRProtocol``. This
+    compatibility builder intentionally excludes human-utility estimands,
+    because operators cannot provide utility outcomes while predictions are
+    hidden.
+    """
+
     return FrozenPilotProtocol(
         registered_at_utc=datetime.now(timezone.utc),
         planned_start_utc=planned_start_utc,
@@ -118,8 +126,6 @@ def default_protocol(
             "nonactionable_episodes_per_100_healthy_deployment_hours",
             "mrr_hits1_hits3_and_ranking_coverage",
             "unsupported_and_data_quality_blocked_rates",
-            "engineer_top3_usefulness",
-            "time_to_first_useful_hypothesis",
         ),
         inclusion_criteria=(
             "all_confirmed_customer_impacting_incidents",

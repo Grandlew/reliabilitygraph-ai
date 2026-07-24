@@ -1,0 +1,107 @@
+{
+  "$defs": {
+    "AnchorReceiptPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint_sequence": {
+          "minimum": 1,
+          "title": "Checkpoint Sequence",
+          "type": "integer"
+        },
+        "checkpoint_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Checkpoint Sha256",
+          "type": "string"
+        },
+        "external_location": {
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "External Location",
+          "type": "string"
+        },
+        "external_trust_domain": {
+          "maxLength": 256,
+          "minLength": 3,
+          "title": "External Trust Domain",
+          "type": "string"
+        },
+        "previous_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Previous Receipt Sha256",
+          "type": "string"
+        },
+        "receipt_version": {
+          "default": "0.7.1",
+          "title": "Receipt Version",
+          "type": "string"
+        },
+        "received_at_utc": {
+          "format": "date-time",
+          "title": "Received At Utc",
+          "type": "string"
+        },
+        "signed_checkpoint_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Signed Checkpoint Sha256",
+          "type": "string"
+        },
+        "sink_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "title": "Sink Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sink_id",
+        "external_trust_domain",
+        "external_location",
+        "received_at_utc",
+        "checkpoint_sequence",
+        "checkpoint_sha256",
+        "signed_checkpoint_sha256",
+        "previous_receipt_sha256"
+      ],
+      "title": "AnchorReceiptPayload",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "adapter_truth_status": {
+      "title": "Adapter Truth Status",
+      "type": "string"
+    },
+    "custodian_public_key_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Custodian Public Key Sha256",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/AnchorReceiptPayload"
+    },
+    "payload_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Payload Sha256",
+      "type": "string"
+    },
+    "signature_algorithm": {
+      "default": "ed25519",
+      "title": "Signature Algorithm",
+      "type": "string"
+    },
+    "signature_base64": {
+      "title": "Signature Base64",
+      "type": "string"
+    }
+  },
+  "required": [
+    "payload",
+    "payload_sha256",
+    "custodian_public_key_sha256",
+    "signature_base64",
+    "adapter_truth_status"
+  ],
+  "title": "AnchorReceipt",
+  "type": "object"
+}

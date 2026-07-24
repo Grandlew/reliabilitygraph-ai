@@ -1,0 +1,89 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "application_instance_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "title": "Application Instance Id",
+      "type": "string"
+    },
+    "application_trust_domain": {
+      "maxLength": 256,
+      "minLength": 3,
+      "title": "Application Trust Domain",
+      "type": "string"
+    },
+    "checkpoint_sequence": {
+      "minimum": 1,
+      "title": "Checkpoint Sequence",
+      "type": "integer"
+    },
+    "checkpoint_version": {
+      "default": "0.7.1",
+      "title": "Checkpoint Version",
+      "type": "string"
+    },
+    "created_at_utc": {
+      "format": "date-time",
+      "title": "Created At Utc",
+      "type": "string"
+    },
+    "evidence_count": {
+      "minimum": 0,
+      "title": "Evidence Count",
+      "type": "integer"
+    },
+    "latest_decision_cutoff_utc": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Latest Decision Cutoff Utc"
+    },
+    "model_bundle_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Model Bundle Sha256",
+      "type": "string"
+    },
+    "prediction_chain_head": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Prediction Chain Head",
+      "type": "string"
+    },
+    "previous_checkpoint_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Previous Checkpoint Sha256",
+      "type": "string"
+    },
+    "previous_evidence_count": {
+      "minimum": 0,
+      "title": "Previous Evidence Count",
+      "type": "integer"
+    },
+    "protocol_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Protocol Sha256",
+      "type": "string"
+    }
+  },
+  "required": [
+    "checkpoint_sequence",
+    "created_at_utc",
+    "application_instance_id",
+    "application_trust_domain",
+    "protocol_sha256",
+    "model_bundle_sha256",
+    "evidence_count",
+    "previous_evidence_count",
+    "prediction_chain_head",
+    "previous_checkpoint_sha256"
+  ],
+  "title": "EvidenceCheckpoint",
+  "type": "object"
+}

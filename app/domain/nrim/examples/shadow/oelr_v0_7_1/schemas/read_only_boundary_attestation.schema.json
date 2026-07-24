@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "all_forbidden_actions_denied": {
+      "title": "All Forbidden Actions Denied",
+      "type": "boolean"
+    },
+    "attestation_id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Attestation Id",
+      "type": "string"
+    },
+    "attested_at_utc": {
+      "format": "date-time",
+      "title": "Attested At Utc",
+      "type": "string"
+    },
+    "credential_inventory_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Credential Inventory Sha256",
+      "type": "string"
+    },
+    "independent_reviewer_pseudonym": {
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "Independent Reviewer Pseudonym",
+      "type": "string"
+    },
+    "network_policy_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Network Policy Sha256",
+      "type": "string"
+    },
+    "operational_write_credentials_present": {
+      "title": "Operational Write Credentials Present",
+      "type": "boolean"
+    },
+    "reachable_mutation_endpoints": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Reachable Mutation Endpoints",
+      "type": "array"
+    },
+    "tested_forbidden_actions": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 5,
+      "title": "Tested Forbidden Actions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "attestation_id",
+    "attested_at_utc",
+    "independent_reviewer_pseudonym",
+    "credential_inventory_sha256",
+    "network_policy_sha256",
+    "operational_write_credentials_present",
+    "tested_forbidden_actions",
+    "all_forbidden_actions_denied"
+  ],
+  "title": "ReadOnlyBoundaryAttestation",
+  "type": "object"
+}
