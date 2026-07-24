@@ -41,7 +41,14 @@ def build_test_evidence(
     errors = list(suite.iter("error"))
     skipped = list(suite.iter("skipped"))
     status = _git(root, "status", "--porcelain=v1").decode("utf-8")
-    diff = _git(root, "diff", "--binary", "HEAD")
+    head = _git(root, "rev-parse", "HEAD").decode("ascii").strip()
+    tracked_changed_names = _git(
+        root,
+        "diff",
+        "--name-only",
+        "HEAD",
+        "--",
+    ).decode("utf-8").splitlines()
     untracked_names = _git(
         root,
         "ls-files",
@@ -62,18 +69,29 @@ def build_test_evidence(
     def is_source_artifact(name: str) -> bool:
         path = (root / name).resolve()
         return (
-            path.is_file()
-            and path != junit_path.resolve()
+            path != junit_path.resolve()
             and evidence_directory not in path.parents
         )
 
-    untracked_manifest = "\n".join(
-        f"{name}:{file_hash(root / name)}"
-        for name in sorted(untracked_names)
-        if is_source_artifact(name)
+    changed_source_names = sorted(
+        {
+            name
+            for name in (*tracked_changed_names, *untracked_names)
+            if is_source_artifact(name)
+        }
+    )
+    source_manifest = "\n".join(
+        (
+            f"{name}:{file_hash(root / name)}"
+            if (root / name).is_file()
+            else f"{name}:DELETED"
+        )
+        for name in changed_source_names
     ).encode("utf-8")
     source_state_hash = bytes_hash(
-        diff + b"\0UNTRACKED\0" + untracked_manifest
+        f"HEAD:{head}".encode("ascii")
+        + b"\0CHANGED_SOURCE_FILES\0"
+        + source_manifest
     )
     return {
         "schema_version": "0.7.1-oelr",
@@ -96,10 +114,9 @@ def build_test_evidence(
         ),
         "node_ids": node_ids,
         "junit_sha256": file_hash(junit_path),
-        "git_commit": _git(root, "rev-parse", "HEAD")
-        .decode("ascii")
-        .strip(),
+        "git_commit": head,
         "working_tree_clean": not bool(status.strip()),
+        "working_tree_source_clean": not changed_source_names,
         "working_tree_source_state_sha256": source_state_hash,
         "python_version": platform.python_version(),
         "pytest_version": pytest.__version__,

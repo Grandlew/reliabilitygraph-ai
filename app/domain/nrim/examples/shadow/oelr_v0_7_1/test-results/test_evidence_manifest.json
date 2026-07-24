@@ -1,8 +1,8 @@
 {
   "error_count": 0,
   "failure_count": 0,
-  "git_commit": "35f82f5f67ac1e4d40714e71548f329091b9c239",
-  "junit_sha256": "0632cf9256505a4459f4ed755b601b7641292b51a0abe52871bd9697c4c8b7f4",
+  "git_commit": "3dcb10941de76dd60f5e79d26852ec38bc65592e",
+  "junit_sha256": "6127500ec50df3674653676334845c94318db4c4822748c12a72edaa0d6a4f1b",
   "node_ids": [
     "tests.domain.nrim.baselines.test_abstention::test_margin",
     "tests.domain.nrim.baselines.test_abstention::test_abstains_on_low_top_score",
@@ -79,6 +79,7 @@
     "tests.domain.nrim.shadow.test_adjudication_evaluation_governance::test_review_api_requires_authentication_and_blinded_sequence",
     "tests.domain.nrim.shadow.test_adjudication_evaluation_governance::test_review_console_is_same_origin_and_discloses_no_case_data",
     "tests.domain.nrim.shadow.test_adjudication_evaluation_governance::test_metrics_report_nonzero_uncertainty_when_no_false_episodes",
+    "tests.domain.nrim.shadow.test_adjudication_evaluation_governance::test_operational_recall_does_not_drop_unsupported_incidents",
     "tests.domain.nrim.shadow.test_adjudication_evaluation_governance::test_synthetic_results_can_never_promote_release",
     "tests.domain.nrim.shadow.test_adjudication_evaluation_governance::test_protocol_is_signed_preregistered_and_cannot_be_overwritten",
     "tests.domain.nrim.shadow.test_bundle_and_runtime::test_signed_bundle_verifies_and_refuses_source_mutation",
@@ -292,21 +293,22 @@
     "tests.test_engine::test_backend_accepts_new_room_tv_delivery_values",
     "tests.test_engine::test_backend_normalizes_blank_archive_days"
   ],
-  "passed_count": 287,
+  "passed_count": 288,
   "pytest_version": "9.0.1",
   "python_version": "3.12.0",
   "requirements_sha256": "8b0d6169d609ec7888cb4e13306bca7f4d847aa0ec7cae3f7948101d1ade4d92",
   "schema_version": "0.7.1-oelr",
   "scope_counts": {
-    "full_suite_including_nrim": 287,
-    "nrim_subset_including_shadow": 270,
-    "shadow_subset": 40
+    "full_suite_including_nrim": 288,
+    "nrim_subset_including_shadow": 271,
+    "shadow_subset": 41
   },
   "scope_relationship": "shadow_subset is contained in nrim_subset; nrim_subset is contained in full_suite. Counts must not be summed.",
   "skipped_count": 0,
   "suite": "full_repository",
-  "test_count": 287,
+  "test_count": 288,
   "truth_note": "JUnit evidence proves the recorded software test run only. It does not establish real telemetry or operational efficacy.",
   "working_tree_clean": false,
-  "working_tree_source_state_sha256": "7ce574a2f185bc4587057f27aea7ae14cdba2b0260042a898da730f78331d499"
+  "working_tree_source_clean": false,
+  "working_tree_source_state_sha256": "ad0c16d723499944725f9738ef9ec7f5895abef82e96703e8e59f23c96a54c23"
 }
