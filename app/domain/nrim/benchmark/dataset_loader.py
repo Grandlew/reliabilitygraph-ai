@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 import math
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Iterator
 
 from .models import WindowSummary
 
 
 MISSING_FEATURE_SUFFIX = "__missing"
+_MANIFEST_RUNTIME_PATH = "_runtime_manifest_path"
 
 
 def load_json(path: str | Path) -> dict[str, Any]:
@@ -29,7 +30,8 @@ def load_json(path: str | Path) -> dict[str, Any]:
 def load_model_ready_manifest(
     path: str | Path,
 ) -> dict[str, Any]:
-    manifest = load_json(path)
+    manifest_path = Path(path).resolve()
+    manifest = load_json(manifest_path)
 
     records = manifest.get("records")
 
@@ -45,15 +47,61 @@ def load_model_ready_manifest(
             "Model-ready manifest has no feature schema."
         )
 
+    manifest[_MANIFEST_RUNTIME_PATH] = str(manifest_path)
     return manifest
+
+
+def resolve_window_record_path(
+    *,
+    manifest: dict[str, Any],
+    record: dict[str, Any],
+) -> Path:
+    """Resolve a window beside its current manifest, not its recorded path."""
+
+    runtime_manifest_path = manifest.get(_MANIFEST_RUNTIME_PATH)
+    if not isinstance(runtime_manifest_path, str):
+        raise ValueError(
+            "Model-ready manifest has no trusted runtime location"
+        )
+    split = str(record["split"])
+    if (
+        not split
+        or split in {".", ".."}
+        or "/" in split
+        or "\\" in split
+    ):
+        raise ValueError(
+            f"Model-ready record has an invalid split: {split!r}"
+        )
+    expected_filename = f"{record['window_id']}.json"
+    raw_path = record["path"]
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError(
+            "Recorded model-ready path must be a non-empty string"
+        )
+    portable = PurePosixPath(raw_path.replace("\\", "/"))
+    if ".." in portable.parts:
+        raise ValueError("Recorded model-ready path contains traversal")
+    if portable.name != expected_filename:
+        raise ValueError(
+            "Recorded model-ready path has the wrong filename: "
+            f"expected {expected_filename!r}"
+        )
+    path = Path(runtime_manifest_path).parent / split / expected_filename
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Required colocated model-ready window is missing: {path}"
+        )
+    return path
 
 
 def iter_window_records(
     manifest: dict[str, Any],
 ) -> Iterator[tuple[dict[str, Any], dict[str, Any]]]:
     for manifest_record in manifest["records"]:
-        window_path = Path(
-            str(manifest_record["path"])
+        window_path = resolve_window_record_path(
+            manifest=manifest,
+            record=manifest_record,
         )
 
         yield manifest_record, load_json(window_path)

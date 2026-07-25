@@ -15,6 +15,7 @@ from app.domain.nrim.benchmark.dataset_loader import (
 from app.domain.nrim.simulation.locked_test_governance import (
     locked_test_is_unopened,
     open_locked_test_once,
+    resolve_seal_manifest_path,
     verify_locked_test_seal,
 )
 
@@ -884,7 +885,11 @@ def main() -> None:
         )
 
     development_source = _load_json(
-        Path(seal["development_manifest_path"])
+        resolve_seal_manifest_path(
+            seal_path=seal_path,
+            seal=seal,
+            field="development_manifest_path",
+        )
     )
     scenario_metadata = _scenario_metadata(
         development_source["records"]

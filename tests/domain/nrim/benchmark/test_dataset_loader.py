@@ -1,7 +1,13 @@
+import json
+from pathlib import Path
+
 import pytest
 
 from app.domain.nrim.benchmark.dataset_loader import (
+    iter_window_records,
+    load_model_ready_manifest,
     missing_feature_fraction,
+    resolve_window_record_path,
     summarize_window,
     validate_numeric_matrix,
 )
@@ -98,3 +104,78 @@ def test_missing_fraction_excludes_non_applicable_signals() -> None:
     )
 
     assert result == 1.0
+
+
+@pytest.mark.parametrize(
+    "recorded_path",
+    [
+        r"C:\retired\day09_model_ready_v06\train\window_abc.json",
+        "/retired/day09_model_ready_v06/train/window_abc.json",
+    ],
+)
+def test_model_ready_loader_uses_colocated_window(
+    tmp_path: Path,
+    recorded_path: str,
+) -> None:
+    window_dir = tmp_path / "train"
+    window_dir.mkdir()
+    (window_dir / "window_abc.json").write_text(
+        json.dumps(make_window()),
+        encoding="utf-8",
+    )
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "records": [
+                    {
+                        "window_id": "window_abc",
+                        "split": "train",
+                        "path": recorded_path,
+                    }
+                ],
+                "feature_schema": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    manifest = load_model_ready_manifest(manifest_path)
+    records = list(iter_window_records(manifest))
+
+    assert records[0][1]["window_id"] == "window_abc"
+    assert not Path(recorded_path).exists()
+
+
+@pytest.mark.parametrize(
+    "recorded_path",
+    [
+        "../window_abc.json",
+        r"C:\retired\train\wrong.json",
+    ],
+)
+def test_model_ready_resolver_rejects_untrusted_recorded_path(
+    tmp_path: Path,
+    recorded_path: str,
+) -> None:
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "records": [],
+                "feature_schema": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest = load_model_ready_manifest(manifest_path)
+
+    with pytest.raises(ValueError):
+        resolve_window_record_path(
+            manifest=manifest,
+            record={
+                "window_id": "window_abc",
+                "split": "train",
+                "path": recorded_path,
+            },
+        )

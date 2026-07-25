@@ -111,6 +111,27 @@ The validated foundation changes were subsequently committed and pushed as
 `pytest.ini`; and deletion of the two formerly tracked generated evidence
 files.
 
+## Cross-platform locked-test evidence correction
+
+The committed v0.6 seal and manifests retain absolute paths from their original
+Windows checkout as historical provenance. A verifier incorrectly treated
+those strings as live filesystem locations, so a relocated Ubuntu checkout
+could not find the locked manifest or its scenario files. Local validation
+masked the defect because the retired source repository still existed.
+
+The uncommitted correction resolves governed manifests, scenario sidecars, and
+model-ready windows only from their current artifact location, declared split,
+scenario or window identifier, and required filename. Recorded paths are
+validated as metadata but are never dereferenced. Missing colocated files,
+wrong filenames, traversal components, altered manifest content, altered
+scenario content, and changed commitment hashes remain rejected. No governed
+v0.6 JSON artifact was modified, regenerated, or re-signed.
+
+Regression coverage includes stale Windows and POSIX absolute provenance paths.
+Current local validation passes with 296 tests, including the relocated strict
+shadow parity test. Clean Ubuntu acceptance still requires an actual successful
+GitHub Actions run.
+
 ## Risks and limitations
 
 - The Ubuntu workflow is defined but cannot be executed by this local Windows

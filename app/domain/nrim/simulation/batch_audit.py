@@ -7,6 +7,9 @@ from statistics import mean
 from typing import Any
 
 from .dataset_manifest import DatasetManifest
+from .locked_test_governance import (
+    resolve_manifest_record_path,
+)
 from .models import FailureType
 from .quality_audit import (
     audit_observable_scenario,
@@ -27,6 +30,8 @@ def load_json(path: str | Path) -> dict[str, Any]:
 
 def audit_manifest(
     manifest: DatasetManifest,
+    *,
+    manifest_path: Path,
 ) -> dict[str, Any]:
     records = [
         record.model_dump(mode="json")
@@ -162,7 +167,11 @@ def audit_manifest(
 
     for record in records:
         observable = load_json(
-            record["observable_path"]
+            resolve_manifest_record_path(
+                manifest_path=manifest_path,
+                record=record,
+                kind="observable",
+            )
         )
 
         leakage = audit_observable_scenario(

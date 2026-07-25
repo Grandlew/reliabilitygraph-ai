@@ -47,7 +47,10 @@ def main() -> None:
     )
 
     summary = manifest_summary(manifest)
-    audit = audit_manifest(manifest)
+    audit = audit_manifest(
+        manifest,
+        manifest_path=manifest_path,
+    )
 
     audit_path = output_dir / "audit.json"
 

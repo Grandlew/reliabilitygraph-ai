@@ -39,6 +39,7 @@ from app.domain.nrim.simulation.feature_schema import (
     build_feature_schema,
 )
 from app.domain.nrim.simulation.locked_test_governance import (
+    resolve_seal_manifest_path,
     verify_locked_test_seal,
 )
 
@@ -137,7 +138,13 @@ def package(*, root: Path, output: Path, blueprint_path: Path) -> dict[str, Any]
         seal_path=source_root / "governance/locked_test_seal.json"
     )
     development_source = _load(
-        Path(seal["development_manifest_path"])
+        resolve_seal_manifest_path(
+            seal_path=(
+                source_root / "governance/locked_test_seal.json"
+            ),
+            seal=seal,
+            field="development_manifest_path",
+        )
     )
     scenario_metadata = _scenario_metadata(
         development_source["records"]
