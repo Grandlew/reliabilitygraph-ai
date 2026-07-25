@@ -12,7 +12,9 @@ NRIM models, thresholds, policies, scientific semantics, or conservative
 added. The 271-test baseline is preserved and 11 infrastructure tests were
 added, for 282 passing tests.
 
-No commit or push was performed.
+After the local validation recorded below, the standalone foundation was
+committed and pushed to `feat/standalone-foundation` as
+`a5f2a003e222fb2566bc60b0722870368d9f43e9` (`a5f2a003`).
 
 ## Import and dependency audit
 
@@ -103,10 +105,11 @@ git diff --check
 No output; exit code 0.
 ```
 
-`git status --short` reports only the intended uncommitted foundation changes:
-new workflow, ignore file, README, report, `pyproject.toml`, `uv.lock`, tools,
-and infrastructure tests; deletion of `pytest.ini`; and deletion of the two
-formerly tracked generated evidence files.
+The validated foundation changes were subsequently committed and pushed as
+`a5f2a003`. The commit contains the workflow, ignore file, README, report,
+`pyproject.toml`, `uv.lock`, tools, and infrastructure tests; deletion of
+`pytest.ini`; and deletion of the two formerly tracked generated evidence
+files.
 
 ## Risks and limitations
 
@@ -119,8 +122,8 @@ formerly tracked generated evidence files.
   preserve their commitments. The automated boundary applies to executable
   Python imports, where coupling risk exists.
 - Evidence generation deliberately refuses a dirty Git tree or stale lock.
-  Therefore it is expected to run after these changes are committed by a human
-  or in CI, not in this intentionally uncommitted working tree.
+  The committed foundation at `a5f2a003` supplies the clean, commit-bound input
+  needed by CI. The current correction remains intentionally uncommitted.
 
 ## Acceptance status
 

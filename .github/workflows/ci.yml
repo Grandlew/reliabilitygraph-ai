@@ -1,6 +1,7 @@
 name: NRIM foundation
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -20,9 +21,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Install uv and Python 3.12
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7.1.4
         with:
           python-version: "3.12"
           enable-cache: true
@@ -45,9 +46,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Install uv and Python 3.12
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7.1.4
         with:
           python-version: "3.12"
           enable-cache: true
@@ -62,9 +63,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Install uv and Python 3.12
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7.1.4
         with:
           python-version: "3.12"
           enable-cache: true
@@ -92,10 +93,12 @@ jobs:
           --manifest artifacts/test-evidence/manifest.json
       - name: Upload generated test evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        # Actions artifacts are a diagnostic handoff, not the final long-term
+        # evidence store; verified evidence must be exported before expiry.
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: nrim-test-evidence-${{ github.sha }}
           path: artifacts/test-evidence/
           if-no-files-found: warn
-          retention-days: 30
-
+          # Maximum without relying on a higher repository retention setting.
+          retention-days: 90
