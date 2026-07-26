@@ -24,7 +24,10 @@ def test_generated_dataset_has_no_integrity_errors(
         generation_seed=42,
     )
 
-    audit = audit_manifest(manifest)
+    audit = audit_manifest(
+        manifest,
+        manifest_path=tmp_path / "manifest.json",
+    )
 
     assert audit["errors"] == []
 
@@ -45,6 +48,9 @@ def test_audit_reports_expected_scenario_count(
         generation_seed=42,
     )
 
-    audit = audit_manifest(manifest)
+    audit = audit_manifest(
+        manifest,
+        manifest_path=tmp_path / "manifest.json",
+    )
 
     assert audit["scenario_count"] == 6

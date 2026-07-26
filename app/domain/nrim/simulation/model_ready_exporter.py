@@ -8,6 +8,10 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.domain.nrim.benchmark.dataset_loader import (
+    load_model_ready_manifest,
+)
+
 from .feature_schema import (
     FeatureSchema,
     SIGNAL_NAMES,
@@ -16,6 +20,9 @@ from .feature_schema import (
 from .graph_feature_builder import (
     build_edge_feature_matrix,
     build_node_feature_matrix,
+)
+from .locked_test_governance import (
+    resolve_manifest_record_path,
 )
 from .sanitizer import (
     sanitize_observable_scenario,
@@ -372,11 +379,15 @@ def export_dataset(
     for raw_record in manifest["records"]:
         split = str(raw_record["split"])
 
-        observable_path = Path(
-            raw_record["observable_path"]
+        observable_path = resolve_manifest_record_path(
+            manifest_path=day08_manifest_path,
+            record=raw_record,
+            kind="observable",
         )
-        hidden_path = Path(
-            raw_record["hidden_path"]
+        hidden_path = resolve_manifest_record_path(
+            manifest_path=day08_manifest_path,
+            record=raw_record,
+            kind="hidden",
         )
 
         split_output_dir = output_root / split
@@ -431,4 +442,4 @@ def export_dataset(
             indent=2,
         )
 
-    return exported_manifest
+    return load_model_ready_manifest(manifest_path)

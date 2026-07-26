@@ -8,6 +8,8 @@ from app.domain.nrim.benchmark.dataset_loader import (
     load_model_ready_manifest,
 )
 from app.domain.nrim.simulation.locked_test_governance import (
+    resolve_manifest_record_path,
+    resolve_seal_manifest_path,
     verify_locked_test_seal,
 )
 
@@ -19,13 +21,17 @@ def main() -> None:
     simulation = root / "app/domain/nrim/examples/simulation"
     source = simulation / "day08_dataset_v06"
     model = simulation / "day09_model_ready_v06"
+    seal_path = source / "governance/locked_test_seal.json"
     seal = verify_locked_test_seal(
-        seal_path=source / "governance/locked_test_seal.json"
+        seal_path=seal_path
+    )
+    development_manifest_path = resolve_seal_manifest_path(
+        seal_path=seal_path,
+        seal=seal,
+        field="development_manifest_path",
     )
     development = json.loads(
-        Path(seal["development_manifest_path"]).read_text(
-            encoding="utf-8"
-        )
+        development_manifest_path.read_text(encoding="utf-8")
     )
     metadata = {
         str(item["scenario_id"]): item
@@ -65,7 +71,11 @@ def main() -> None:
             continue
         seen_topologies.add(topology)
         observable = json.loads(
-            Path(row["observable_path"]).read_text(encoding="utf-8")
+            resolve_manifest_record_path(
+                manifest_path=development_manifest_path,
+                record=row,
+                kind="observable",
+            ).read_text(encoding="utf-8")
         )
         results.append(
             verify_synthetic_serving_parity(

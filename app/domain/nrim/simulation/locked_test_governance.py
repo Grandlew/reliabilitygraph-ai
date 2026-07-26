@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from .dataset_manifest import (
@@ -11,6 +11,13 @@ from .dataset_manifest import (
     save_manifest,
 )
 from .scenario_design import DatasetSplit
+
+
+_SEAL_FILENAME = "locked_test_seal.json"
+_MANIFEST_FILENAMES = {
+    "locked_manifest_path": "locked_test_manifest.json",
+    "development_manifest_path": "development_manifest.json",
+}
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -35,6 +42,100 @@ def file_sha256(path: Path) -> str:
         ):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _validate_recorded_filename(
+    raw_path: Any,
+    *,
+    expected_filename: str,
+) -> None:
+    if not isinstance(raw_path, str) or not raw_path:
+        raise ValueError("Recorded artifact path must be a non-empty string")
+    portable = PurePosixPath(raw_path.replace("\\", "/"))
+    if ".." in portable.parts:
+        raise ValueError("Recorded artifact path contains traversal")
+    if portable.name != expected_filename:
+        raise ValueError(
+            "Recorded artifact path has the wrong filename: "
+            f"expected {expected_filename!r}"
+        )
+
+
+def _require_colocated_file(
+    *,
+    directory: Path,
+    filename: str,
+) -> Path:
+    path = directory / filename
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Required colocated artifact is missing: {path}"
+        )
+    return path
+
+
+def resolve_seal_manifest_path(
+    *,
+    seal_path: Path,
+    seal: dict[str, Any],
+    field: str,
+) -> Path:
+    """Resolve a manifest beside its seal without trusting provenance paths."""
+
+    if seal_path.name != _SEAL_FILENAME:
+        raise ValueError(
+            f"Locked-test seal must be named {_SEAL_FILENAME!r}"
+        )
+    try:
+        expected_filename = _MANIFEST_FILENAMES[field]
+        raw_path = seal[field]
+    except KeyError as error:
+        raise ValueError(
+            f"Locked-test seal is missing {field!r}"
+        ) from error
+    _validate_recorded_filename(
+        raw_path,
+        expected_filename=expected_filename,
+    )
+    return _require_colocated_file(
+        directory=seal_path.parent,
+        filename=expected_filename,
+    )
+
+
+def resolve_manifest_record_path(
+    *,
+    manifest_path: Path,
+    record: dict[str, Any],
+    kind: str,
+) -> Path:
+    """Resolve a scenario artifact from the current manifest location."""
+
+    if kind not in {"observable", "hidden"}:
+        raise ValueError(f"Unsupported scenario artifact kind: {kind!r}")
+    scenario_id = str(record["scenario_id"])
+    split = str(record["split"])
+    try:
+        DatasetSplit(split)
+    except ValueError as error:
+        raise ValueError(
+            f"Scenario record has an invalid split: {split!r}"
+        ) from error
+    expected_filename = f"{scenario_id}.{kind}.json"
+    _validate_recorded_filename(
+        record[f"{kind}_path"],
+        expected_filename=expected_filename,
+    )
+    manifest_directory = manifest_path.parent
+    dataset_root = (
+        manifest_directory.parent
+        if manifest_directory.name == "governance"
+        else manifest_directory
+    )
+    return _require_colocated_file(
+        directory=dataset_root / split,
+        filename=expected_filename,
+    )
 
 
 def create_locked_test_seal(
@@ -82,11 +183,13 @@ def create_locked_test_seal(
 
     file_hashes = {}
     for record in locked_records:
-        for kind, raw_path in (
-            ("observable", record.observable_path),
-            ("hidden", record.hidden_path),
-        ):
-            path = Path(raw_path)
+        record_payload = record.model_dump(mode="json")
+        for kind in ("observable", "hidden"):
+            path = resolve_manifest_record_path(
+                manifest_path=locked_manifest_path,
+                record=record_payload,
+                kind=kind,
+            )
             file_hashes[
                 f"{record.scenario_id}:{kind}"
             ] = file_sha256(path)
@@ -130,11 +233,22 @@ def verify_locked_test_seal(
     *,
     seal_path: Path,
 ) -> dict[str, Any]:
+    if seal_path.name != _SEAL_FILENAME:
+        raise ValueError(
+            f"Locked-test seal must be named {_SEAL_FILENAME!r}"
+        )
     seal = json.loads(
         seal_path.read_text(encoding="utf-8")
     )
-    locked_manifest_path = Path(
-        seal["locked_manifest_path"]
+    locked_manifest_path = resolve_seal_manifest_path(
+        seal_path=seal_path,
+        seal=seal,
+        field="locked_manifest_path",
+    )
+    resolve_seal_manifest_path(
+        seal_path=seal_path,
+        seal=seal,
+        field="development_manifest_path",
     )
     locked_payload = json.loads(
         locked_manifest_path.read_text(
@@ -150,15 +264,34 @@ def verify_locked_test_seal(
         raise ValueError(
             "Locked manifest no longer matches its seal"
         )
+    records = locked_payload.get("records")
+    if not isinstance(records, list):
+        raise ValueError("Locked manifest has no records list")
+    if (
+        seal.get("locked_split")
+        != DatasetSplit.LOCKED_TEST.value
+        or len(records) != seal.get("scenario_count")
+        or any(
+            record.get("split")
+            != DatasetSplit.LOCKED_TEST.value
+            for record in records
+        )
+    ):
+        raise ValueError(
+            "Locked-test split or scenario-count invariant is invalid"
+        )
     current_hashes = {}
-    for record in locked_payload["records"]:
-        for kind, raw_path in (
-            ("observable", record["observable_path"]),
-            ("hidden", record["hidden_path"]),
-        ):
+    for record in records:
+        for kind in ("observable", "hidden"):
             current_hashes[
                 f"{record['scenario_id']}:{kind}"
-            ] = file_sha256(Path(raw_path))
+            ] = file_sha256(
+                resolve_manifest_record_path(
+                    manifest_path=locked_manifest_path,
+                    record=record,
+                    kind=kind,
+                )
+            )
     expected_hashes = dict(seal["file_hashes"])
     if current_hashes != expected_hashes:
         raise ValueError(
@@ -207,6 +340,11 @@ def open_locked_test_once(
     seal = verify_locked_test_seal(
         seal_path=seal_path
     )
+    locked_manifest_path = resolve_seal_manifest_path(
+        seal_path=seal_path,
+        seal=seal,
+        field="locked_manifest_path",
+    )
     ledger = {
         "accessed_at": datetime.now(
             timezone.utc
@@ -226,9 +364,7 @@ def open_locked_test_once(
         encoding="utf-8",
     )
     return json.loads(
-        Path(
-            seal["locked_manifest_path"]
-        ).read_text(encoding="utf-8")
+        locked_manifest_path.read_text(encoding="utf-8")
     )
 
 

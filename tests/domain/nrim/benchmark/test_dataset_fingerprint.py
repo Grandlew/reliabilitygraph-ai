@@ -5,10 +5,15 @@ from app.domain.nrim.benchmark.dataset_fingerprint import (
     sha256_json,
     verify_dataset_fingerprint,
 )
+from app.domain.nrim.benchmark.dataset_loader import (
+    load_model_ready_manifest,
+)
 
 
 def make_manifest(tmp_path) -> dict:
-    window_path = tmp_path / "window_1.json"
+    window_dir = tmp_path / "train"
+    window_dir.mkdir()
+    window_path = window_dir / "window_1.json"
 
     window_path.write_text(
         json.dumps(
@@ -20,7 +25,7 @@ def make_manifest(tmp_path) -> dict:
         encoding="utf-8",
     )
 
-    return {
+    payload = {
         "dataset_name": "test",
         "dataset_version": "0.1.0",
         "source_dataset_version": "0.1.0",
@@ -40,6 +45,12 @@ def make_manifest(tmp_path) -> dict:
             }
         ],
     }
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(payload),
+        encoding="utf-8",
+    )
+    return load_model_ready_manifest(manifest_path)
 
 
 def test_json_hash_is_order_independent() -> None:
@@ -82,7 +93,7 @@ def test_changed_window_invalidates_fingerprint(
         manifest=manifest
     )
 
-    window_path = tmp_path / "window_1.json"
+    window_path = tmp_path / "train/window_1.json"
 
     window_path.write_text(
         json.dumps(

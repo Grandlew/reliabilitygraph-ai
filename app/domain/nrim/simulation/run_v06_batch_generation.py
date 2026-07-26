@@ -56,7 +56,10 @@ def main() -> None:
         manifest=manifest,
         path=manifest_path,
     )
-    audit = audit_manifest(manifest)
+    audit = audit_manifest(
+        manifest,
+        manifest_path=manifest_path,
+    )
     audit_path = output_dir / "audit.json"
     audit_path.write_text(
         json.dumps(audit, indent=2),

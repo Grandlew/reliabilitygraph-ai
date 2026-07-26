@@ -21,6 +21,9 @@ from .models import (
     BaselineName,
     WindowRankingResult,
 )
+from ..benchmark.dataset_loader import (
+    resolve_window_record_path,
+)
 from .ranking_metrics import (
     summarize_ranking_results,
 )
@@ -157,7 +160,12 @@ def load_split_windows(
     split: str,
 ) -> list[dict[str, Any]]:
     return [
-        load_json(record["path"])
+        load_json(
+            resolve_window_record_path(
+                manifest=manifest,
+                record=record,
+            )
+        )
         for record in manifest["records"]
         if str(record["split"]) == split
     ]

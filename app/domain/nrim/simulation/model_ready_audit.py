@@ -5,6 +5,10 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from app.domain.nrim.benchmark.dataset_loader import (
+    resolve_window_record_path,
+)
+
 from .sanitizer import (
     FORBIDDEN_RECURSIVE_KEYS,
     FORBIDDEN_TOP_LEVEL_KEYS,
@@ -232,8 +236,9 @@ def audit_model_ready_dataset(
             )
         ] += 1
 
-        path = Path(
-            manifest_record["path"]
+        path = resolve_window_record_path(
+            manifest=manifest,
+            record=manifest_record,
         )
 
         record = load_json(path)

@@ -1,0 +1,52 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Environments and local tooling
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+.python-version
+.uv-cache/
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Generated test and reproducibility evidence
+artifacts/
+test-results/
+**/test-results/
+*-junit.xml
+*-environment.txt
+junit*.xml
+test_evidence_manifest.json
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+~$*
+

@@ -10,6 +10,9 @@ from typing import Any, Sequence
 from app.domain.nrim.benchmark.dataset_loader import (
     load_model_ready_manifest,
 )
+from app.domain.nrim.simulation.locked_test_governance import (
+    resolve_manifest_record_path,
+)
 
 from .baseline_evaluator import load_split_windows
 from .incident_detector import (
@@ -55,6 +58,8 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _augment_operational_metadata(
     records: Sequence[dict[str, Any]],
+    *,
+    manifest_path: Path,
 ) -> dict[str, dict[str, Any]]:
     """Expose only deployment configuration from legacy hidden sidecars.
 
@@ -77,7 +82,13 @@ def _augment_operational_metadata(
         enriched = dict(record)
         missing = [name for name in allowed if name not in enriched]
         if missing:
-            hidden = _load_json(Path(str(record["hidden_path"])))
+            hidden = _load_json(
+                resolve_manifest_record_path(
+                    manifest_path=manifest_path,
+                    record=record,
+                    kind="hidden",
+                )
+            )
             environment = hidden["scenario_plan"]["environment"]
             for name in allowed:
                 enriched[name] = environment[name]
@@ -425,7 +436,8 @@ def main() -> None:
         / "diagnostic_experiments.json"
     )
     scenario_metadata = _augment_operational_metadata(
-        source_manifest["records"]
+        source_manifest["records"],
+        manifest_path=source_root / "manifest.json",
     )
 
     print("Loading immutable benchmark windows")

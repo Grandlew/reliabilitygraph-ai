@@ -1,0 +1,104 @@
+name: NRIM foundation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - "feat/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  UV_FROZEN: "1"
+  UV_PYTHON: "3.12"
+
+jobs:
+  foundation:
+    name: Foundation checks
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7.1.4
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Check lockfile
+        run: uv lock --check
+      - name: Synchronize frozen development environment
+        run: uv sync --frozen --group dev
+      - name: Enforce standalone import boundary
+        run: uv run python -m tools.project_checks imports
+      - name: Compile all application modules
+        run: uv run python -m compileall app
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Require a clean checkout
+        run: uv run python -m tools.project_checks clean-tree
+
+  collect:
+    name: Test collection
+    needs: foundation
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7.1.4
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Synchronize frozen development environment
+        run: uv sync --frozen --group dev
+      - name: Collect NRIM tests
+        run: uv run pytest --collect-only -q
+
+  test:
+    name: Full test and evidence
+    needs: collect
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7.1.4
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Synchronize frozen development environment
+        run: uv sync --frozen --group dev
+      - name: Confirm clean evidence input
+        run: uv run python -m tools.project_checks all
+      - name: Record collected test IDs
+        run: |
+          mkdir -p artifacts/test-evidence
+          uv run pytest --collect-only -q > artifacts/test-evidence/test-ids.txt
+      - name: Run full test suite with JUnit
+        run: >-
+          uv run pytest -q
+          --junitxml=artifacts/test-evidence/junit.xml
+      - name: Generate commit-bound evidence manifest
+        run: >-
+          uv run python -m tools.test_evidence generate
+          --junit artifacts/test-evidence/junit.xml
+          --test-ids artifacts/test-evidence/test-ids.txt
+          --output artifacts/test-evidence/manifest.json
+      - name: Verify evidence integrity
+        run: >-
+          uv run python -m tools.test_evidence verify
+          --manifest artifacts/test-evidence/manifest.json
+      - name: Upload generated test evidence
+        if: always()
+        # Actions artifacts are a diagnostic handoff, not the final long-term
+        # evidence store; verified evidence must be exported before expiry.
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nrim-test-evidence-${{ github.sha }}
+          path: artifacts/test-evidence/
+          if-no-files-found: warn
+          # Maximum without relying on a higher repository retention setting.
+          retention-days: 90

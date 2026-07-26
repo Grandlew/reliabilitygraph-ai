@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .dataset_loader import resolve_window_record_path
 from .models import DatasetFingerprint
 
 
@@ -61,7 +62,10 @@ def build_dataset_fingerprint(
 
     for record in records:
         window_id = str(record["window_id"])
-        path = Path(str(record["path"]))
+        path = resolve_window_record_path(
+            manifest=manifest,
+            record=record,
+        )
 
         file_hashes[window_id] = sha256_file(path)
 
