@@ -127,10 +127,36 @@ wrong filenames, traversal components, altered manifest content, altered
 scenario content, and changed commitment hashes remain rejected. No governed
 v0.6 JSON artifact was modified, regenerated, or re-signed.
 
-Regression coverage includes stale Windows and POSIX absolute provenance paths.
-Current local validation passes with 296 tests, including the relocated strict
-shadow parity test. Clean Ubuntu acceptance still requires an actual successful
-GitHub Actions run.
+A byte-level audit of all 480 locked-test scenario sidecars then identified a
+second, independent Ubuntu failure. All 240 `*.observable.json` files and all
+240 `*.hidden.json` files have LF-only Git blobs but were historically sealed
+from a CRLF Windows working tree. For every mismatch, the seal-expected SHA-256
+equals both the raw Windows working-tree SHA-256 and the SHA-256 produced by
+reconstructing CRLF from the Git blob. Conversely, the Git blob SHA-256 equals
+the SHA-256 produced by normalizing the working-tree bytes to LF. There were no
+exceptions or non-newline byte differences.
+
+The portable resolver independently mapped all 480 manifest records to 480
+unique, existing files under the relocated `locked_test` directory, with zero
+wrong targets. Path resolution therefore did not contribute to any hash
+mismatch.
+
+The root `.gitattributes` now restores the historically sealed working-tree
+bytes on both Windows and Ubuntu using only these governed text-artifact rules:
+
+```gitattributes
+app/domain/nrim/examples/simulation/day08_dataset_v06/locked_test/*.observable.json text eol=crlf
+app/domain/nrim/examples/simulation/day08_dataset_v06/locked_test/*.hidden.json text eol=crlf
+```
+
+No binary path is marked as text. Raw SHA-256 verification and the existing seal
+remain unchanged; there is no normalized-hash or multiple-hash fallback.
+Regression coverage verifies Git checkout conversion with both
+`core.autocrlf=false` and `core.autocrlf=true`, rejection of genuine content
+changes to CRLF-sealed bytes, and verification after physical relocation with
+stale Windows and POSIX provenance paths. Final local validation passes with
+297 tests, including the strict shadow parity test. Clean Ubuntu acceptance
+still requires an actual successful GitHub Actions run.
 
 ## Risks and limitations
 
