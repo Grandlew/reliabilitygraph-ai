@@ -1,0 +1,10 @@
+{
+  "compatibility": "frozen_v0.6_outputs_preserved",
+  "decision_count": 1,
+  "event_count": 8,
+  "events_sha256": "f2a931ee77e62bc61f41a1139d71fc3d2a2a78ca2ac71619f26e3832589023d8",
+  "input_sha256": "f2a931ee77e62bc61f41a1139d71fc3d2a2a78ca2ac71619f26e3832589023d8",
+  "schema_version": "0.7.2",
+  "snapshots_sha256": "82256f861211c1cd6881d018fdf4052480f050adafd10092f958e8a299b446ee",
+  "truth_status": "synthetic_software_evidence_only"
+}

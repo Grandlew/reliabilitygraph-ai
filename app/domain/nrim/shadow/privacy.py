@@ -101,7 +101,9 @@ def _walk(value: Any, path: tuple[str, ...] = ()):
         (str, bytes, bytearray),
     ):
         for index, child in enumerate(value):
-            yield from _walk(child, (*path, str(index)))
+            child_path = (*path, str(index))
+            yield child_path, child
+            yield from _walk(child, child_path)
 
 
 def assert_no_direct_identifiers(value: Any) -> None:

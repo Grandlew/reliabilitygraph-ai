@@ -1,0 +1,14 @@
+{
+  "files": {
+    "SYNTHETIC_ONLY.md": "f6aed3b87014cd10ad92208179c76bd1bcdc7f22d147eb686420b7ef19672633",
+    "expected/events.jsonl": "f2a931ee77e62bc61f41a1139d71fc3d2a2a78ca2ac71619f26e3832589023d8",
+    "expected/manifest.json": "ecf349ea6208b7a05db484f70859e410868f8d315e98b431426a1b839a9e47ae",
+    "expected/snapshots.jsonl": "82256f861211c1cd6881d018fdf4052480f050adafd10092f958e8a299b446ee",
+    "input/events.jsonl": "f2a931ee77e62bc61f41a1139d71fc3d2a2a78ca2ac71619f26e3832589023d8",
+    "schemas/manifest.json": "ddb37e2b4312e5aa30ea2f358ebe7ccb15dcf1cba28e6f8c8a3354c1e06233b7",
+    "scope.json": "be2d46b1a8da765eacfd04b6d3c4fe931a63c9dd31481382ae1c22e21a1a379a"
+  },
+  "portable_paths_only": true,
+  "schema_version": "0.7.2",
+  "truth_status": "synthetic_software_evidence_only"
+}

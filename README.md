@@ -84,3 +84,55 @@ uv run python -m tools.test_evidence verify \
 The PowerShell equivalent uses `New-Item -ItemType Directory -Force
 artifacts/test-evidence` for the first command and backticks for line
 continuation.
+
+## Immutable decision evidence (v0.7.2)
+
+The decision-evidence layer records why a frozen v0.6 decision existed without
+changing how that candidate decides. A decision stream contains strict,
+hash-chained events for the serving snapshot, support, data quality, frozen
+prediction, legal candidate universe, Stage 2 ranking when permitted,
+observational evidence obligations, and final seal. Later evidence is appended
+as an amendment or adjudication link; it never rewrites the original stream.
+
+`DecisionSnapshot` is a deterministic projection, not another mutable truth
+store. It supports:
+
+- `original`: the exact events sealed for the historical decision;
+- `as_known_at`: only events recorded by an explicit UTC knowledge time;
+- `latest`: the original plus all valid amendments;
+- `comparison`: original and latest with an event-level delta.
+
+Candidate scores and causal evidence remain separate. Evidence states distinguish
+support, contradiction, missingness, inapplicability, and unresolved evidence;
+they never claim observational evidence is causal proof. Unsupported or
+data-quality-blocked decisions remain `UNKNOWN`/`ESCALATE` and expose no Stage 2
+ranking.
+
+The checked-in fixture can be verified and replayed without network or
+operational access:
+
+```bash
+uv run python -m app.domain.nrim.shadow.golden_replay verify-fixture \
+  --directory app/domain/nrim/examples/shadow/decision_v0_7_2
+
+uv run python -m app.domain.nrim.shadow.golden_replay replay \
+  --input app/domain/nrim/examples/shadow/decision_v0_7_2/input/events.jsonl \
+  --output-dir /tmp/nrim-decision-replay
+```
+
+`create_decision_router` provides only read operations:
+
+- `GET /shadow/decisions`
+- `GET /shadow/decisions/{id}`
+- `GET /shadow/decisions/{id}/events`
+- `GET /shadow/decisions/{id}/evidence`
+- `GET /shadow/decisions/{id}/export`
+- `GET /shadow/decisions/stream`
+
+Reads never run inference. The router contains no ticket, notification,
+configuration, suppression, restart, remediation, active-query, or customer
+mutation capability.
+
+This release proves deterministic software behavior and synthetic replay only.
+It does not establish real IPTV accuracy, calibration, causal validity, alert
+burden, human utility, outage prevention, or production readiness.

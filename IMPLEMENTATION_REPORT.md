@@ -177,3 +177,99 @@ still requires an actual successful GitHub Actions run.
 All 20 requested implementation tasks are complete. All locally executable
 validation criteria pass with zero test failures, zero collection errors, and
 no hidden warnings. Clean Ubuntu execution remains pending the first CI run.
+
+## v0.7.2 decision-event and causal-evidence core
+
+Date: 2026-07-26
+
+Branch: `feat/v0.7.2-decision-evidence-core`
+
+Baseline commit: `98a7aa0eab267a3828d2b32797afb5ae7e3c24c3`
+
+### Outcome
+
+v0.7.2 adds immutable, typed decision-event streams around the frozen v0.6
+candidate. Every stream binds its information cutoff, truth time, knowledge
+time, payload hashes, predecessor chain, candidate universe, observational
+evidence obligations, final decision, and frozen prediction identity.
+Deterministic projections reconstruct original, as-known-at, latest, and
+comparison views. Late observations and adjudications append new events without
+rewriting original model output.
+
+The existing SQLite evidence authority now has a narrow decision-event adapter
+with transactional whole-stream append, idempotent retries, immutable triggers,
+ordered lookup, and append-only stream commits. The v0.6 adapter preserves the
+entire `PredictionEnvelope`, rank order, scalar precision, safety state,
+activation path, feature/schema/model/policy hashes, and blocked-route
+semantics. Candidate instrumentation is observational and does not enter the
+ranker or alter tensors.
+
+A deterministic replay command produces LF-only canonical JSONL, projections,
+and a digest-bound manifest. The checked-in synthetic fixture, versioned JSON
+Schemas, schema manifest, scope ledger, and frozen identities are independently
+verifiable. The FastAPI router exposes GET-only list, detail, event, evidence,
+export, and resumable SSE views; reads never invoke inference.
+
+### Test-first evidence
+
+The representative red-phase test
+`test_canonical_json_rejects_unsafe_process_dependent_values` failed twice
+before implementation because the prior canonicalizer silently converted bytes
+and unordered sets to process-dependent strings. The hardened canonicalizer now
+rejects both, normalizes aware datetimes to UTC, rejects naive/non-finite values,
+and binds contract type and schema version into typed commitments.
+
+The focused v0.7.2 suite covers strict contracts, payload variants, bitemporal
+boundaries, hashing, chain tamper/splice rejection, candidate exclusions,
+evidence alternatives, append-only storage, projections and amendments, v0.6
+compatibility, replay/restart/relocation, schema drift, read-only HTTP/SSE, PII,
+dependency direction, and forbidden capabilities.
+
+### Validation evidence
+
+Commands were run from the repository root with the frozen Python 3.12
+environment:
+
+```text
+uv run pytest --collect-only -q
+462 tests collected
+
+uv run pytest -q
+462 passed in 66.09s
+
+uv run pytest tests/domain/nrim/shadow/test_real_feature_parity.py -q
+1 passed in 11.32s
+
+uv lock --check
+Resolved 24 packages in 2ms
+
+uv run python -m tools.project_checks imports
+project check passed: imports
+
+uv run python -m compileall app
+Completed successfully
+```
+
+The v0.7.2 focused suite contributes 165 passing cases over the 297-test
+baseline. The sealed synthetic fixture and generated exchange contracts have
+these handoff identities:
+
+- Fixture manifest: `56aa79401d77f00a4e933e0151c1b7637b618a65f83f1e73babceddb992a5c62`
+- Schema manifest: `ddb37e2b4312e5aa30ea2f358ebe7ccb15dcf1cba28e6f8c8a3354c1e06233b7`
+- Canonical event JSONL: `f2a931ee77e62bc61f41a1139d71fc3d2a2a78ca2ac71619f26e3832589023d8`
+- Canonical snapshot JSONL: `82256f861211c1cd6881d018fdf4052480f050adafd10092f958e8a299b446ee`
+
+### Compatibility and authority statement
+
+No governed v0.6 artifact, bundle, threshold, label, temporal policy, support
+rule, feature, tensor, probability, rank, or activation decision was changed.
+No dependency was added. No operational query, ticket, notification,
+configuration write, alarm suppression, restart, remediation, customer action,
+GNN, graph database, broker, Kubernetes, MPC, or LLM authority was introduced.
+
+This remains a read-only `CANDIDATE`. Passing software and synthetic replay
+tests do not establish real IPTV calibration, causal validity, alert burden,
+human utility, production efficacy, outage prevention, remedy safety, ISP
+transfer, cybersecurity readiness, or cross-sector generality. Real collector
+and topology acceptance, approved historical replay, independent evidence
+custody, dress rehearsal, and prospective silent-pilot gates remain closed.
