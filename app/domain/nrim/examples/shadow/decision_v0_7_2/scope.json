@@ -1,0 +1,37 @@
+{
+  "allowed_capabilities": [
+    "append_only_decision_events",
+    "deterministic_projection",
+    "deterministic_schema_export",
+    "read_only_http_get",
+    "synthetic_golden_replay",
+    "v0.6_compatibility_wrapping"
+  ],
+  "baseline_commit": "98a7aa0eab267a3828d2b32797afb5ae7e3c24c3",
+  "candidate_state": "candidate",
+  "forbidden_capabilities": [
+    "active_query",
+    "alarm_suppression",
+    "automated_remediation",
+    "configuration_write",
+    "customer_notification",
+    "gnn",
+    "graph_database",
+    "kubernetes",
+    "llm_decision_authority",
+    "message_broker",
+    "model_or_threshold_tuning",
+    "restart",
+    "ticket_write"
+  ],
+  "frozen_identities": {
+    "bundle_manifest_sha256": "07bfab9d935e205e9372121622d674f03ab51e81c65f0cd4e063387b7baa4fb9",
+    "bundle_sha256": "9767bc9f3184a9e68fe99e0a31c5593a610c9dbd3b524dfa155c8bb53091ecf7",
+    "feature_schema_sha256": "b2cb5de814d319934e80f4eb9d474ac2831fed9b8db18077cc61d56185c6e9e7",
+    "policy_sha256": "f78e0bb65a39364b53cf5888d24455158090d056a6fd31a90df116f7fb85c036",
+    "prediction_envelope_schema_sha256": "a6d6a276bf89a76a8d4418664462583aeb3a7d060ad589baa817abaf8953f75c"
+  },
+  "schema_version": "0.7.2",
+  "starting_test_count": 297,
+  "truth_status": "synthetic_software_evidence_only"
+}

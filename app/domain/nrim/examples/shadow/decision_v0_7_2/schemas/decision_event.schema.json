@@ -1,0 +1,1322 @@
+{
+  "$defs": {
+    "AdjudicationLinkedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "adjudication_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Adjudication Id",
+          "type": "string"
+        },
+        "adjudication_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Adjudication Sha256",
+          "type": "string"
+        },
+        "adjudication_version": {
+          "exclusiveMinimum": 0,
+          "title": "Adjudication Version",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "adjudication_linked",
+          "default": "adjudication_linked",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reviewed_decision_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Reviewed Decision Ids",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "adjudication_id",
+        "adjudication_version",
+        "reviewed_decision_ids",
+        "adjudication_sha256"
+      ],
+      "title": "AdjudicationLinkedPayload",
+      "type": "object"
+    },
+    "AlternativeHypothesis": {
+      "additionalProperties": false,
+      "properties": {
+        "alternative_candidate_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Alternative Candidate Pseudonym",
+          "type": "string"
+        },
+        "candidate_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Candidate Pseudonym",
+          "type": "string"
+        },
+        "discriminator_obligation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Discriminator Obligation Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_pseudonym",
+        "alternative_candidate_pseudonym",
+        "discriminator_obligation_ids"
+      ],
+      "title": "AlternativeHypothesis",
+      "type": "object"
+    },
+    "AmendmentReason": {
+      "enum": [
+        "late_observation",
+        "adjudication",
+        "correction",
+        "source_reissue"
+      ],
+      "title": "AmendmentReason",
+      "type": "string"
+    },
+    "CandidateCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "adjudication_reference": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Adjudication Reference",
+          "type": "string"
+        },
+        "denominator": {
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "eligible_true_cause_count": {
+          "minimum": 0,
+          "title": "Eligible True Cause Count",
+          "type": "integer"
+        },
+        "included_true_cause_count": {
+          "minimum": 0,
+          "title": "Included True Cause Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "eligible_true_cause_count",
+        "included_true_cause_count",
+        "denominator",
+        "adjudication_reference"
+      ],
+      "title": "CandidateCoverage",
+      "type": "object"
+    },
+    "CandidateExclusion": {
+      "additionalProperties": false,
+      "properties": {
+        "component_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Component Pseudonym",
+          "type": "string"
+        },
+        "rationale_code": {
+          "pattern": "^[a-z0-9][a-z0-9_.-]{0,127}$",
+          "title": "Rationale Code",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "#/$defs/CandidateExclusionReason"
+        }
+      },
+      "required": [
+        "component_pseudonym",
+        "reason",
+        "rationale_code"
+      ],
+      "title": "CandidateExclusion",
+      "type": "object"
+    },
+    "CandidateExclusionReason": {
+      "enum": [
+        "not_applicable",
+        "invalid_topology_version",
+        "outside_support",
+        "data_unavailable",
+        "policy_excluded",
+        "generator_limit",
+        "unresolved"
+      ],
+      "title": "CandidateExclusionReason",
+      "type": "string"
+    },
+    "CandidateGeneratorIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Algorithm Version",
+          "type": "string"
+        },
+        "configuration_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Configuration Sha256",
+          "type": "string"
+        },
+        "feature_schema_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Feature Schema Sha256",
+          "type": "string"
+        },
+        "policy_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Policy Sha256",
+          "type": "string"
+        },
+        "topology_snapshot_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Topology Snapshot Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "algorithm_version",
+        "topology_snapshot_sha256",
+        "feature_schema_sha256",
+        "policy_sha256",
+        "configuration_sha256"
+      ],
+      "title": "CandidateGeneratorIdentity",
+      "type": "object"
+    },
+    "CandidateSet": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CandidateCoverage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "decision_cutoff_utc": {
+          "format": "date-time",
+          "title": "Decision Cutoff Utc",
+          "type": "string"
+        },
+        "exclusions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CandidateExclusion"
+          },
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "generator": {
+          "$ref": "#/$defs/CandidateGeneratorIdentity"
+        },
+        "included_candidates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Included Candidates",
+          "type": "array"
+        },
+        "schema_version": {
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_cutoff_utc",
+        "included_candidates",
+        "generator"
+      ],
+      "title": "CandidateSet",
+      "type": "object"
+    },
+    "CandidateSetProducedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_set": {
+          "$ref": "#/$defs/CandidateSet"
+        },
+        "kind": {
+          "const": "candidate_set_produced",
+          "default": "candidate_set_produced",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_set"
+      ],
+      "title": "CandidateSetProducedPayload",
+      "type": "object"
+    },
+    "CausalEvidenceProducedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_set": {
+          "$ref": "#/$defs/CausalEvidenceSet"
+        },
+        "kind": {
+          "const": "causal_evidence_produced",
+          "default": "causal_evidence_produced",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_set"
+      ],
+      "title": "CausalEvidenceProducedPayload",
+      "type": "object"
+    },
+    "CausalEvidenceSet": {
+      "additionalProperties": false,
+      "properties": {
+        "alternatives": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AlternativeHypothesis"
+          },
+          "title": "Alternatives",
+          "type": "array"
+        },
+        "ambiguous": {
+          "default": false,
+          "title": "Ambiguous",
+          "type": "boolean"
+        },
+        "obligations": {
+          "items": {
+            "$ref": "#/$defs/EvidenceObligation"
+          },
+          "title": "Obligations",
+          "type": "array"
+        },
+        "ranked_candidates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ranked Candidates",
+          "type": "array"
+        },
+        "schema_version": {
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "unresolved_reason_code": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9_.-]{0,127}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unresolved Reason Code"
+        }
+      },
+      "required": [
+        "ranked_candidates",
+        "obligations"
+      ],
+      "title": "CausalEvidenceSet",
+      "type": "object"
+    },
+    "DataQualityAssessedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability_summary": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Applicability Summary",
+          "type": "object"
+        },
+        "available_observation_count": {
+          "minimum": 0,
+          "title": "Available Observation Count",
+          "type": "integer"
+        },
+        "expected_observation_count": {
+          "minimum": 0,
+          "title": "Expected Observation Count",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "data_quality_assessed",
+          "default": "data_quality_assessed",
+          "title": "Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/DataQualityState"
+        },
+        "warning_codes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Warning Codes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "state",
+        "expected_observation_count",
+        "available_observation_count"
+      ],
+      "title": "DataQualityAssessedPayload",
+      "type": "object"
+    },
+    "DataQualityState": {
+      "enum": [
+        "accepted",
+        "degraded",
+        "blocked"
+      ],
+      "title": "DataQualityState",
+      "type": "string"
+    },
+    "DecisionEventType": {
+      "enum": [
+        "snapshot_sealed",
+        "support_assessed",
+        "data_quality_assessed",
+        "incident_evidence_produced",
+        "candidate_set_produced",
+        "ranking_produced",
+        "causal_evidence_produced",
+        "decision_sealed",
+        "evidence_amended",
+        "adjudication_linked"
+      ],
+      "title": "DecisionEventType",
+      "type": "string"
+    },
+    "DecisionSealedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_path": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Activation Path",
+          "type": "string"
+        },
+        "chain_head_before_seal": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Chain Head Before Seal",
+          "type": "string"
+        },
+        "final_state": {
+          "$ref": "#/$defs/DecisionState"
+        },
+        "kind": {
+          "const": "decision_sealed",
+          "default": "decision_sealed",
+          "title": "Kind",
+          "type": "string"
+        },
+        "prediction_envelope_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Prediction Envelope Sha256",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "final_state",
+        "activation_path",
+        "prediction_envelope_sha256",
+        "chain_head_before_seal"
+      ],
+      "title": "DecisionSealedPayload",
+      "type": "object"
+    },
+    "DecisionState": {
+      "enum": [
+        "healthy",
+        "suspect",
+        "incident",
+        "recovery",
+        "unknown",
+        "escalate",
+        "data_quality_escalation"
+      ],
+      "title": "DecisionState",
+      "type": "string"
+    },
+    "EvidenceAmendedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "amendment_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Amendment Sha256",
+          "type": "string"
+        },
+        "evidence_references": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence References",
+          "type": "array"
+        },
+        "kind": {
+          "const": "evidence_amended",
+          "default": "evidence_amended",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason_code": {
+          "$ref": "#/$defs/AmendmentReason"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "target_event_id": {
+          "pattern": "^decision_event_[0-9a-f]{32}$",
+          "title": "Target Event Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_event_id",
+        "reason_code",
+        "evidence_references",
+        "amendment_sha256"
+      ],
+      "title": "EvidenceAmendedPayload",
+      "type": "object"
+    },
+    "EvidenceApplicability": {
+      "enum": [
+        "applicable",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "EvidenceApplicability",
+      "type": "string"
+    },
+    "EvidenceObligation": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "$ref": "#/$defs/EvidenceApplicability"
+        },
+        "candidate_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Candidate Pseudonym",
+          "type": "string"
+        },
+        "expected_direction": {
+          "$ref": "#/$defs/ExpectedDirection"
+        },
+        "mechanism_code": {
+          "pattern": "^[a-z0-9][a-z0-9_.-]{0,127}$",
+          "title": "Mechanism Code",
+          "type": "string"
+        },
+        "obligation_id": {
+          "pattern": "^obligation_[0-9a-f]{16,64}$",
+          "title": "Obligation Id",
+          "type": "string"
+        },
+        "observed_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Value"
+        },
+        "rationale_code": {
+          "pattern": "^[a-z0-9][a-z0-9_.-]{0,127}$",
+          "title": "Rationale Code",
+          "type": "string"
+        },
+        "source_event_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Event Ids",
+          "type": "array"
+        },
+        "standardized_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standardized Value"
+        },
+        "status": {
+          "$ref": "#/$defs/EvidenceStatus"
+        },
+        "time_relation": {
+          "$ref": "#/$defs/EvidenceTimeRelation"
+        }
+      },
+      "required": [
+        "obligation_id",
+        "candidate_pseudonym",
+        "mechanism_code",
+        "expected_direction",
+        "time_relation",
+        "applicability",
+        "status",
+        "rationale_code"
+      ],
+      "title": "EvidenceObligation",
+      "type": "object"
+    },
+    "EvidenceStatus": {
+      "enum": [
+        "supports",
+        "contradicts",
+        "missing",
+        "not_applicable",
+        "unresolved"
+      ],
+      "title": "EvidenceStatus",
+      "type": "string"
+    },
+    "EvidenceTimeRelation": {
+      "enum": [
+        "precedes",
+        "coincides",
+        "follows",
+        "window_aggregate",
+        "unresolved"
+      ],
+      "title": "EvidenceTimeRelation",
+      "type": "string"
+    },
+    "ExpectedDirection": {
+      "enum": [
+        "increases",
+        "decreases",
+        "present",
+        "absent",
+        "unresolved"
+      ],
+      "title": "ExpectedDirection",
+      "type": "string"
+    },
+    "IncidentEvidenceProducedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "incident_evidence_produced",
+          "default": "incident_evidence_produced",
+          "title": "Kind",
+          "type": "string"
+        },
+        "prediction": {
+          "$ref": "#/$defs/PredictionEnvelope"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "prediction"
+      ],
+      "title": "IncidentEvidenceProducedPayload",
+      "type": "object"
+    },
+    "PredictionEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_path": {
+          "maxLength": 32,
+          "minLength": 1,
+          "title": "Activation Path",
+          "type": "string"
+        },
+        "causal_consistency": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Causal Consistency"
+        },
+        "counterfactual_policy_states": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DecisionState"
+          },
+          "title": "Counterfactual Policy States",
+          "type": "object"
+        },
+        "created_at_utc": {
+          "format": "date-time",
+          "title": "Created At Utc",
+          "type": "string"
+        },
+        "data_quality_state": {
+          "$ref": "#/$defs/DataQualityState"
+        },
+        "data_quality_warnings": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Data Quality Warnings",
+          "type": "array"
+        },
+        "decision_cutoff_utc": {
+          "format": "date-time",
+          "title": "Decision Cutoff Utc",
+          "type": "string"
+        },
+        "deployment_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Deployment Pseudonym",
+          "type": "string"
+        },
+        "dual_path_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DecisionState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "episode_state_after": {
+          "$ref": "#/$defs/DecisionState"
+        },
+        "episode_state_before": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DecisionState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fast_path_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DecisionState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "feature_schema_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Feature Schema Hash",
+          "type": "string"
+        },
+        "feature_vector_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Feature Vector Hash"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/DecisionState"
+        },
+        "healthy_residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Healthy Residual"
+        },
+        "impact_families": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Impact Families",
+          "type": "array"
+        },
+        "impact_score": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Impact Score"
+        },
+        "inference_latency_ms": {
+          "minimum": 0.0,
+          "title": "Inference Latency Ms",
+          "type": "number"
+        },
+        "infrastructure_version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Infrastructure Version",
+          "type": "string"
+        },
+        "model_bundle_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Model Bundle Hash",
+          "type": "string"
+        },
+        "operational_profile_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Operational Profile Hash",
+          "type": "string"
+        },
+        "policy_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Policy Hash",
+          "type": "string"
+        },
+        "prediction_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Prediction Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "0.7.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "slow_path_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DecisionState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "slow_path_statistic": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Slow Path Statistic"
+        },
+        "snapshot_mode": {
+          "$ref": "#/$defs/SnapshotMode"
+        },
+        "stage1_probability": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stage1 Probability"
+        },
+        "stage2_top_k": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RankedCause"
+          },
+          "title": "Stage2 Top K",
+          "type": "array"
+        },
+        "supersedes_prediction_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supersedes Prediction Id"
+        },
+        "support_axes": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Support Axes",
+          "type": "object"
+        },
+        "support_score": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Support Score"
+        },
+        "telemetry_snapshot_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Telemetry Snapshot Hash",
+          "type": "string"
+        },
+        "topology_snapshot_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Topology Snapshot Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "prediction_id",
+        "decision_cutoff_utc",
+        "deployment_pseudonym",
+        "snapshot_mode",
+        "telemetry_snapshot_hash",
+        "topology_snapshot_hash",
+        "operational_profile_hash",
+        "feature_schema_hash",
+        "model_bundle_hash",
+        "policy_hash",
+        "episode_state_after",
+        "final_decision",
+        "activation_path",
+        "data_quality_state",
+        "inference_latency_ms",
+        "infrastructure_version",
+        "created_at_utc"
+      ],
+      "title": "PredictionEnvelope",
+      "type": "object"
+    },
+    "RankedCause": {
+      "additionalProperties": false,
+      "properties": {
+        "component_pseudonym": {
+          "maxLength": 128,
+          "minLength": 12,
+          "title": "Component Pseudonym",
+          "type": "string"
+        },
+        "evidence": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Evidence",
+          "type": "object"
+        },
+        "score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "component_pseudonym",
+        "score"
+      ],
+      "title": "RankedCause",
+      "type": "object"
+    },
+    "RankingProducedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ranking_produced",
+          "default": "ranking_produced",
+          "title": "Kind",
+          "type": "string"
+        },
+        "ranker_identity_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Ranker Identity Sha256",
+          "type": "string"
+        },
+        "ranking": {
+          "items": {
+            "$ref": "#/$defs/RankedCause"
+          },
+          "minItems": 1,
+          "title": "Ranking",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ranking",
+        "ranker_identity_sha256"
+      ],
+      "title": "RankingProducedPayload",
+      "type": "object"
+    },
+    "SnapshotMode": {
+      "enum": [
+        "prospective",
+        "late_data_replay",
+        "golden_replay"
+      ],
+      "title": "SnapshotMode",
+      "type": "string"
+    },
+    "SnapshotSealedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "snapshot_sealed",
+          "default": "snapshot_sealed",
+          "title": "Kind",
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/$defs/SnapshotMode"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "snapshot_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Snapshot Sha256",
+          "type": "string"
+        },
+        "source_digests": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Source Digests",
+          "type": "object"
+        },
+        "watermark_utc": {
+          "format": "date-time",
+          "title": "Watermark Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "snapshot_id",
+        "snapshot_sha256",
+        "mode",
+        "watermark_utc",
+        "source_digests"
+      ],
+      "title": "SnapshotSealedPayload",
+      "type": "object"
+    },
+    "SupportAssessedPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "axes": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Axes",
+          "type": "object"
+        },
+        "kind": {
+          "const": "support_assessed",
+          "default": "support_assessed",
+          "title": "Kind",
+          "type": "string"
+        },
+        "profile_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Profile Sha256",
+          "type": "string"
+        },
+        "reason_codes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Reason Codes",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "0.7.2",
+          "default": "0.7.2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/SupportState"
+        }
+      },
+      "required": [
+        "state",
+        "profile_sha256"
+      ],
+      "title": "SupportAssessedPayload",
+      "type": "object"
+    },
+    "SupportState": {
+      "enum": [
+        "in_support",
+        "limited",
+        "unsupported"
+      ],
+      "title": "SupportState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "causation_event_id": {
+      "anyOf": [
+        {
+          "pattern": "^decision_event_[0-9a-f]{32}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Causation Event Id"
+    },
+    "correlation_id": {
+      "maxLength": 128,
+      "minLength": 8,
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "decision_cutoff_utc": {
+      "format": "date-time",
+      "title": "Decision Cutoff Utc",
+      "type": "string"
+    },
+    "decision_id": {
+      "pattern": "^decision_[0-9a-z_.-]{8,120}$",
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "deployment_pseudonym": {
+      "maxLength": 128,
+      "minLength": 12,
+      "title": "Deployment Pseudonym",
+      "type": "string"
+    },
+    "event_id": {
+      "pattern": "^decision_event_[0-9a-f]{32}$",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Event Sha256",
+      "type": "string"
+    },
+    "event_time_utc": {
+      "format": "date-time",
+      "title": "Event Time Utc",
+      "type": "string"
+    },
+    "event_type": {
+      "$ref": "#/$defs/DecisionEventType"
+    },
+    "payload": {
+      "discriminator": {
+        "mapping": {
+          "adjudication_linked": "#/$defs/AdjudicationLinkedPayload",
+          "candidate_set_produced": "#/$defs/CandidateSetProducedPayload",
+          "causal_evidence_produced": "#/$defs/CausalEvidenceProducedPayload",
+          "data_quality_assessed": "#/$defs/DataQualityAssessedPayload",
+          "decision_sealed": "#/$defs/DecisionSealedPayload",
+          "evidence_amended": "#/$defs/EvidenceAmendedPayload",
+          "incident_evidence_produced": "#/$defs/IncidentEvidenceProducedPayload",
+          "ranking_produced": "#/$defs/RankingProducedPayload",
+          "snapshot_sealed": "#/$defs/SnapshotSealedPayload",
+          "support_assessed": "#/$defs/SupportAssessedPayload"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SnapshotSealedPayload"
+        },
+        {
+          "$ref": "#/$defs/SupportAssessedPayload"
+        },
+        {
+          "$ref": "#/$defs/DataQualityAssessedPayload"
+        },
+        {
+          "$ref": "#/$defs/IncidentEvidenceProducedPayload"
+        },
+        {
+          "$ref": "#/$defs/CandidateSetProducedPayload"
+        },
+        {
+          "$ref": "#/$defs/RankingProducedPayload"
+        },
+        {
+          "$ref": "#/$defs/CausalEvidenceProducedPayload"
+        },
+        {
+          "$ref": "#/$defs/DecisionSealedPayload"
+        },
+        {
+          "$ref": "#/$defs/EvidenceAmendedPayload"
+        },
+        {
+          "$ref": "#/$defs/AdjudicationLinkedPayload"
+        }
+      ],
+      "title": "Payload"
+    },
+    "payload_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Payload Sha256",
+      "type": "string"
+    },
+    "previous_event_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Previous Event Sha256",
+      "type": "string"
+    },
+    "recorded_at_utc": {
+      "format": "date-time",
+      "title": "Recorded At Utc",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.7.2",
+      "default": "0.7.2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "stream_sequence": {
+      "exclusiveMinimum": 0,
+      "title": "Stream Sequence",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "deployment_pseudonym",
+    "decision_id",
+    "decision_cutoff_utc",
+    "event_time_utc",
+    "recorded_at_utc",
+    "stream_sequence",
+    "correlation_id",
+    "payload",
+    "payload_sha256",
+    "previous_event_sha256",
+    "event_sha256"
+  ],
+  "title": "DecisionEvent",
+  "type": "object"
+}

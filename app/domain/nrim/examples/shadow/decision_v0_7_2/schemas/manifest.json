@@ -1,0 +1,15 @@
+{
+  "compatibility": {
+    "frozen_v0.6": "wrapped_without_reinterpretation",
+    "unknown_major_versions": "rejected"
+  },
+  "schema_version": "0.7.2",
+  "schemas": {
+    "candidate_set.schema.json": "c2a0494b9314e427554d9dd1e421bf249ad4d97dec009cb185377c87def1f7e0",
+    "causal_evidence_set.schema.json": "a922c759f410e0379acf718f2ee05689ae7fe203e150be4d70e0b1e8fb714533",
+    "decision_comparison.schema.json": "ced0bfee1ed120de6c5af848bf64bf974e10a713dfffd7bb3f574a4def04ca6e",
+    "decision_event.schema.json": "cd261a6e29bb5efea14e36ad2992ce560db3140d6a536cab66162b156f1aa549",
+    "decision_snapshot.schema.json": "863c8cb90aeb3ea6d56b58d6062e7d2810081b58913cb1666e1f2444d75dea35"
+  },
+  "truth_status": "synthetic_software_contracts_only"
+}

@@ -17,10 +17,20 @@ from .contracts import (
     TopologyComponent,
     TopologyEdge,
 )
+from .decision_events import DecisionEvent, DecisionEventType
+from .decision_projection import (
+    DecisionComparison,
+    DecisionSnapshot,
+    project_decision,
+)
 
 __all__ = [
     "Applicability",
     "DecisionState",
+    "DecisionComparison",
+    "DecisionEvent",
+    "DecisionEventType",
+    "DecisionSnapshot",
     "IncidentAdjudication",
     "ObservationQuality",
     "PredictionEnvelope",
@@ -28,4 +38,5 @@ __all__ = [
     "TelemetryObservation",
     "TopologyComponent",
     "TopologyEdge",
+    "project_decision",
 ]
