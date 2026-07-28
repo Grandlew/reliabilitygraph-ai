@@ -71,6 +71,7 @@ from .topology import (
     TopologyHistory,
 )
 from .trusted_signers import TrustedSignerRegistry
+from .v06_stage2_parity import build_v06_stage2_example_seal
 
 
 BASE_TIME = datetime(2026, 1, 2, 12, 0, tzinfo=timezone.utc)
@@ -464,6 +465,10 @@ def generate_fixture(root: Path) -> dict[str, object]:
     root = root.resolve()
     root.mkdir(parents=True, exist_ok=True)
     request = build_synthetic_request()
+    _write_json(
+        root / "parity/v06_stage2_example.seal.json",
+        build_v06_stage2_example_seal().model_dump(mode="json"),
+    )
     records = build_synthetic_records(request)
     topology = build_synthetic_topology()
     (root / "SYNTHETIC_ONLY.md").write_bytes(

@@ -56,6 +56,17 @@ snapshot, applied captures, applicability decision and temporal rule. Required
 coverage is derived from this lineage; zero governed Stage 2 cells yields zero
 coverage. No inference or tuning path is present.
 
+A repository-relative parity seal also binds one locked v0.6 source scenario
+to its exported model-ready Stage 2 window. The bound example contains 29
+ordered candidates and the complete 114-feature frozen tensor, including seven
+applicability and seven missingness columns, with an absolute tolerance of
+`1e-12`. IPTV-P0 reconstructs this example through the frozen v0.6 feature
+builder. Acceptance requires exact candidate and feature order, exact shape and
+masks, and numerical parity within the declared tolerance. Regression controls
+reject omitted or reordered features, candidate reordering, node-row
+broadcasting, mask changes and out-of-tolerance values. Evidence after either
+the event-time or knowledge-time cutoff is excluded.
+
 `QualificationMetrics` has been removed. The request instead carries frozen,
 immutable measured-result objects containing individual semantic mappings,
 positive and mutation controls, topology cutoffs and mutations, feature

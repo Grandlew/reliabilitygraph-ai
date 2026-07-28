@@ -43,6 +43,19 @@ zero governed cells yields zero coverage. `UNKNOWN`, `ESCALATE` and `BLOCKED`
 routes remain conservative, and qualification additionally requires a
 `COMPLETE` reconstruction state.
 
+The follow-up parity hardening binds locked scenario
+`scenario_0004e9f6aafd` to exported v0.6 window
+`window_68fe47e9b82a3632` through a repository-relative canonical seal. The
+example fixes 29 candidate nodes, 114 ordered Stage 2 features, seven
+applicability masks, seven missingness masks, both bitemporal cutoffs and an
+absolute numerical tolerance of `1e-12`. The IPTV-P0 compatibility
+reconstructor delegates to the frozen v0.6 feature builder without invoking
+inference. Tests require exact candidate order, feature order, tensor shape and
+masks plus values within tolerance. Negative controls cover feature omission
+and reordering, candidate reordering, cross-node broadcasting, mask mutation
+and out-of-tolerance values. Additional high-value observations after either
+cutoff leave the tensor unchanged.
+
 `QualificationMetrics` and all request-level authoritative gate scalars were
 removed. Frozen measured-result contracts now carry the individual semantic,
 mutation, topology-cutoff, feature, outcome, privacy, tuning, repeated-run and
@@ -110,14 +123,15 @@ uv run python -m compileall app tests tools
 Completed successfully
 
 uv run pytest tests/domain/nrim/shadow/iptv_p0 \
+  tests/domain/nrim/shadow/test_real_feature_parity.py \
   tests/domain/nrim/shadow/test_iptv_p0_red_phase.py -q
-285 passed in 5.09s
+297 passed in 17.85s
 
 uv run pytest -q
-747 passed in 86.12s
+758 passed in 71.33s
 
 uv run pytest tests/domain/nrim/shadow/test_real_feature_parity.py -q
-1 passed in 15.03s
+1 passed in 9.72s
 
 uv run python -m app.domain.nrim.shadow.iptv_p0.qualification verify \
   --directory app/domain/nrim/examples/shadow/iptv_p0_v0_8/expected \
@@ -131,9 +145,13 @@ advisories for modified source files).
 ```
 
 The v0.8 fixture manifest SHA-256 is
-`3ca73d991b05db3b7f68f61c9d7f595e1082a92039265a87fb2451e0f4d0d5cd`.
+`dbb0243b9daf8b986be27bb0f31c479ce2e3407302aeb00d2728350c21cca895`.
 The qualification evidence manifest SHA-256 is
 `a80afad03bcaf11c008a1c719acf64627895532529bcd1c31564894056993f61`.
+The sealed v0.6 Stage 2 parity example file SHA-256 is
+`250db6d749b5fafb2cbe16c1010796e2ec9250879e19070027a1523877177ab0`;
+its canonical internal commitment is
+`fff25d59fbd6ceafe15bb7d0ce89d6a9ce806059080590fc3d567939034982b9`.
 
 Date: 2026-07-24  
 Branch: `feat/standalone-foundation`  
