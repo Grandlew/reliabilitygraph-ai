@@ -57,6 +57,22 @@ class FeatureLineage(StrictModel):
     applicability_evidence: str
 
 
+class NodeFeatureLineage(StrictModel):
+    topology_node_id: str
+    observation_component_pseudonym: str | None
+    feature_name: str
+    state: FeatureEvidenceState
+    source_ids: tuple[str, ...] = ()
+    source_record_sha256: tuple[str, ...] = ()
+    event_cutoff_utc: datetime
+    knowledge_cutoff_utc: datetime
+    topology_snapshot_sha256: str
+    topology_capture_ids: tuple[str, ...]
+    required_for_gate: bool
+    applicability_evidence: str
+    temporal_evidence: str
+
+
 class TensorEvidence(StrictModel):
     tensor_name: str
     feature_names: tuple[str, ...]
@@ -102,9 +118,91 @@ class FeatureDryRunResult(StrictModel):
     residual: TensorEvidence
     stage2: TensorEvidence
     lineage: tuple[FeatureLineage, ...]
-    required_feature_fraction: float = Field(ge=0.0, le=1.0)
-    inference_call_count: int = Field(default=0, ge=0, le=0)
-    tuning_event_count: int = Field(default=0, ge=0, le=0)
+    per_node_lineage: tuple[NodeFeatureLineage, ...]
+    inference_call_sha256: tuple[str, ...] = ()
+    tuning_event_sha256: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_node_evidence(self):
+        expected = self.stage2.shape[0] * self.stage2.shape[1]
+        if len(self.per_node_lineage) != expected:
+            raise ValueError("Stage 2 lineage does not cover every tensor cell")
+        if self.stage2.shape[1] != len(self.stage2.feature_names):
+            raise ValueError("Stage 2 feature axis differs from its schema")
+        node_groups: list[str] = []
+        for index, (value, lineage) in enumerate(
+            zip(
+                self.stage2.values,
+                self.per_node_lineage,
+                strict=True,
+            )
+        ):
+            expected_feature = self.stage2.feature_names[
+                index % self.stage2.shape[1]
+            ]
+            if lineage.feature_name != expected_feature:
+                raise ValueError("Stage 2 lineage feature order differs")
+            if (value is not None) != (
+                lineage.state is FeatureEvidenceState.OBSERVED
+            ):
+                raise ValueError("Stage 2 values and lineage states differ")
+            if lineage.required_for_gate and lineage.state is (
+                FeatureEvidenceState.NOT_APPLICABLE
+            ):
+                raise ValueError(
+                    "Required Stage 2 evidence cannot be not applicable"
+                )
+            if index % self.stage2.shape[1] == 0:
+                node_groups.append(lineage.topology_node_id)
+            elif lineage.topology_node_id != node_groups[-1]:
+                raise ValueError("Stage 2 node lineage is not contiguous")
+        if len(node_groups) != self.stage2.shape[0] or len(
+            set(node_groups)
+        ) != len(node_groups):
+            raise ValueError("Stage 2 node axis differs from its lineage")
+        if self.per_node_lineage:
+            first = self.per_node_lineage[0]
+            for lineage in self.per_node_lineage[1:]:
+                if (
+                    lineage.event_cutoff_utc != first.event_cutoff_utc
+                    or lineage.knowledge_cutoff_utc
+                    != first.knowledge_cutoff_utc
+                    or lineage.topology_snapshot_sha256
+                    != first.topology_snapshot_sha256
+                    or lineage.topology_capture_ids
+                    != first.topology_capture_ids
+                ):
+                    raise ValueError(
+                        "Stage 2 lineage uses inconsistent reconstruction evidence"
+                    )
+        for digest in (
+            *self.inference_call_sha256,
+            *self.tuning_event_sha256,
+        ):
+            if len(digest) != 64 or any(
+                char not in "0123456789abcdef" for char in digest
+            ):
+                raise ValueError("Execution evidence commitment is invalid")
+        return self
+
+    @property
+    def required_feature_fraction(self) -> float:
+        required = tuple(
+            item for item in self.per_node_lineage if item.required_for_gate
+        )
+        if not required:
+            return 0.0
+        return sum(
+            item.state is FeatureEvidenceState.OBSERVED for item in required
+        ) / len(required)
+
+    @property
+    def inference_call_count(self) -> int:
+        return len(self.inference_call_sha256)
+
+    @property
+    def tuning_event_count(self) -> int:
+        return len(self.tuning_event_sha256)
 
     @property
     def content_hash(self) -> str:
@@ -137,9 +235,6 @@ def reconstruct_frozen_features(
     lineage: list[FeatureLineage] = []
     stage1_values: list[float | None] = []
     residual_values: list[float | None] = []
-    required_total = 0
-    required_observed = 0
-
     for signal_name in SIGNAL_NAMES:
         requirement = registry.requirement(signal_name)
         predicate = conditional_predicates.get(signal_name)
@@ -169,11 +264,6 @@ def reconstruct_frozen_features(
                 prior_by_component[record.component_pseudonym] = previous
             latest_by_component[record.component_pseudonym] = record
 
-        if requirement.availability is AvailabilityClass.REQUIRED or (
-            requirement.availability is AvailabilityClass.CONDITIONAL
-            and predicate is not False
-        ):
-            required_total += 1
         if requirement.availability is AvailabilityClass.UNAVAILABLE:
             value = None
             residual = None
@@ -206,11 +296,6 @@ def reconstruct_frozen_features(
             )
             state = FeatureEvidenceState.OBSERVED
             evidence = "qualified_records_visible_at_bitemporal_cutoffs"
-            if requirement.availability in {
-                AvailabilityClass.REQUIRED,
-                AvailabilityClass.CONDITIONAL,
-            }:
-                required_observed += 1
         else:
             value = None
             residual = None
@@ -263,8 +348,120 @@ def reconstruct_frozen_features(
     )
     node_ids = tuple(item.node_id for item in topology.nodes)
     stage2_values: list[float | None] = []
-    for _node_id in node_ids:
-        stage2_values.extend(stage1_values)
+    per_node_lineage: list[NodeFeatureLineage] = []
+    topology_sha256 = topology.content_hash
+    for node in topology.nodes:
+        for signal_name in SIGNAL_NAMES:
+            requirement = registry.requirement(signal_name)
+            predicate = conditional_predicates.get(signal_name)
+            registered_applicable = signal_name in node.applicable_signals
+            condition_applies = not (
+                requirement.availability
+                is AvailabilityClass.CONDITIONAL
+                and predicate is False
+            )
+            local_records = [
+                record
+                for record in visible
+                if record.metric_name == signal_name
+                and record.component_pseudonym
+                == node.observation_component_pseudonym
+                and record.applicability == "observed"
+            ]
+            local_records.sort(
+                key=lambda item: (
+                    item.event_time_utc,
+                    item.ingestion_time_utc,
+                    item.source_id,
+                    item.source_sequence_id,
+                )
+            )
+            if not registered_applicable or not condition_applies:
+                value = None
+                state = FeatureEvidenceState.NOT_APPLICABLE
+                applicability_evidence = (
+                    "topology_node_signal_not_applicable"
+                    if not registered_applicable
+                    else "registered_conditional_predicate_false"
+                )
+                selected: tuple[BatchInputRecord, ...] = ()
+            elif requirement.availability is AvailabilityClass.UNAVAILABLE:
+                value = None
+                state = FeatureEvidenceState.UNAVAILABLE
+                applicability_evidence = (
+                    "deployment_registry_declares_unavailable"
+                )
+                selected = ()
+                reasons.append(
+                    f"{requirement.support_consequence.value}:"
+                    f"{node.node_id}:{signal_name}:UNAVAILABLE"
+                )
+            elif local_records:
+                latest = local_records[-1]
+                value = (
+                    None
+                    if latest.metric_value is None
+                    else float(latest.metric_value)
+                )
+                state = FeatureEvidenceState.OBSERVED
+                applicability_evidence = (
+                    "topology_binding_and_signal_applicability_registered"
+                )
+                selected = (latest,)
+            else:
+                value = None
+                state = FeatureEvidenceState.MISSING
+                applicability_evidence = (
+                    "applicable_topology_node_has_no_visible_local_record"
+                )
+                selected = ()
+                route = registry.route_absence(
+                    signal_name,
+                    predicate_value=predicate,
+                )
+                if route is not None:
+                    reasons.append(
+                        f"{route.value}:{node.node_id}:"
+                        f"{signal_name}:MISSING"
+                    )
+            required_for_gate = (
+                registered_applicable
+                and condition_applies
+                and (
+                    requirement.availability
+                    in {
+                        AvailabilityClass.REQUIRED,
+                        AvailabilityClass.CONDITIONAL,
+                    }
+                )
+            )
+            stage2_values.append(value)
+            per_node_lineage.append(
+                NodeFeatureLineage(
+                    topology_node_id=node.node_id,
+                    observation_component_pseudonym=(
+                        node.observation_component_pseudonym
+                    ),
+                    feature_name=signal_name,
+                    state=state,
+                    source_ids=tuple(
+                        sorted({record.source_id for record in selected})
+                    ),
+                    source_record_sha256=tuple(
+                        record.record_sha256 for record in selected
+                    ),
+                    event_cutoff_utc=event_cutoff,
+                    knowledge_cutoff_utc=knowledge_cutoff,
+                    topology_snapshot_sha256=topology_sha256,
+                    topology_capture_ids=topology.applied_capture_ids,
+                    required_for_gate=required_for_gate,
+                    applicability_evidence=applicability_evidence,
+                    temporal_evidence=(
+                        "event_time<=event_cutoff_and_"
+                        "ingestion_time<=knowledge_cutoff"
+                    ),
+                )
+            )
     stage2 = TensorEvidence(
         tensor_name="stage2_input",
         feature_names=tuple(SIGNAL_NAMES),
@@ -282,9 +479,6 @@ def reconstruct_frozen_features(
         state = ReconstructionState.UNKNOWN
     else:
         state = ReconstructionState.COMPLETE
-    fraction = (
-        required_observed / required_total if required_total else 1.0
-    )
     return FeatureDryRunResult(
         state=state,
         reason_codes=tuple(sorted(set(reasons))),
@@ -295,5 +489,5 @@ def reconstruct_frozen_features(
         residual=residual,
         stage2=stage2,
         lineage=tuple(lineage),
-        required_feature_fraction=fraction,
+        per_node_lineage=tuple(per_node_lineage),
     )

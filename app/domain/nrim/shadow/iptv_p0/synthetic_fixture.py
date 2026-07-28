@@ -23,11 +23,23 @@ from .contracts import (
     SignatureState,
 )
 from .qualification import (
-    QualificationMetrics,
     QualificationRequest,
     export_schemas,
     seal_evidence_bundle,
 )
+from .qualification_measurements import (
+    EvidenceCheck,
+    OutcomeMeasuredResult,
+    PrivacyMeasuredResult,
+    QualificationMeasurements,
+    ReproducibilityMeasuredResult,
+    SemanticMeasuredResult,
+    SignalMappingCheck,
+    TopologyCutoffResult,
+    TopologyMeasuredResult,
+    TuningAuditResult,
+)
+from .feature_reconstruction import reconstruct_frozen_features
 from .replay_protocol import (
     CohortDefinition,
     HistoricalReplayProtocol,
@@ -56,7 +68,9 @@ from .topology import (
     IptvNode,
     IptvNodeType,
     TopologyCapture,
+    TopologyHistory,
 )
+from .trusted_signers import TrustedSignerRegistry
 
 
 BASE_TIME = datetime(2026, 1, 2, 12, 0, tzinfo=timezone.utc)
@@ -70,6 +84,28 @@ def _unsigned() -> SignatureMetadata:
     return SignatureMetadata(
         state=SignatureState.NOT_SIGNED_SYNTHETIC,
         algorithm="none",
+    )
+
+
+def _records_for_source(
+    source: SourceIdentity,
+) -> tuple[BatchInputRecord, ...]:
+    return tuple(
+        BatchInputRecord(
+            source_id=source.source_id,
+            source_sequence_id=f"synthetic-{index:02d}",
+            schema_version=source.schema_version,
+            metric_name=name,
+            metric_value=float(index),
+            unit=EXPECTED_UNIT[MetricName(name)].value,
+            component_pseudonym="cmp_" + "b" * 16,
+            event_time_utc=BASE_TIME - timedelta(minutes=1),
+            observation_time_utc=BASE_TIME - timedelta(seconds=59),
+            ingestion_time_utc=BASE_TIME - timedelta(seconds=58),
+            quality="high",
+            applicability="observed",
+        )
+        for index, name in enumerate(SIGNAL_NAMES, start=1)
     )
 
 
@@ -241,26 +277,111 @@ def build_synthetic_request() -> QualificationRequest:
             if item is not Capability.OFFLINE_FILE_READ
         },
     )
-    metrics = QualificationMetrics(
-        collector_mapping_fraction=1.0,
-        semantic_mutation_rejection_fraction=1.0,
-        topology_reconstruction_fraction=1.0,
-        topology_mutation_rejection_fraction=1.0,
-        required_feature_fraction=1.0,
-        incident_alignment_fraction=0.0,
-        root_cause_mapping_fraction=0.0,
-        outcome_inventory_complete=False,
-        future_leakage_count=0,
-        identifier_leakage_count=0,
-        inference_call_count=0,
-        model_tuning_event_count=0,
-        threshold_tuning_event_count=0,
-        feature_tuning_event_count=0,
-        support_rule_tuning_event_count=0,
-        watermark_tuning_event_count=0,
-        episode_grouping_tuning_event_count=0,
-        evidence_determinism_fraction=1.0,
-        tamper_detection_passed=True,
+    records = _records_for_source(source)
+    topology_snapshot = TopologyHistory(
+        (build_synthetic_topology(),)
+    ).reconstruct(
+        event_cutoff_utc=BASE_TIME,
+        knowledge_cutoff_utc=BASE_TIME,
+    )
+    feature_result = reconstruct_frozen_features(
+        records=records,
+        registry=registry,
+        topology=topology_snapshot,
+        event_cutoff_utc=BASE_TIME,
+        knowledge_cutoff_utc=BASE_TIME,
+    )
+    measurements = QualificationMeasurements(
+        semantic=SemanticMeasuredResult(
+            result_id="synthetic-semantic-measurement",
+            mapping_checks=tuple(
+                SignalMappingCheck(
+                    signal_name=name,
+                    qualified=True,
+                    evidence_sha256=canonical_hash(
+                        {"signal": name, "qualified": True}
+                    ),
+                )
+                for name in SIGNAL_NAMES
+            ),
+            positive_fixture_checks=(
+                EvidenceCheck(
+                    check_id="synthetic-positive-fixture",
+                    passed=True,
+                    evidence_sha256=canonical_hash(
+                        "synthetic-positive-fixture"
+                    ),
+                ),
+            ),
+            mutation_checks=tuple(
+                EvidenceCheck(
+                    check_id=f"synthetic-semantic-mutation-{index}",
+                    passed=True,
+                    evidence_sha256=canonical_hash(
+                        {"synthetic_semantic_mutation": index}
+                    ),
+                )
+                for index in range(7)
+            ),
+        ),
+        topology=TopologyMeasuredResult(
+            result_id="synthetic-topology-measurement",
+            cutoff_results=(
+                TopologyCutoffResult(
+                    cutoff_utc=BASE_TIME,
+                    snapshot_sha256=topology_snapshot.content_hash,
+                    deterministic=True,
+                ),
+            ),
+            mutation_checks=tuple(
+                EvidenceCheck(
+                    check_id=f"synthetic-topology-mutation-{index}",
+                    passed=True,
+                    evidence_sha256=canonical_hash(
+                        {"synthetic_topology_mutation": index}
+                    ),
+                )
+                for index in range(3)
+            ),
+        ),
+        feature_reconstruction=feature_result,
+        outcomes=OutcomeMeasuredResult(
+            result_id="synthetic-outcome-measurement",
+            incident_outcome_ids=(),
+            aligned_incident_outcome_ids=(),
+            adjudicated_root_cause_ids=(),
+            mapped_root_cause_ids=(),
+            inventory_complete=False,
+            evidence_sha256=canonical_hash("no-real-outcome-evidence"),
+        ),
+        privacy=PrivacyMeasuredResult(
+            result_id="synthetic-privacy-measurement",
+            scanned_artifact_sha256=(
+                canonical_hash("synthetic-scanned-artifact"),
+            ),
+        ),
+        tuning_audit=TuningAuditResult(
+            result_id="synthetic-tuning-audit",
+            audited_event_sha256=(
+                canonical_hash("synthetic-audited-events"),
+            ),
+        ),
+        reproducibility=ReproducibilityMeasuredResult(
+            result_id="synthetic-reproducibility-measurement",
+            run_output_sha256=(
+                canonical_hash("synthetic-qualification-output"),
+                canonical_hash("synthetic-qualification-output"),
+            ),
+            tamper_checks=(
+                EvidenceCheck(
+                    check_id="synthetic-tamper-control",
+                    passed=True,
+                    evidence_sha256=canonical_hash(
+                        "synthetic-tamper-control"
+                    ),
+                ),
+            ),
+        ),
     )
     return QualificationRequest(
         domain_pack=domain,
@@ -269,7 +390,15 @@ def build_synthetic_request() -> QualificationRequest:
         source_inventory=inventory,
         capability_attestation=capability,
         replay_protocol=protocol,
-        metrics=metrics,
+        measurements=measurements,
+        qualification_cutoff_utc=BASE_TIME,
+    )
+
+
+def build_synthetic_trusted_signer_registry() -> TrustedSignerRegistry:
+    return TrustedSignerRegistry(
+        registry_id="synthetic-empty-registry",
+        registry_version="0.8.0",
     )
 
 
@@ -277,23 +406,7 @@ def build_synthetic_records(
     request: QualificationRequest,
 ) -> tuple[BatchInputRecord, ...]:
     source = request.source_inventory.sources[0]
-    return tuple(
-        BatchInputRecord(
-            source_id=source.source_id,
-            source_sequence_id=f"synthetic-{index:02d}",
-            schema_version=source.schema_version,
-            metric_name=name,
-            metric_value=float(index),
-            unit=EXPECTED_UNIT[MetricName(name)].value,
-            component_pseudonym="cmp_" + "b" * 16,
-            event_time_utc=BASE_TIME - timedelta(minutes=1),
-            observation_time_utc=BASE_TIME - timedelta(seconds=59),
-            ingestion_time_utc=BASE_TIME - timedelta(seconds=58),
-            quality="high",
-            applicability="observed",
-        )
-        for index, name in enumerate(SIGNAL_NAMES, start=1)
-    )
+    return _records_for_source(source)
 
 
 def build_synthetic_topology() -> TopologyCapture:
@@ -307,6 +420,8 @@ def build_synthetic_topology() -> TopologyCapture:
             node_id="topo_" + "2" * 12,
             node_type=IptvNodeType.CORE,
             service_path_id="path_" + "a" * 12,
+            observation_component_pseudonym="cmp_" + "b" * 16,
+            applicable_signals=tuple(SIGNAL_NAMES),
         ),
         IptvNode(
             node_id="topo_" + "3" * 12,
@@ -435,6 +550,7 @@ def generate_fixture(root: Path) -> dict[str, object]:
     export_schemas(root / "schemas")
     seal_evidence_bundle(
         request=request,
+        trusted_signer_registry=build_synthetic_trusted_signer_registry(),
         output_directory=root / "expected",
         signature=_unsigned(),
     )

@@ -7,6 +7,7 @@ import pytest
 
 from app.domain.nrim.simulation.feature_schema import SIGNAL_NAMES
 from app.domain.nrim.shadow.contracts import EXPECTED_UNIT, MetricName
+from app.domain.nrim.shadow.hashing import canonical_hash
 from app.domain.nrim.shadow.iptv_p0.batch_adapter import BatchInputRecord
 from app.domain.nrim.shadow.iptv_p0.clock_watermark import (
     ClockWatermarkPolicy,
@@ -26,8 +27,22 @@ from app.domain.nrim.shadow.iptv_p0.contracts import (
     create_ed25519_signature,
 )
 from app.domain.nrim.shadow.iptv_p0.qualification import (
-    QualificationMetrics,
     QualificationRequest,
+)
+from app.domain.nrim.shadow.iptv_p0.qualification_measurements import (
+    EvidenceCheck,
+    OutcomeMeasuredResult,
+    PrivacyMeasuredResult,
+    QualificationMeasurements,
+    ReproducibilityMeasuredResult,
+    SemanticMeasuredResult,
+    SignalMappingCheck,
+    TopologyCutoffResult,
+    TopologyMeasuredResult,
+    TuningAuditResult,
+)
+from app.domain.nrim.shadow.iptv_p0.feature_reconstruction import (
+    reconstruct_frozen_features,
 )
 from app.domain.nrim.shadow.iptv_p0.replay_protocol import (
     CohortDefinition,
@@ -57,6 +72,9 @@ from app.domain.nrim.shadow.iptv_p0.topology import (
     IptvNodeType,
     TopologyCapture,
     TopologyHistory,
+)
+from app.domain.nrim.shadow.iptv_p0.trusted_signers import (
+    TrustedSignerRegistry,
 )
 
 
@@ -258,6 +276,8 @@ def topology_capture() -> TopologyCapture:
             node_id="topo_" + "3" * 12,
             node_type=IptvNodeType.AGGREGATION,
             service_path_id="path_" + "a" * 12,
+            observation_component_pseudonym="cmp_" + "b" * 16,
+            applicable_signals=tuple(SIGNAL_NAMES),
         ),
         IptvNode(
             node_id="topo_" + "4" * 12,
@@ -424,27 +444,105 @@ def replay_protocol(
 
 
 @pytest.fixture
-def perfect_metrics() -> QualificationMetrics:
-    return QualificationMetrics(
-        collector_mapping_fraction=1.0,
-        semantic_mutation_rejection_fraction=1.0,
-        topology_reconstruction_fraction=1.0,
-        topology_mutation_rejection_fraction=1.0,
-        required_feature_fraction=1.0,
-        incident_alignment_fraction=1.0,
-        root_cause_mapping_fraction=1.0,
-        outcome_inventory_complete=True,
-        future_leakage_count=0,
-        identifier_leakage_count=0,
-        inference_call_count=0,
-        model_tuning_event_count=0,
-        threshold_tuning_event_count=0,
-        feature_tuning_event_count=0,
-        support_rule_tuning_event_count=0,
-        watermark_tuning_event_count=0,
-        episode_grouping_tuning_event_count=0,
-        evidence_determinism_fraction=1.0,
-        tamper_detection_passed=True,
+def measurements(
+    records,
+    registry,
+    topology_snapshot,
+) -> QualificationMeasurements:
+    feature = reconstruct_frozen_features(
+        records=records,
+        registry=registry,
+        topology=topology_snapshot,
+        event_cutoff_utc=BASE_TIME,
+        knowledge_cutoff_utc=BASE_TIME,
+    )
+    semantic = SemanticMeasuredResult(
+        result_id="semantic-measurement",
+        mapping_checks=tuple(
+            SignalMappingCheck(
+                signal_name=name,
+                qualified=True,
+                evidence_sha256=canonical_hash(
+                    {"signal": name, "qualified": True}
+                ),
+            )
+            for name in SIGNAL_NAMES
+        ),
+        positive_fixture_checks=(
+            EvidenceCheck(
+                check_id="positive-fixture",
+                passed=True,
+                evidence_sha256=canonical_hash("positive-fixture"),
+            ),
+        ),
+        mutation_checks=tuple(
+            EvidenceCheck(
+                check_id=f"semantic-mutation-{index}",
+                passed=True,
+                evidence_sha256=canonical_hash(
+                    {"semantic_mutation": index}
+                ),
+            )
+            for index in range(7)
+        ),
+    )
+    topology = TopologyMeasuredResult(
+        result_id="topology-measurement",
+        cutoff_results=(
+            TopologyCutoffResult(
+                cutoff_utc=BASE_TIME,
+                snapshot_sha256=topology_snapshot.content_hash,
+                deterministic=True,
+            ),
+        ),
+        mutation_checks=tuple(
+            EvidenceCheck(
+                check_id=f"topology-mutation-{index}",
+                passed=True,
+                evidence_sha256=canonical_hash(
+                    {"topology_mutation": index}
+                ),
+            )
+            for index in range(3)
+        ),
+    )
+    incident_ids = tuple(f"incident-{index}" for index in range(10))
+    root_cause_ids = tuple(f"root-cause-{index}" for index in range(10))
+    return QualificationMeasurements(
+        semantic=semantic,
+        topology=topology,
+        feature_reconstruction=feature,
+        outcomes=OutcomeMeasuredResult(
+            result_id="outcome-measurement",
+            incident_outcome_ids=incident_ids,
+            aligned_incident_outcome_ids=incident_ids,
+            adjudicated_root_cause_ids=root_cause_ids,
+            mapped_root_cause_ids=root_cause_ids,
+            inventory_complete=True,
+            evidence_sha256=canonical_hash("outcome-evidence"),
+        ),
+        privacy=PrivacyMeasuredResult(
+            result_id="privacy-measurement",
+            scanned_artifact_sha256=(canonical_hash("scanned-artifact"),),
+        ),
+        tuning_audit=TuningAuditResult(
+            result_id="tuning-audit",
+            audited_event_sha256=(canonical_hash("audited-events"),),
+        ),
+        reproducibility=ReproducibilityMeasuredResult(
+            result_id="reproducibility-measurement",
+            run_output_sha256=(
+                canonical_hash("qualification-output"),
+                canonical_hash("qualification-output"),
+            ),
+            tamper_checks=(
+                EvidenceCheck(
+                    check_id="tamper-control",
+                    passed=True,
+                    evidence_sha256=canonical_hash("tamper-control"),
+                ),
+            ),
+        ),
     )
 
 
@@ -456,7 +554,7 @@ def qualification_request(
     inventory: SourceInventory,
     capability: ReadOnlyCapabilityAttestation,
     replay_protocol: HistoricalReplayProtocol,
-    perfect_metrics: QualificationMetrics,
+    measurements: QualificationMeasurements,
 ) -> QualificationRequest:
     return QualificationRequest(
         domain_pack=domain_pack,
@@ -465,5 +563,14 @@ def qualification_request(
         source_inventory=inventory,
         capability_attestation=capability,
         replay_protocol=replay_protocol,
-        metrics=perfect_metrics,
+        measurements=measurements,
+        qualification_cutoff_utc=BASE_TIME,
+    )
+
+
+@pytest.fixture
+def trusted_signer_registry() -> TrustedSignerRegistry:
+    return TrustedSignerRegistry(
+        registry_id="synthetic-empty-registry",
+        registry_version="0.8.0",
     )

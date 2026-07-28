@@ -10,7 +10,10 @@ from app.domain.nrim.shadow.iptv_p0.qualification import (
 from app.domain.nrim.shadow.iptv_p0.repository_hygiene import (
     scan_fixture_tree,
 )
-from app.domain.nrim.shadow.iptv_p0.synthetic_fixture import generate_fixture
+from app.domain.nrim.shadow.iptv_p0.synthetic_fixture import (
+    build_synthetic_trusted_signer_registry,
+    generate_fixture,
+)
 
 
 ROOT = Path(__file__).resolve().parents[5]
@@ -38,7 +41,12 @@ def test_checked_in_fixture_manifest_verifies_every_file():
 
 
 def test_checked_in_qualification_bundle_verifies():
-    manifest = verify_evidence_bundle(FIXTURE / "expected")
+    manifest = verify_evidence_bundle(
+        FIXTURE / "expected",
+        trusted_signer_registry=(
+            build_synthetic_trusted_signer_registry()
+        ),
+    )
     assert manifest["decision"] == "REAL_DATA_REQUIRED"
     assert manifest["synthetic_evidence_only"] is True
 

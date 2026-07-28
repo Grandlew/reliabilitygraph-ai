@@ -93,11 +93,6 @@ class SignatureMetadata(StrictModel):
         min_length=16,
         max_length=1024,
     )
-    public_key_base64: str | None = Field(
-        default=None,
-        min_length=16,
-        max_length=256,
-    )
     signed_payload_sha256: str | None = Field(
         default=None,
         pattern=SHA256_PATTERN,
@@ -110,7 +105,6 @@ class SignatureMetadata(StrictModel):
             (
                 self.key_id,
                 self.signature_base64,
-                self.public_key_base64,
                 self.signed_payload_sha256,
             )
         )
@@ -120,7 +114,6 @@ class SignatureMetadata(StrictModel):
             self.algorithm != "none"
             or self.key_id is not None
             or self.signature_base64 is not None
-            or self.public_key_base64 is not None
         ):
             raise ValueError("Synthetic unsigned artifacts cannot name a key")
         return self
@@ -135,34 +128,42 @@ def create_ed25519_signature(
     if len(private_key_bytes) != 32:
         raise ValueError("Ed25519 private key material must be 32 bytes")
     private_key = Ed25519PrivateKey.from_private_bytes(private_key_bytes)
-    public_key = private_key.public_key().public_bytes_raw()
     signature = private_key.sign(payload_sha256.encode("ascii"))
     return SignatureMetadata(
         state=SignatureState.VERIFIED,
         algorithm="ed25519",
         key_id=key_id,
         signature_base64=base64.b64encode(signature).decode("ascii"),
-        public_key_base64=base64.b64encode(public_key).decode("ascii"),
         signed_payload_sha256=payload_sha256,
     )
+
+
+def ed25519_public_key_base64(private_key_bytes: bytes) -> str:
+    if len(private_key_bytes) != 32:
+        raise ValueError("Ed25519 private key material must be 32 bytes")
+    private_key = Ed25519PrivateKey.from_private_bytes(private_key_bytes)
+    return base64.b64encode(
+        private_key.public_key().public_bytes_raw()
+    ).decode("ascii")
 
 
 def verify_signature(
     signature: SignatureMetadata,
     *,
     expected_payload_sha256: str,
+    trusted_public_key_base64: str | None = None,
 ) -> bool:
     if (
         signature.state is not SignatureState.VERIFIED
         or signature.algorithm != "ed25519"
         or signature.signed_payload_sha256 != expected_payload_sha256
-        or signature.public_key_base64 is None
+        or trusted_public_key_base64 is None
         or signature.signature_base64 is None
     ):
         return False
     try:
         public_key = Ed25519PublicKey.from_public_bytes(
-            base64.b64decode(signature.public_key_base64, validate=True)
+            base64.b64decode(trusted_public_key_base64, validate=True)
         )
         public_key.verify(
             base64.b64decode(signature.signature_base64, validate=True),
@@ -284,10 +285,7 @@ class DomainPack(StrictModel):
 
     @property
     def signature_valid(self) -> bool:
-        return verify_signature(
-            self.signature,
-            expected_payload_sha256=self.content_hash(),
-        )
+        return False
 
 
 class DeploymentPack(StrictModel):
@@ -340,10 +338,6 @@ class DeploymentPack(StrictModel):
             self.real_operator_data
             and self.lawful_scope_approved
             and self.operator_approved
-            and verify_signature(
-                self.signature,
-                expected_payload_sha256=self.content_hash(),
-            )
         )
 
     def content_hash(self) -> str:

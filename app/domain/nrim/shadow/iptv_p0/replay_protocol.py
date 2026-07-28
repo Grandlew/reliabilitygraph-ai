@@ -13,13 +13,7 @@ from pydantic import (
 )
 
 from ..hashing import canonical_hash
-from .contracts import (
-    GateDecision,
-    LabelKind,
-    SignatureMetadata,
-    utc,
-    verify_signature,
-)
+from .contracts import GateDecision, LabelKind, SignatureMetadata, utc
 
 
 class StrictModel(BaseModel):
@@ -112,10 +106,7 @@ class HistoricalReplayProtocol(StrictModel):
 
     @property
     def signature_valid(self) -> bool:
-        return verify_signature(
-            self.signature,
-            expected_payload_sha256=self.content_hash(),
-        )
+        return False
 
 
 def replay_readiness(

@@ -263,4 +263,63 @@ def test_feature_lineage_contains_only_record_hashes_not_raw_payload(
     result = _run(records, registry, topology_snapshot)
     serialized = result.model_dump_json()
     assert "source_record_sha256" in serialized
-    assert "component_pseudonym" not in serialized
+    assert "metric_value" not in serialized
+    assert "source_sequence_id" not in serialized
+    assert all(
+        item.topology_snapshot_sha256 == topology_snapshot.content_hash
+        for item in result.per_node_lineage
+    )
+
+
+def test_stage2_reconstructs_component_local_applicability_and_time(
+    records,
+    record_factory,
+    registry,
+    topology_snapshot,
+):
+    local_component = "cmp_" + "c" * 16
+    nodes = list(topology_snapshot.nodes)
+    nodes[0] = nodes[0].model_copy(
+        update={
+            "observation_component_pseudonym": local_component,
+            "applicable_signals": tuple(SIGNAL_NAMES[:2]),
+        }
+    )
+    topology = topology_snapshot.model_copy(update={"nodes": tuple(nodes)})
+    local = record_factory(
+        metric_name=SIGNAL_NAMES[0],
+        sequence="local-source-headend",
+        value=999.0,
+        component=local_component,
+    )
+    future_visible = record_factory(
+        metric_name=SIGNAL_NAMES[1],
+        sequence="future-local-source-headend",
+        value=888.0,
+        component=local_component,
+        ingestion_time=BASE_TIME + timedelta(seconds=1),
+    )
+
+    result = _run(
+        (*records, local, future_visible),
+        registry,
+        topology,
+    )
+    width = len(SIGNAL_NAMES)
+    source_row = result.stage2.values[:width]
+    aggregation_row = result.stage2.values[2 * width : 3 * width]
+
+    assert source_row[0] == 999.0
+    assert aggregation_row[0] == records[0].metric_value
+    assert source_row[1] is None
+    assert source_row[2] is None
+    source_lineage = result.per_node_lineage[:width]
+    assert source_lineage[0].state is FeatureEvidenceState.OBSERVED
+    assert source_lineage[1].state is FeatureEvidenceState.MISSING
+    assert source_lineage[1].source_record_sha256 == ()
+    assert source_lineage[2].state is FeatureEvidenceState.NOT_APPLICABLE
+    assert all(
+        item.topology_snapshot_sha256 == topology.content_hash
+        and item.topology_capture_ids == topology.applied_capture_ids
+        for item in source_lineage
+    )

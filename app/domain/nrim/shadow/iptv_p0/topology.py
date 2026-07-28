@@ -14,6 +14,8 @@ from pydantic import (
     model_validator,
 )
 
+from app.domain.nrim.simulation.feature_schema import SIGNAL_NAMES
+
 from ..hashing import canonical_hash
 from ..privacy import assert_no_direct_identifiers
 from .contracts import utc
@@ -56,6 +58,29 @@ class IptvNode(StrictModel):
     node_id: str = Field(pattern=r"^topo_[0-9a-f]{8,64}$")
     node_type: IptvNodeType
     service_path_id: str = Field(pattern=r"^path_[0-9a-f]{8,64}$")
+    observation_component_pseudonym: str | None = Field(
+        default=None,
+        pattern=r"^cmp_[0-9a-f]{8,64}$",
+    )
+    applicable_signals: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_observation_binding(self) -> Self:
+        if len(self.applicable_signals) != len(set(self.applicable_signals)):
+            raise ValueError("Node applicability signals must be unique")
+        unknown = set(self.applicable_signals) - set(SIGNAL_NAMES)
+        if unknown:
+            raise ValueError(
+                f"Node applicability contains unknown signals: {sorted(unknown)}"
+            )
+        if (
+            self.applicable_signals
+            and self.observation_component_pseudonym is None
+        ):
+            raise ValueError(
+                "Applicable node signals require an observation-component binding"
+            )
+        return self
 
 
 class IptvEdge(StrictModel):

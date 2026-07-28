@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ..hashing import (
     bytes_hash,
@@ -20,13 +21,19 @@ from .contracts import (
     GateDecision,
     SignatureMetadata,
     SignatureState,
-    verify_signature,
+    utc,
 )
+from .feature_reconstruction import ReconstructionState
+from .qualification_measurements import QualificationMeasurements
 from .replay_protocol import HistoricalReplayProtocol
 from .signal_registry import SignalRegistry
 from .source_inventory import (
     ReadOnlyCapabilityAttestation,
     SourceInventory,
+)
+from .trusted_signers import (
+    SignerRole,
+    TrustedSignerRegistry,
 )
 
 
@@ -38,28 +45,6 @@ class StrictModel(BaseModel):
     )
 
 
-class QualificationMetrics(StrictModel):
-    collector_mapping_fraction: float = Field(ge=0.0, le=1.0)
-    semantic_mutation_rejection_fraction: float = Field(ge=0.0, le=1.0)
-    topology_reconstruction_fraction: float = Field(ge=0.0, le=1.0)
-    topology_mutation_rejection_fraction: float = Field(ge=0.0, le=1.0)
-    required_feature_fraction: float = Field(ge=0.0, le=1.0)
-    incident_alignment_fraction: float = Field(ge=0.0, le=1.0)
-    root_cause_mapping_fraction: float = Field(ge=0.0, le=1.0)
-    outcome_inventory_complete: bool
-    future_leakage_count: int = Field(ge=0)
-    identifier_leakage_count: int = Field(ge=0)
-    inference_call_count: int = Field(ge=0)
-    model_tuning_event_count: int = Field(ge=0)
-    threshold_tuning_event_count: int = Field(ge=0)
-    feature_tuning_event_count: int = Field(ge=0)
-    support_rule_tuning_event_count: int = Field(ge=0)
-    watermark_tuning_event_count: int = Field(ge=0)
-    episode_grouping_tuning_event_count: int = Field(ge=0)
-    evidence_determinism_fraction: float = Field(ge=0.0, le=1.0)
-    tamper_detection_passed: bool
-
-
 class QualificationRequest(StrictModel):
     domain_pack: DomainPack
     deployment_pack: DeploymentPack
@@ -67,7 +52,13 @@ class QualificationRequest(StrictModel):
     source_inventory: SourceInventory
     capability_attestation: ReadOnlyCapabilityAttestation
     replay_protocol: HistoricalReplayProtocol
-    metrics: QualificationMetrics
+    measurements: QualificationMeasurements
+    qualification_cutoff_utc: datetime
+
+    @field_validator("qualification_cutoff_utc")
+    @classmethod
+    def normalize_cutoff(cls, value: datetime) -> datetime:
+        return utc(value)
 
 
 class QualificationBundle(StrictModel):
@@ -85,7 +76,8 @@ class QualificationBundle(StrictModel):
     signal_registry_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     source_inventory_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     replay_protocol_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    metrics_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    measurements_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    trusted_signer_registry_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     synthetic_evidence_only: bool
     model_or_threshold_tuning_authorized: bool = False
     operational_write_authorized: bool = False
@@ -98,17 +90,51 @@ class QualificationBundle(StrictModel):
 
 def evaluate_qualification(
     request: QualificationRequest,
+    *,
+    trusted_signer_registry: TrustedSignerRegistry,
 ) -> QualificationBundle:
-    metrics = request.metrics
+    request = QualificationRequest.model_validate(
+        request.model_dump(mode="json")
+    )
+    trusted_signer_registry = TrustedSignerRegistry.model_validate(
+        trusted_signer_registry.model_dump(mode="json")
+    )
+    measurements = request.measurements
+    registry = trusted_signer_registry
+    deployment = request.deployment_pack.deployment_pseudonym
+    at_utc = request.qualification_cutoff_utc
+    artifact_signatures = (
+        request.domain_pack.signature,
+        request.deployment_pack.signature,
+        request.replay_protocol.signature,
+    )
     criteria = {
         "lawful_scope": request.deployment_pack.lawful_scope_approved,
         "operator_approval": request.deployment_pack.operator_approved,
-        "verified_deployment_signature": (
-            request.deployment_pack.real_gate_identity_complete
+        "verified_deployment_signature": registry.verify(
+            request.deployment_pack.signature,
+            expected_payload_sha256=request.deployment_pack.content_hash(),
+            required_role=SignerRole.DEPLOYMENT_AUTHORITY,
+            deployment_pseudonym=deployment,
+            at_utc=at_utc,
         ),
-        "verified_domain_signature": request.domain_pack.signature_valid,
-        "verified_replay_protocol_signature": (
-            request.replay_protocol.signature_valid
+        "verified_domain_signature": registry.verify(
+            request.domain_pack.signature,
+            expected_payload_sha256=request.domain_pack.content_hash(),
+            required_role=SignerRole.DOMAIN_AUTHORITY,
+            deployment_pseudonym=deployment,
+            at_utc=at_utc,
+        ),
+        "verified_replay_protocol_signature": registry.verify(
+            request.replay_protocol.signature,
+            expected_payload_sha256=request.replay_protocol.content_hash(),
+            required_role=SignerRole.REPLAY_GOVERNANCE,
+            deployment_pseudonym=deployment,
+            at_utc=at_utc,
+        ),
+        "distinct_artifact_signers": (
+            all(item.key_id is not None for item in artifact_signatures)
+            and len({item.key_id for item in artifact_signatures}) == 3
         ),
         "contract_compatibility": (
             request.deployment_pack.domain_pack_sha256
@@ -124,38 +150,39 @@ def evaluate_qualification(
         ),
         "read_only_capability": request.capability_attestation.passed,
         "collector_semantics": (
-            metrics.collector_mapping_fraction == 1.0
-            and metrics.semantic_mutation_rejection_fraction == 1.0
+            measurements.semantic.mapping_fraction == 1.0
+            and measurements.semantic.positive_fixture_fraction == 1.0
+            and measurements.semantic.mutation_rejection_fraction == 1.0
         ),
         "topology": (
-            metrics.topology_reconstruction_fraction == 1.0
-            and metrics.topology_mutation_rejection_fraction == 1.0
+            measurements.topology.reconstruction_fraction == 1.0
+            and measurements.topology.mutation_rejection_fraction == 1.0
         ),
         "feature_reconstructability": (
-            metrics.required_feature_fraction >= 0.95
-            and metrics.inference_call_count == 0
+            measurements.feature_reconstruction.state
+            is ReconstructionState.COMPLETE
+            and measurements.feature_reconstruction.required_feature_fraction
+            >= 0.95
+            and measurements.feature_reconstruction.inference_call_count == 0
         ),
-        "incident_alignment": metrics.incident_alignment_fraction >= 0.90,
-        "root_cause_mapping": metrics.root_cause_mapping_fraction >= 0.95,
-        "outcome_inventory": metrics.outcome_inventory_complete,
+        "incident_alignment": (
+            measurements.outcomes.incident_alignment_fraction >= 0.90
+        ),
+        "root_cause_mapping": (
+            measurements.outcomes.root_cause_mapping_fraction >= 0.95
+        ),
+        "outcome_inventory": measurements.outcomes.inventory_complete,
         "zero_leakage": (
-            metrics.future_leakage_count == 0
-            and metrics.identifier_leakage_count == 0
+            measurements.topology.future_leakage_count == 0
+            and measurements.privacy.identifier_leakage_count == 0
         ),
-        "no_tuning": all(
-            value == 0
-            for value in (
-                metrics.model_tuning_event_count,
-                metrics.threshold_tuning_event_count,
-                metrics.feature_tuning_event_count,
-                metrics.support_rule_tuning_event_count,
-                metrics.watermark_tuning_event_count,
-                metrics.episode_grouping_tuning_event_count,
-            )
+        "no_tuning": (
+            measurements.tuning_audit.prohibited_event_count == 0
+            and measurements.feature_reconstruction.tuning_event_count == 0
         ),
         "deterministic_tamper_evident_evidence": (
-            metrics.evidence_determinism_fraction == 1.0
-            and metrics.tamper_detection_passed
+            measurements.reproducibility.determinism_fraction == 1.0
+            and measurements.reproducibility.tamper_detection_fraction == 1.0
         ),
     }
     synthetic = not request.deployment_pack.real_operator_data
@@ -188,7 +215,9 @@ def evaluate_qualification(
         "signal_registry": request.signal_registry.content_hash(),
         "source_inventory": request.source_inventory.content_hash(),
         "replay_protocol": request.replay_protocol.content_hash(),
-        "metrics": canonical_hash(metrics.model_dump(mode="json")),
+        "measurements": measurements.content_hash,
+        "trusted_signer_registry": registry.content_hash,
+        "qualification_cutoff_utc": at_utc,
         "decision": decision.value,
         "reason_codes": sorted(reasons),
     }
@@ -204,7 +233,10 @@ def evaluate_qualification(
         signal_registry_sha256=identity["signal_registry"],
         source_inventory_sha256=identity["source_inventory"],
         replay_protocol_sha256=identity["replay_protocol"],
-        metrics_sha256=identity["metrics"],
+        measurements_sha256=identity["measurements"],
+        trusted_signer_registry_sha256=identity[
+            "trusted_signer_registry"
+        ],
         synthetic_evidence_only=synthetic,
     )
 
@@ -214,9 +246,11 @@ _SCHEMA_MODELS = {
     "domain_pack": DomainPack,
     "qualification_bundle": QualificationBundle,
     "qualification_request": QualificationRequest,
+    "qualification_measurements": QualificationMeasurements,
     "replay_protocol": HistoricalReplayProtocol,
     "signal_registry": SignalRegistry,
     "source_inventory": SourceInventory,
+    "trusted_signer_registry": TrustedSignerRegistry,
 }
 
 
@@ -236,6 +270,7 @@ def export_schemas(directory: Path) -> dict[str, str]:
 def seal_evidence_bundle(
     *,
     request: QualificationRequest,
+    trusted_signer_registry: TrustedSignerRegistry,
     output_directory: Path,
     signature: SignatureMetadata | None = None,
     signature_provider: Callable[[str], SignatureMetadata] | None = None,
@@ -244,19 +279,30 @@ def seal_evidence_bundle(
         raise ValueError("Provide signature metadata or a provider, not both")
     output = output_directory.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    result = evaluate_qualification(request)
+    result = evaluate_qualification(
+        request,
+        trusted_signer_registry=trusted_signer_registry,
+    )
     result_path = output / "qualification.json"
     request_path = output / "request.json"
+    trusted_registry_path = output / "trusted_signer_registry.json"
     result_path.write_bytes(
         canonical_json(result.model_dump(mode="json")).encode("utf-8") + b"\n"
     )
     request_path.write_bytes(
         canonical_json(request.model_dump(mode="json")).encode("utf-8") + b"\n"
     )
+    trusted_registry_path.write_bytes(
+        canonical_json(
+            trusted_signer_registry.model_dump(mode="json")
+        ).encode("utf-8")
+        + b"\n"
+    )
     schema_hashes = export_schemas(output / "schemas")
     files = {
         "qualification.json": file_hash(result_path),
         "request.json": file_hash(request_path),
+        "trusted_signer_registry.json": file_hash(trusted_registry_path),
         **{
             f"schemas/{name}": digest
             for name, digest in sorted(schema_hashes.items())
@@ -275,11 +321,28 @@ def seal_evidence_bundle(
         signature = signature_provider(manifest_payload_sha256)
     if signature is None:
         raise ValueError("Qualification manifest signature metadata is required")
-    if signature.state is SignatureState.VERIFIED and not verify_signature(
-        signature,
-        expected_payload_sha256=manifest_payload_sha256,
+    if signature.state is SignatureState.VERIFIED and not (
+        trusted_signer_registry.verify(
+            signature,
+            expected_payload_sha256=manifest_payload_sha256,
+            required_role=SignerRole.QUALIFICATION_AUTHORITY,
+            deployment_pseudonym=request.deployment_pack.deployment_pseudonym,
+            at_utc=request.qualification_cutoff_utc,
+        )
     ):
         raise ValueError("Qualification manifest signature is invalid")
+    artifact_key_ids = {
+        request.domain_pack.signature.key_id,
+        request.deployment_pack.signature.key_id,
+        request.replay_protocol.signature.key_id,
+    }
+    if (
+        signature.state is SignatureState.VERIFIED
+        and signature.key_id in artifact_key_ids
+    ):
+        raise ValueError(
+            "Qualification manifest signer must be distinct from artifact signers"
+        )
     if (
         result.decision is GateDecision.REAL_REPLAY_READY
         and signature.state is not SignatureState.VERIFIED
@@ -296,7 +359,11 @@ def seal_evidence_bundle(
     return manifest
 
 
-def verify_evidence_bundle(directory: Path) -> dict[str, Any]:
+def verify_evidence_bundle(
+    directory: Path,
+    *,
+    trusted_signer_registry: TrustedSignerRegistry,
+) -> dict[str, Any]:
     root = directory.resolve()
     manifest_path = root / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -317,6 +384,22 @@ def verify_evidence_bundle(directory: Path) -> dict[str, Any]:
     result = QualificationBundle.model_validate_json(
         (root / "qualification.json").read_text(encoding="utf-8")
     )
+    request = QualificationRequest.model_validate_json(
+        (root / "request.json").read_text(encoding="utf-8")
+    )
+    bundled_registry = TrustedSignerRegistry.model_validate_json(
+        (root / "trusted_signer_registry.json").read_text(encoding="utf-8")
+    )
+    if bundled_registry.content_hash != trusted_signer_registry.content_hash:
+        raise ValueError(
+            "Bundled signer registry differs from the trusted registry"
+        )
+    expected_result = evaluate_qualification(
+        request,
+        trusted_signer_registry=trusted_signer_registry,
+    )
+    if expected_result.content_hash != result.content_hash:
+        raise ValueError("Qualification result is not derived from its evidence")
     if (
         result.synthetic_evidence_only
         and result.decision is GateDecision.REAL_REPLAY_READY
@@ -333,11 +416,28 @@ def verify_evidence_bundle(directory: Path) -> dict[str, Any]:
     expected_payload = canonical_hash(manifest_payload)
     if manifest.get("manifest_payload_sha256") != expected_payload:
         raise ValueError("Qualification manifest payload commitment differs")
-    if signature.state is SignatureState.VERIFIED and not verify_signature(
-        signature,
-        expected_payload_sha256=expected_payload,
+    if signature.state is SignatureState.VERIFIED and not (
+        trusted_signer_registry.verify(
+            signature,
+            expected_payload_sha256=expected_payload,
+            required_role=SignerRole.QUALIFICATION_AUTHORITY,
+            deployment_pseudonym=request.deployment_pack.deployment_pseudonym,
+            at_utc=request.qualification_cutoff_utc,
+        )
     ):
         raise ValueError("Qualification manifest signature is invalid")
+    artifact_key_ids = {
+        request.domain_pack.signature.key_id,
+        request.deployment_pack.signature.key_id,
+        request.replay_protocol.signature.key_id,
+    }
+    if (
+        signature.state is SignatureState.VERIFIED
+        and signature.key_id in artifact_key_ids
+    ):
+        raise ValueError(
+            "Qualification manifest signer must be distinct from artifact signers"
+        )
     if (
         result.decision is GateDecision.REAL_REPLAY_READY
         and signature.state is not SignatureState.VERIFIED
@@ -351,22 +451,46 @@ def _main() -> int:
     subparsers = parser.add_subparsers(dest="command", required=True)
     qualify = subparsers.add_parser("qualify")
     qualify.add_argument("--request", type=Path, required=True)
+    qualify.add_argument(
+        "--trusted-signer-registry",
+        type=Path,
+        required=True,
+    )
+    qualify.add_argument(
+        "--manifest-signature",
+        type=Path,
+        required=True,
+    )
     qualify.add_argument("--output-dir", type=Path, required=True)
     verify = subparsers.add_parser("verify")
     verify.add_argument("--directory", type=Path, required=True)
+    verify.add_argument(
+        "--trusted-signer-registry",
+        type=Path,
+        required=True,
+    )
     args = parser.parse_args()
+    trusted_registry = TrustedSignerRegistry.model_validate_json(
+        args.trusted_signer_registry.read_text(encoding="utf-8")
+    )
     if args.command == "qualify":
         request = QualificationRequest.model_validate_json(
             args.request.read_text(encoding="utf-8")
         )
-        signature = request.deployment_pack.signature
+        signature = SignatureMetadata.model_validate_json(
+            args.manifest_signature.read_text(encoding="utf-8")
+        )
         manifest = seal_evidence_bundle(
             request=request,
+            trusted_signer_registry=trusted_registry,
             output_directory=args.output_dir,
             signature=signature,
         )
     else:
-        manifest = verify_evidence_bundle(args.directory)
+        manifest = verify_evidence_bundle(
+            args.directory,
+            trusted_signer_registry=trusted_registry,
+        )
     print(canonical_json(manifest))
     return 0
 

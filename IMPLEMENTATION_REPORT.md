@@ -25,6 +25,50 @@ The machine-readable baseline is `docs/v0.8/baseline_ledger.json`; the exact
 20-assignment ledger and claim boundary are in
 `docs/v0.8/qualification_ledger.md`.
 
+### v0.8 pre-merge qualification hardening
+
+The pre-merge audit added three regression tests first. Before the fixes, all
+three failed for the intended reasons: every Stage 2 topology row was
+identical, `QualificationRequest` exposed the authoritative `metrics` field,
+and a signature verified against the public key embedded in its own metadata.
+
+Stage 2 is now reconstructed per topology node. An `IptvNode` can bind an exact
+observation-component pseudonym and frozen-signal applicability set. The
+reconstructor selects only component-local records visible at both cutoffs and
+emits separate observed, missing, unavailable and not-applicable cells.
+Per-node lineage records source commitments, event and knowledge cutoffs,
+topology snapshot and capture commitments, applicability and temporal evidence.
+Required feature coverage is derived from required per-node lineage cells;
+zero governed cells yields zero coverage. `UNKNOWN`, `ESCALATE` and `BLOCKED`
+routes remain conservative, and qualification additionally requires a
+`COMPLETE` reconstruction state.
+
+`QualificationMetrics` and all request-level authoritative gate scalars were
+removed. Frozen measured-result contracts now carry the individual semantic,
+mutation, topology-cutoff, feature, outcome, privacy, tuning, repeated-run and
+tamper records. The compiler revalidates those immutable records and derives
+coverage, leakage, alignment, mutation-rejection, determinism and tuning
+results. The request and derived result are hash-bound into the evidence
+manifest, and bundle verification recomputes the qualification from the sealed
+request.
+
+Signature metadata no longer contains a public key. Verification requires an
+independently supplied trusted signer registry whose entries bind signer and
+key identity to role, deployment, half-open validity interval and revocation.
+Signer IDs, key IDs and public keys are unique, preventing aliases of one key
+from satisfying distinct-signature policy. A real-ready result requires three
+distinct authorized signatures for the Domain Pack, Deployment Pack and replay
+protocol. Sealing additionally requires a fourth distinct qualification
+authority signature for the final manifest. The evidence bundle records a
+hash-bound registry copy for audit, while the verifier requires an out-of-band
+registry with the same commitment and therefore never trusts a bundle-supplied
+key registry by itself.
+
+The checked-in fixture and generated schemas were refreshed because they are
+unsigned synthetic v0.8 evidence governed by deterministic regeneration. No
+signed governance JSON, frozen v0.6/v0.7.2 artifact, model, threshold, policy,
+semantic identity or raw verification rule was modified.
+
 ### Test-first evidence
 
 Before implementation, the v0.8 red-phase test failed with
@@ -67,23 +111,29 @@ Completed successfully
 
 uv run pytest tests/domain/nrim/shadow/iptv_p0 \
   tests/domain/nrim/shadow/test_iptv_p0_red_phase.py -q
-269 passed
+285 passed in 5.09s
 
 uv run pytest -q
-731 passed in 110.26s
+747 passed in 86.12s
+
+uv run pytest tests/domain/nrim/shadow/test_real_feature_parity.py -q
+1 passed in 15.03s
 
 uv run python -m app.domain.nrim.shadow.iptv_p0.qualification verify \
-  --directory app/domain/nrim/examples/shadow/iptv_p0_v0_8/expected
+  --directory app/domain/nrim/examples/shadow/iptv_p0_v0_8/expected \
+  --trusted-signer-registry \
+  app/domain/nrim/examples/shadow/iptv_p0_v0_8/expected/trusted_signer_registry.json
 decision=REAL_DATA_REQUIRED; claim_ceiling=engineering_readiness_only
 
 git diff --check
-No output; exit code 0
+Exit code 0; no whitespace errors (Windows emitted LF/CRLF checkout-policy
+advisories for modified source files).
 ```
 
 The v0.8 fixture manifest SHA-256 is
-`bb29016ed56190ec5acde631103f17d301e7dff6f70c1d76ce2ae35b3e90f355`.
+`3ca73d991b05db3b7f68f61c9d7f595e1082a92039265a87fb2451e0f4d0d5cd`.
 The qualification evidence manifest SHA-256 is
-`01c422bf13e9eaa9634d25fd3616043c4701f5036acf92515cf28579db2ad5da`.
+`a80afad03bcaf11c008a1c719acf64627895532529bcd1c31564894056993f61`.
 
 Date: 2026-07-24  
 Branch: `feat/standalone-foundation`  
