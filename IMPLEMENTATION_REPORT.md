@@ -48,13 +48,27 @@ The follow-up parity hardening binds locked scenario
 `window_68fe47e9b82a3632` through a repository-relative canonical seal. The
 example fixes 29 candidate nodes, 114 ordered Stage 2 features, seven
 applicability masks, seven missingness masks, both bitemporal cutoffs and an
-absolute numerical tolerance of `1e-12`. The IPTV-P0 compatibility
-reconstructor delegates to the frozen v0.6 feature builder without invoking
-inference. Tests require exact candidate order, feature order, tensor shape and
-masks plus values within tolerance. Negative controls cover feature omission
-and reordering, candidate reordering, cross-node broadcasting, mask mutation
-and out-of-tolerance values. Additional high-value observations after either
-cutoff leave the tensor unchanged.
+absolute numerical tolerance of `1e-12`.
+
+The legacy v0.6 self-consistency check remains, but is now named honestly. It
+uses `synthetic_shadow_snapshot`, `ServingFeatureBuilder` and
+`normalized_reference_window` to prove that the legacy serving builder still
+agrees with its own frozen export. It does not support an IPTV-P0 parity claim.
+
+The separate IPTV-P0 end-to-end check starts from the sealed observable
+telemetry, converts every observation to a `BatchInputRecord`, applies the
+IPTV-P0 signal registry, reconstructs a bitemporal IPTV-P0 topology, invokes
+`reconstruct_frozen_features` for component-local evidence and expands that
+evidence plus adapter records and topology into the actual 29-by-114 tensor.
+The actual function does not accept the reference window and does not call
+`ServingFeatureBuilder`, `synthetic_shadow_snapshot` or
+`normalized_reference_window`; those remain confined to the independent
+expected-reference and legacy paths. Tests require exact candidate order,
+feature order, tensor shape and masks plus values within tolerance. Negative
+controls cover feature omission and reordering, candidate reordering,
+cross-node broadcasting, mask mutation, out-of-tolerance values, a broken
+IPTV-P0 local reconstructor and a changed adapter record. Additional
+high-value observations after either cutoff leave the tensor unchanged.
 
 `QualificationMetrics` and all request-level authoritative gate scalars were
 removed. Frozen measured-result contracts now carry the individual semantic,
@@ -125,10 +139,10 @@ Completed successfully
 uv run pytest tests/domain/nrim/shadow/iptv_p0 \
   tests/domain/nrim/shadow/test_real_feature_parity.py \
   tests/domain/nrim/shadow/test_iptv_p0_red_phase.py -q
-297 passed in 17.85s
+300 passed in 17.25s
 
 uv run pytest -q
-758 passed in 71.33s
+761 passed in 86.08s
 
 uv run pytest tests/domain/nrim/shadow/test_real_feature_parity.py -q
 1 passed in 9.72s
@@ -145,13 +159,13 @@ advisories for modified source files).
 ```
 
 The v0.8 fixture manifest SHA-256 is
-`dbb0243b9daf8b986be27bb0f31c479ce2e3407302aeb00d2728350c21cca895`.
+`e794b29a78636fe613db47ec64689b0baef142d17347daefe7623606e8f0909c`.
 The qualification evidence manifest SHA-256 is
 `a80afad03bcaf11c008a1c719acf64627895532529bcd1c31564894056993f61`.
 The sealed v0.6 Stage 2 parity example file SHA-256 is
-`250db6d749b5fafb2cbe16c1010796e2ec9250879e19070027a1523877177ab0`;
+`909274e9a54d6577ba3f0a3b97b7092cf541505b0236818d483b6e03cc1bab02`;
 its canonical internal commitment is
-`fff25d59fbd6ceafe15bb7d0ce89d6a9ce806059080590fc3d567939034982b9`.
+`1dc24ec1e7de422d576ab1384c5775471fb824f8eb538ba02096dc1ed3590cf6`.
 
 Date: 2026-07-24  
 Branch: `feat/standalone-foundation`  

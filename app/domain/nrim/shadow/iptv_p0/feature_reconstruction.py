@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 import math
+from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from functools import reduce
 from operator import mul
+from statistics import mean, pstdev
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.domain.nrim.simulation.feature_schema import (
+    NODE_TYPES,
+    SIGNAL_APPLICABLE_NODE_TYPES,
     SIGNAL_NAMES,
     build_feature_schema,
 )
@@ -211,6 +216,271 @@ class FeatureDryRunResult(StrictModel):
 
 def _mean(values: list[float]) -> float | None:
     return sum(values) / len(values) if values else None
+
+
+@dataclass(frozen=True)
+class V06Stage2Node:
+    node_id: str
+    node_type: str
+
+    def __post_init__(self) -> None:
+        if self.node_type not in NODE_TYPES:
+            raise ValueError("Unknown frozen v0.6 node type")
+
+
+@dataclass(frozen=True)
+class V06Stage2ContextEvent:
+    component_node_id: str | None
+    event_time_utc: datetime
+    ingestion_time_utc: datetime
+
+
+_V06_CRITICAL_NODE_TYPES = {
+    "middleware",
+    "database",
+    "catchup_service",
+    "catchup_storage",
+    "core_switch",
+}
+_V06_LOW_QUALITY_VALUES = {"low", "quarantined"}
+
+
+def _v06_linear_slope(
+    timestamps: list[datetime],
+    values: list[float],
+) -> float:
+    if len(values) < 2:
+        return 0.0
+    start = timestamps[0]
+    x_values = [
+        (timestamp - start).total_seconds() / 3600.0
+        for timestamp in timestamps
+    ]
+    x_mean = mean(x_values)
+    y_mean = mean(values)
+    denominator = sum((item - x_mean) ** 2 for item in x_values)
+    if denominator == 0.0:
+        return 0.0
+    numerator = sum(
+        (x_value - x_mean) * (y_value - y_mean)
+        for x_value, y_value in zip(x_values, values, strict=True)
+    )
+    return numerator / denominator
+
+
+def _v06_signal_statistics(
+    *,
+    records: tuple[BatchInputRecord, ...],
+    cutoff: datetime,
+    latest: float,
+) -> dict[str, float]:
+    ordered = tuple(
+        sorted(
+            records,
+            key=lambda item: (
+                item.event_time_utc,
+                item.ingestion_time_utc,
+                item.source_id,
+                item.source_sequence_id,
+            ),
+        )
+    )
+    values = [float(item.metric_value) for item in ordered]
+    timestamps = [item.event_time_utc for item in ordered]
+    low_quality_count = sum(
+        item.quality in _V06_LOW_QUALITY_VALUES for item in ordered
+    )
+    return {
+        "latest": latest,
+        "mean": mean(values),
+        "minimum": min(values),
+        "maximum": max(values),
+        "standard_deviation": (
+            pstdev(values) if len(values) > 1 else 0.0
+        ),
+        "slope": _v06_linear_slope(timestamps, values),
+        "count": float(len(values)),
+        "low_quality_fraction": low_quality_count / len(values),
+        "hours_since_latest": max(
+            0.0,
+            (cutoff - timestamps[-1]).total_seconds() / 3600.0,
+        ),
+    }
+
+
+def reconstruct_v06_stage2_tensor(
+    *,
+    records: tuple[BatchInputRecord, ...],
+    registry: SignalRegistry,
+    topology: TopologySnapshot,
+    nodes: tuple[V06Stage2Node, ...],
+    context_events: tuple[V06Stage2ContextEvent, ...],
+    observation_start_utc: datetime,
+    event_cutoff_utc: datetime,
+    knowledge_cutoff_utc: datetime,
+) -> TensorEvidence:
+    """Build the frozen 114-column Stage 2 tensor through IPTV-P0 evidence.
+
+    This compatibility reconstruction is intentionally independent of the
+    legacy serving builder. It first runs the governed IPTV-P0 local feature
+    reconstruction, then expands those component-local states and values into
+    the frozen v0.6 Stage 2 feature contract.
+    """
+
+    start = utc(observation_start_utc)
+    event_cutoff = utc(event_cutoff_utc)
+    knowledge_cutoff = utc(knowledge_cutoff_utc)
+    if start > event_cutoff or knowledge_cutoff < event_cutoff:
+        raise ValueError("Stage 2 bitemporal window is invalid")
+    topology_node_ids = {item.node_id for item in topology.nodes}
+    candidate_ids = tuple(item.node_id for item in nodes)
+    if (
+        len(candidate_ids) != len(set(candidate_ids))
+        or set(candidate_ids) != topology_node_ids
+    ):
+        raise ValueError(
+            "Stage 2 candidate order differs from reconstructed topology"
+        )
+    visible_records = tuple(
+        record
+        for record in records
+        if start <= record.event_time_utc <= event_cutoff
+        and record.ingestion_time_utc <= knowledge_cutoff
+    )
+    local_result = reconstruct_frozen_features(
+        records=visible_records,
+        registry=registry,
+        topology=topology,
+        event_cutoff_utc=event_cutoff,
+        knowledge_cutoff_utc=knowledge_cutoff,
+    )
+    if local_result.stage2.feature_names != tuple(SIGNAL_NAMES):
+        raise ValueError("IPTV-P0 local feature order differs")
+    if local_result.stage2.shape != (
+        len(topology.nodes),
+        len(SIGNAL_NAMES),
+    ):
+        raise ValueError("IPTV-P0 local Stage 2 shape differs")
+    local_cells = {
+        (lineage.topology_node_id, lineage.feature_name): (value, lineage)
+        for value, lineage in zip(
+            local_result.stage2.values,
+            local_result.per_node_lineage,
+            strict=True,
+        )
+    }
+    if len(local_cells) != len(topology.nodes) * len(SIGNAL_NAMES):
+        raise ValueError("IPTV-P0 local Stage 2 lineage is incomplete")
+
+    incoming: dict[str, int] = defaultdict(int)
+    outgoing: dict[str, int] = defaultdict(int)
+    for edge in topology.edges:
+        outgoing[edge.source_node_id] += 1
+        incoming[edge.destination_node_id] += 1
+    visible_context = tuple(
+        event
+        for event in context_events
+        if start <= utc(event.event_time_utc) <= event_cutoff
+        and utc(event.ingestion_time_utc) <= knowledge_cutoff
+    )
+    global_change_count = len(visible_context)
+    changes_by_node: dict[str, int] = defaultdict(int)
+    for event in visible_context:
+        if event.component_node_id is not None:
+            changes_by_node[event.component_node_id] += 1
+
+    records_by_node_signal: dict[
+        tuple[str, str],
+        list[BatchInputRecord],
+    ] = defaultdict(list)
+    component_by_node = {
+        item.node_id: item.observation_component_pseudonym
+        for item in topology.nodes
+    }
+    node_by_component = {
+        component: node_id
+        for node_id, component in component_by_node.items()
+        if component is not None
+    }
+    for record in visible_records:
+        if record.applicability != "observed":
+            continue
+        node_id = node_by_component.get(record.component_pseudonym)
+        if node_id is not None:
+            records_by_node_signal[(node_id, record.metric_name)].append(
+                record
+            )
+
+    schema = build_feature_schema()
+    feature_names = tuple(
+        definition.name for definition in schema.node_features
+    )
+    defaults = {
+        definition.name: definition.default_value
+        for definition in schema.node_features
+    }
+    values: list[float] = []
+    for node in nodes:
+        row = dict(defaults)
+        for known_type in NODE_TYPES:
+            row[f"node_type__{known_type}"] = float(
+                node.node_type == known_type
+            )
+        row["in_degree"] = float(incoming[node.node_id])
+        row["out_degree"] = float(outgoing[node.node_id])
+        row["total_degree"] = float(
+            incoming[node.node_id] + outgoing[node.node_id]
+        )
+        row["critical_service"] = float(
+            node.node_type in _V06_CRITICAL_NODE_TYPES
+        )
+        row["recent_change_event_count"] = float(
+            changes_by_node[node.node_id] + global_change_count
+        )
+        for signal_name in SIGNAL_NAMES:
+            safe_signal = signal_name.replace(".", "__")
+            local_value, lineage = local_cells[(node.node_id, signal_name)]
+            applicable = (
+                node.node_type
+                in SIGNAL_APPLICABLE_NODE_TYPES[signal_name]
+            )
+            if applicable != (
+                lineage.state is not FeatureEvidenceState.NOT_APPLICABLE
+            ):
+                raise ValueError(
+                    "IPTV-P0 applicability differs from frozen v0.6 topology"
+                )
+            row[f"{safe_signal}__applicable"] = float(applicable)
+            if not applicable:
+                row[f"{safe_signal}__missing"] = 0.0
+                continue
+            if lineage.state is not FeatureEvidenceState.OBSERVED:
+                row[f"{safe_signal}__missing"] = 1.0
+                continue
+            if local_value is None:
+                raise ValueError("Observed IPTV-P0 feature has no value")
+            local_records = tuple(
+                records_by_node_signal[(node.node_id, signal_name)]
+            )
+            if not local_records:
+                raise ValueError("Observed IPTV-P0 feature has no lineage")
+            statistics = _v06_signal_statistics(
+                records=local_records,
+                cutoff=event_cutoff,
+                latest=float(local_value),
+            )
+            for statistic, value in statistics.items():
+                row[f"{safe_signal}__{statistic}"] = value
+            row[f"{safe_signal}__missing"] = 0.0
+        values.extend(float(row[name]) for name in feature_names)
+
+    return TensorEvidence(
+        tensor_name="v06_stage2_input",
+        feature_names=feature_names,
+        shape=(len(nodes), len(feature_names)),
+        values=tuple(values),
+        observed_mask=(1,) * len(values),
+    )
 
 
 def reconstruct_frozen_features(

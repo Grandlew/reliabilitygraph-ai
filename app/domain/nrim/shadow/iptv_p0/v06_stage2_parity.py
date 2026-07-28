@@ -24,15 +24,36 @@ from app.domain.nrim.simulation.locked_test_governance import (
     resolve_seal_manifest_path,
     verify_locked_test_seal,
 )
-
-from ..hashing import canonical_hash, file_hash
-from ..parity import (
-    normalized_reference_window,
-    synthetic_shadow_snapshot,
+from app.domain.nrim.simulation.feature_schema import (
+    SIGNAL_APPLICABLE_NODE_TYPES,
+    SIGNAL_NAMES,
 )
+
+from ..contracts import EXPECTED_UNIT, MetricName
+from ..hashing import canonical_hash, file_hash
 from ..privacy import Pseudonymizer
-from ..replay import ServingFeatureBuilder
+from .batch_adapter import BatchInputRecord, validate_profile_semantics
 from .contracts import utc
+from .feature_reconstruction import (
+    V06Stage2ContextEvent,
+    V06Stage2Node,
+    reconstruct_v06_stage2_tensor,
+)
+from .signal_registry import (
+    AvailabilityClass,
+    SignalRegistry,
+    SignalRequirement,
+    SupportConsequence,
+)
+from .topology import (
+    CaptureMode,
+    IptvEdge,
+    IptvEdgeType,
+    IptvNode,
+    IptvNodeType,
+    TopologyCapture,
+    TopologyHistory,
+)
 
 
 SHA256_PATTERN = r"^[0-9a-f]{64}$"
@@ -63,6 +84,7 @@ class V06Stage2ExampleSeal(StrictModel):
     reference_window_canonical_sha256: str = Field(
         pattern=SHA256_PATTERN
     )
+    observation_start_utc: datetime
     event_cutoff_utc: datetime
     knowledge_cutoff_utc: datetime
     candidate_count: int = Field(gt=1)
@@ -91,13 +113,21 @@ class V06Stage2ExampleSeal(StrictModel):
             )
         return value
 
-    @field_validator("event_cutoff_utc", "knowledge_cutoff_utc")
+    @field_validator(
+        "observation_start_utc",
+        "event_cutoff_utc",
+        "knowledge_cutoff_utc",
+    )
     @classmethod
     def normalize_cutoff(cls, value: datetime) -> datetime:
         return utc(value)
 
     @model_validator(mode="after")
     def validate_cutoffs(self) -> Self:
+        if self.observation_start_utc > self.event_cutoff_utc:
+            raise ValueError(
+                "Observation start cannot follow the event cutoff"
+            )
         if self.knowledge_cutoff_utc < self.event_cutoff_utc:
             raise ValueError(
                 "Knowledge cutoff cannot precede the event cutoff"
@@ -148,6 +178,9 @@ def build_v06_stage2_example_seal() -> V06Stage2ExampleSeal:
         ),
         reference_window_canonical_sha256=(
             "2496a5ca9720d355363c1e05dfa0205c525a78937a709e7df0afecaa9e3dcc08"
+        ),
+        observation_start_utc=datetime.fromisoformat(
+            "2026-07-18T00:00:00+00:00"
         ),
         event_cutoff_utc=datetime.fromisoformat(
             "2026-07-18T06:00:00+00:00"
@@ -293,6 +326,10 @@ def load_sealed_v06_stage2_example(
         raise ValueError("Stage 2 window and source scenario differ")
     if reference_window["window_id"] != seal.window_id:
         raise ValueError("Stage 2 window identity differs")
+    if utc(datetime.fromisoformat(reference_window["observation_start"])) != (
+        seal.observation_start_utc
+    ):
+        raise ValueError("Stage 2 observation start differs from its seal")
     if utc(datetime.fromisoformat(reference_window["observation_cutoff"])) != (
         seal.event_cutoff_utc
     ):
@@ -324,7 +361,38 @@ def load_sealed_v06_stage2_example(
     )
 
 
-def reconstruct_iptv_p0_v06_stage2(
+def build_sealed_v06_stage2_reference(
+    *,
+    reference_window: dict[str, Any],
+    pseudonymization_secret: bytes,
+) -> dict[str, Any]:
+    """Construct the independently sealed expected Stage 2 contract."""
+
+    from ..parity import normalized_reference_window
+
+    pseudonymizer = Pseudonymizer(
+        pseudonymization_secret,
+        key_id="iptv-p0-v06-stage2-parity",
+    )
+    node_map = {
+        str(node_id): pseudonymizer.pseudonymize(
+            str(node_id),
+            namespace="topo",
+        )
+        for node_id in reference_window["node_ids"]
+    }
+    normalized = normalized_reference_window(
+        reference_window=reference_window,
+        node_map=node_map,
+    )
+    return {
+        "node_ids": normalized["node_ids"],
+        "node_feature_names": normalized["node_feature_names"],
+        "node_features": normalized["node_features"],
+    }
+
+
+def reconstruct_legacy_v06_serving_stage2(
     *,
     observable_scenario: dict[str, Any],
     scenario_metadata: dict[str, Any],
@@ -332,7 +400,13 @@ def reconstruct_iptv_p0_v06_stage2(
     knowledge_cutoff_utc: datetime,
     pseudonymization_secret: bytes,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Reconstruct the frozen v0.6 Stage 2 tensor without inference."""
+    """Check legacy v0.6 serving self-consistency without inference."""
+
+    from ..parity import (
+        normalized_reference_window,
+        synthetic_shadow_snapshot,
+    )
+    from ..replay import ServingFeatureBuilder
 
     pseudonymizer = Pseudonymizer(
         pseudonymization_secret,
@@ -351,6 +425,235 @@ def reconstruct_iptv_p0_v06_stage2(
         node_map=node_map,
     )
     return actual, expected
+
+
+_V06_TO_IPTV_NODE_TYPE = {
+    "signal_source": IptvNodeType.SOURCE_HEADEND,
+    "gateway": IptvNodeType.CORE,
+    "streamer": IptvNodeType.AGGREGATION,
+    "middleware": IptvNodeType.TRANSPORT,
+    "database": IptvNodeType.ACCESS_HANDOFF,
+    "catchup_service": IptvNodeType.ACCESS_HANDOFF,
+    "catchup_storage": IptvNodeType.CUSTOMER_IMPACT,
+    "epg_service": IptvNodeType.ACCESS_HANDOFF,
+    "core_switch": IptvNodeType.TRANSPORT,
+    "distribution_switch": IptvNodeType.ACCESS_HANDOFF,
+    "smart_tv_group": IptvNodeType.CUSTOMER_IMPACT,
+}
+
+
+def _parse_time(value: str) -> datetime:
+    return utc(datetime.fromisoformat(value.replace("Z", "+00:00")))
+
+
+def _v06_parity_registry(source_id: str) -> SignalRegistry:
+    return SignalRegistry(
+        registry_id="v06-stage2-parity-registry",
+        registry_version="0.8.0",
+        requirements=tuple(
+            SignalRequirement(
+                signal_name=name,
+                availability=AvailabilityClass.REQUIRED,
+                canonical_unit=EXPECTED_UNIT[MetricName(name)].value,
+                aggregation="window_statistics_component_local",
+                cadence_seconds=60.0,
+                support_consequence=SupportConsequence.BLOCKED,
+                source_ids=(source_id,),
+                evidence=(
+                    "Locked v0.6 observable telemetry bound by the "
+                    "IPTV-P0 Stage 2 parity seal."
+                ),
+            )
+            for name in SIGNAL_NAMES
+        ),
+    )
+
+
+def reconstruct_iptv_p0_v06_stage2(
+    *,
+    observable_scenario: dict[str, Any],
+    observation_start_utc: datetime,
+    event_cutoff_utc: datetime,
+    knowledge_cutoff_utc: datetime,
+    pseudonymization_secret: bytes,
+) -> dict[str, Any]:
+    """Reconstruct v0.6 Stage 2 through the IPTV-P0 adapter pipeline."""
+
+    start = utc(observation_start_utc)
+    event_cutoff = utc(event_cutoff_utc)
+    knowledge_cutoff = utc(knowledge_cutoff_utc)
+    pseudonymizer = Pseudonymizer(
+        pseudonymization_secret,
+        key_id="iptv-p0-v06-stage2-parity",
+    )
+    topology_value = observable_scenario["topology"]
+    deployment = pseudonymizer.pseudonymize(
+        str(topology_value["topology_id"]),
+        namespace="dep",
+    )
+    service_path_id = pseudonymizer.pseudonymize(
+        str(topology_value["topology_id"]),
+        namespace="path",
+    )
+    source_id = "src_" + canonical_hash(
+        {
+            "adapter": "v06-observable-stage2-parity",
+            "deployment": deployment,
+        }
+    )[:32]
+    registry = _v06_parity_registry(source_id)
+
+    raw_nodes = tuple(topology_value["nodes"])
+    topology_node_id = {
+        str(node["node_id"]): pseudonymizer.pseudonymize(
+            str(node["node_id"]),
+            namespace="topo",
+        )
+        for node in raw_nodes
+    }
+    component_id = {
+        str(node["node_id"]): pseudonymizer.pseudonymize(
+            str(node["node_id"]),
+            namespace="cmp",
+        )
+        for node in raw_nodes
+    }
+    topology_nodes = tuple(
+        IptvNode(
+            node_id=topology_node_id[str(node["node_id"])],
+            node_type=_V06_TO_IPTV_NODE_TYPE[str(node["node_type"])],
+            service_path_id=service_path_id,
+            observation_component_pseudonym=component_id[
+                str(node["node_id"])
+            ],
+            applicable_signals=tuple(
+                signal_name
+                for signal_name in SIGNAL_NAMES
+                if str(node["node_type"])
+                in SIGNAL_APPLICABLE_NODE_TYPES[signal_name]
+            ),
+        )
+        for node in raw_nodes
+    )
+    topology_edges = tuple(
+        IptvEdge(
+            edge_id="edge_"
+            + canonical_hash(
+                {
+                    "source": str(edge["source_node_id"]),
+                    "destination": str(edge["target_node_id"]),
+                    "source_edge_id": str(edge["edge_id"]),
+                }
+            )[:40],
+            source_node_id=topology_node_id[
+                str(edge["source_node_id"])
+            ],
+            destination_node_id=topology_node_id[
+                str(edge["target_node_id"])
+            ],
+            edge_type=IptvEdgeType.AFFECTS,
+        )
+        for edge in topology_value["edges"]
+    )
+    capture = TopologyCapture(
+        capture_id="capture_"
+        + canonical_hash(
+            {
+                "topology": str(topology_value["topology_id"]),
+                "adapter": "v06-stage2-parity",
+            }
+        )[:40],
+        deployment_pseudonym=deployment,
+        topology_version="v06-stage2-parity",
+        mode=CaptureMode.FULL,
+        effective_at_utc=start,
+        recorded_at_utc=start,
+        nodes=topology_nodes,
+        edges=topology_edges,
+    )
+    topology = TopologyHistory((capture,)).reconstruct(
+        event_cutoff_utc=event_cutoff,
+        knowledge_cutoff_utc=knowledge_cutoff,
+    )
+
+    records: list[BatchInputRecord] = []
+    for event in observable_scenario.get("telemetry", ()):
+        metric = MetricName(str(event["signal_name"]))
+        event_time = _parse_time(str(event["observed_at"]))
+        ingestion_time = _parse_time(
+            str(event.get("ingested_at", event["observed_at"]))
+        )
+        value = event.get("value")
+        record = BatchInputRecord(
+            source_id=source_id,
+            source_sequence_id=str(event["event_id"]),
+            schema_version=str(event["schema_version"]),
+            metric_name=metric.value,
+            metric_value=float(value) if value is not None else None,
+            unit=str(event["unit"]),
+            component_pseudonym=component_id[
+                str(event["component_node_id"])
+            ],
+            event_time_utc=event_time,
+            observation_time_utc=event_time,
+            ingestion_time_utc=ingestion_time,
+            quality=str(event.get("quality", "medium")),
+            applicability=(
+                "observed" if value is not None else "missing"
+            ),
+        )
+        if (
+            start <= record.event_time_utc <= event_cutoff
+            and record.ingestion_time_utc <= knowledge_cutoff
+        ):
+            validate_profile_semantics(record, registry=registry)
+        records.append(record)
+
+    nodes = tuple(
+        V06Stage2Node(
+            node_id=topology_node_id[str(node["node_id"])],
+            node_type=str(node["node_type"]),
+        )
+        for node in raw_nodes
+    )
+    context_events = tuple(
+        V06Stage2ContextEvent(
+            component_node_id=(
+                topology_node_id[str(event["component_node_id"])]
+                if event.get("component_node_id") is not None
+                else None
+            ),
+            event_time_utc=_parse_time(str(event["observed_at"])),
+            ingestion_time_utc=_parse_time(
+                str(event.get("ingested_at", event["observed_at"]))
+            ),
+        )
+        for event in observable_scenario.get("context_events", ())
+    )
+    tensor = reconstruct_v06_stage2_tensor(
+        records=tuple(records),
+        registry=registry,
+        topology=topology,
+        nodes=nodes,
+        context_events=context_events,
+        observation_start_utc=start,
+        event_cutoff_utc=event_cutoff,
+        knowledge_cutoff_utc=knowledge_cutoff,
+    )
+    width = tensor.shape[1]
+    return {
+        "node_ids": [item.node_id for item in nodes],
+        "node_feature_names": list(tensor.feature_names),
+        "node_features": [
+            [
+                float(value)
+                for value in tensor.values[
+                    row_index * width : (row_index + 1) * width
+                ]
+            ]
+            for row_index in range(tensor.shape[0])
+        ],
+    }
 
 
 def compare_v06_stage2(
@@ -500,11 +803,15 @@ def verify_sealed_v06_stage2_parity(
         seal_path=seal_path,
         repository_root=repository_root,
     )
-    actual, expected = reconstruct_iptv_p0_v06_stage2(
+    actual = reconstruct_iptv_p0_v06_stage2(
         observable_scenario=example.observable_scenario,
-        scenario_metadata=example.scenario_metadata,
-        reference_window=example.reference_window,
+        observation_start_utc=example.seal.observation_start_utc,
+        event_cutoff_utc=example.seal.event_cutoff_utc,
         knowledge_cutoff_utc=example.seal.knowledge_cutoff_utc,
+        pseudonymization_secret=pseudonymization_secret,
+    )
+    expected = build_sealed_v06_stage2_reference(
+        reference_window=example.reference_window,
         pseudonymization_secret=pseudonymization_secret,
     )
     comparison = compare_v06_stage2(

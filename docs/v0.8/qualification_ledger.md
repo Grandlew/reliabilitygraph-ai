@@ -60,12 +60,27 @@ A repository-relative parity seal also binds one locked v0.6 source scenario
 to its exported model-ready Stage 2 window. The bound example contains 29
 ordered candidates and the complete 114-feature frozen tensor, including seven
 applicability and seven missingness columns, with an absolute tolerance of
-`1e-12`. IPTV-P0 reconstructs this example through the frozen v0.6 feature
-builder. Acceptance requires exact candidate and feature order, exact shape and
-masks, and numerical parity within the declared tolerance. Regression controls
-reject omitted or reordered features, candidate reordering, node-row
-broadcasting, mask changes and out-of-tolerance values. Evidence after either
-the event-time or knowledge-time cutoff is excluded.
+`1e-12`. Two deliberately separate checks now exist:
+
+- **Legacy v0.6 serving self-consistency:** adapts the observable scenario through
+   `synthetic_shadow_snapshot` and compares `ServingFeatureBuilder` with its own
+   frozen export. This preserves the historical check but makes no IPTV-P0
+   parity claim.
+- **IPTV-P0 end-to-end Stage 2 parity:** converts the sealed observable telemetry
+   into `BatchInputRecord` objects, validates the IPTV-P0 signal registry,
+   reconstructs the IPTV-P0 topology at both cutoffs, invokes
+   `reconstruct_frozen_features` for component-local evidence, and expands
+   those records and lineage into the actual 29-by-114 Stage 2 tensor. This
+   actual path cannot receive or copy the reference window and does not call
+   `ServingFeatureBuilder`, `synthetic_shadow_snapshot` or
+   `normalized_reference_window`.
+
+End-to-end acceptance requires exact candidate and feature order, exact shape
+and masks, and numerical parity within the declared tolerance. Regression
+controls reject omitted or reordered features, candidate reordering, node-row
+broadcasting, mask changes and out-of-tolerance values. Breaking the IPTV-P0
+local reconstructor or mutating an adapter record causes parity failure.
+Evidence after either event-time or knowledge-time cutoff is excluded.
 
 `QualificationMetrics` has been removed. The request instead carries frozen,
 immutable measured-result objects containing individual semantic mappings,
