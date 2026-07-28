@@ -40,6 +40,7 @@ def synthetic_shadow_snapshot(
     scenario_metadata: dict[str, Any],
     reference_window: dict[str, Any],
     pseudonymizer: Pseudonymizer,
+    knowledge_cutoff_utc: datetime | None = None,
 ) -> tuple[ServingSnapshot, dict[str, str]]:
     """Adapt a development-only scenario to the real serving contracts."""
 
@@ -61,6 +62,17 @@ def synthetic_shadow_snapshot(
     }
     start = _time(reference_window["observation_start"])
     cutoff = _time(reference_window["observation_cutoff"])
+    knowledge_cutoff = knowledge_cutoff_utc or cutoff
+    if (
+        knowledge_cutoff.tzinfo is None
+        or knowledge_cutoff.utcoffset() is None
+        or knowledge_cutoff < cutoff
+    ):
+        raise ValueError(
+            "Knowledge cutoff must be timezone-aware and not precede "
+            "the event cutoff"
+        )
+    knowledge_cutoff = knowledge_cutoff.astimezone(timezone.utc)
     version = "synthetic-parity-v1"
     components = tuple(
         TopologyComponent(
@@ -112,7 +124,13 @@ def synthetic_shadow_snapshot(
     observations = []
     for event in sanitized.get("telemetry", []):
         event_time = _time(str(event["observed_at"]))
-        if not start <= event_time <= cutoff:
+        ingestion_time = _time(
+            str(event.get("ingested_at", event["observed_at"]))
+        )
+        if (
+            not start <= event_time <= cutoff
+            or ingestion_time > knowledge_cutoff
+        ):
             continue
         metric = MetricName(str(event["signal_name"]))
         node_id = str(event["component_node_id"])
@@ -136,9 +154,7 @@ def synthetic_shadow_snapshot(
                     str(event.get("quality", "medium"))
                 ),
                 event_time_utc=event_time,
-                ingestion_time_utc=_time(
-                    str(event.get("ingested_at", event["observed_at"]))
-                ),
+                ingestion_time_utc=ingestion_time,
                 collector_id=str(
                     event.get("collection_source", "development")
                 ),
@@ -149,7 +165,13 @@ def synthetic_shadow_snapshot(
     operational_events = []
     for event in sanitized.get("context_events", []):
         event_time = _time(str(event["observed_at"]))
-        if not start <= event_time <= cutoff:
+        ingestion_time = _time(
+            str(event.get("ingested_at", event["observed_at"]))
+        )
+        if (
+            not start <= event_time <= cutoff
+            or ingestion_time > knowledge_cutoff
+        ):
             continue
         component = event.get("component_node_id")
         operational_events.append(
@@ -162,7 +184,7 @@ def synthetic_shadow_snapshot(
                 ),
                 signal_name=str(event["signal_name"]),
                 event_time_utc=event_time,
-                ingestion_time_utc=event_time,
+                ingestion_time_utc=ingestion_time,
                 source_sequence_id=str(
                     event.get(
                         "event_id",
@@ -201,7 +223,7 @@ def synthetic_shadow_snapshot(
             deployment_pseudonym=deployment,
             observation_start_utc=start,
             decision_cutoff_utc=cutoff,
-            as_of_ingestion_time_utc=cutoff,
+            as_of_ingestion_time_utc=knowledge_cutoff,
             topology_version=version,
             profile=profile,
             components=components,

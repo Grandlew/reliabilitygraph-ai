@@ -1,2 +1,10 @@
 app/domain/nrim/examples/simulation/day08_dataset_v06/locked_test/*.observable.json text eol=crlf
 app/domain/nrim/examples/simulation/day08_dataset_v06/locked_test/*.hidden.json text eol=crlf
+app/domain/nrim/examples/shadow/decision_v0_7_2/**/*.json text eol=lf
+app/domain/nrim/examples/shadow/decision_v0_7_2/**/*.jsonl text eol=lf
+app/domain/nrim/examples/shadow/decision_v0_7_2/**/*.md text eol=lf
+app/domain/nrim/examples/shadow/iptv_p0_v0_8/**/*.json text eol=lf
+app/domain/nrim/examples/shadow/iptv_p0_v0_8/**/*.jsonl text eol=lf
+app/domain/nrim/examples/shadow/iptv_p0_v0_8/**/*.md text eol=lf
+docs/v0.8/*.json text eol=lf
+docs/v0.8/*.md text eol=lf

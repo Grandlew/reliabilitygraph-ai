@@ -1,4 +1,171 @@
-# NRIM standalone foundation implementation report
+# NRIM implementation and release ledger
+
+Current implementation branch: `feat/v0.8-iptv-p0-qualification`
+
+Current baseline commit: `03ec7e47ced1729e7fb24e8b0e5d44b377e8261b`
+
+Current phase: v0.8 Phase A IPTV-P0 qualification infrastructure
+
+Earlier branch, commit and validation statements below are retained as
+historical release evidence and are not descriptions of the current worktree.
+
+## v0.8 Phase A outcome
+
+The repository now contains an offline, read-only IPTV-P0 qualification layer.
+It freezes scope and exclusions, classifies every frozen input, validates
+source/clock/privacy semantics, reconstructs bitemporal topology, performs a
+no-inference feature dry run, compiles reason-coded gaps, seals deterministic
+evidence and preregisters historical replay without tuning.
+
+The supplied synthetic pack deterministically returns `REAL_DATA_REQUIRED`.
+No real operator pack was supplied or accessed, so v0.8 remains engineering
+readiness infrastructure and cannot claim real-deployment compatibility.
+
+The machine-readable baseline is `docs/v0.8/baseline_ledger.json`; the exact
+20-assignment ledger and claim boundary are in
+`docs/v0.8/qualification_ledger.md`.
+
+### v0.8 pre-merge qualification hardening
+
+The pre-merge audit added three regression tests first. Before the fixes, all
+three failed for the intended reasons: every Stage 2 topology row was
+identical, `QualificationRequest` exposed the authoritative `metrics` field,
+and a signature verified against the public key embedded in its own metadata.
+
+Stage 2 is now reconstructed per topology node. An `IptvNode` can bind an exact
+observation-component pseudonym and frozen-signal applicability set. The
+reconstructor selects only component-local records visible at both cutoffs and
+emits separate observed, missing, unavailable and not-applicable cells.
+Per-node lineage records source commitments, event and knowledge cutoffs,
+topology snapshot and capture commitments, applicability and temporal evidence.
+Required feature coverage is derived from required per-node lineage cells;
+zero governed cells yields zero coverage. `UNKNOWN`, `ESCALATE` and `BLOCKED`
+routes remain conservative, and qualification additionally requires a
+`COMPLETE` reconstruction state.
+
+The follow-up parity hardening binds locked scenario
+`scenario_0004e9f6aafd` to exported v0.6 window
+`window_68fe47e9b82a3632` through a repository-relative canonical seal. The
+example fixes 29 candidate nodes, 114 ordered Stage 2 features, seven
+applicability masks, seven missingness masks, both bitemporal cutoffs and an
+absolute numerical tolerance of `1e-12`.
+
+The legacy v0.6 self-consistency check remains, but is now named honestly. It
+uses `synthetic_shadow_snapshot`, `ServingFeatureBuilder` and
+`normalized_reference_window` to prove that the legacy serving builder still
+agrees with its own frozen export. It does not support an IPTV-P0 parity claim.
+
+The separate IPTV-P0 end-to-end check starts from the sealed observable
+telemetry, converts every observation to a `BatchInputRecord`, applies the
+IPTV-P0 signal registry, reconstructs a bitemporal IPTV-P0 topology, invokes
+`reconstruct_frozen_features` for component-local evidence and expands that
+evidence plus adapter records and topology into the actual 29-by-114 tensor.
+The actual function does not accept the reference window and does not call
+`ServingFeatureBuilder`, `synthetic_shadow_snapshot` or
+`normalized_reference_window`; those remain confined to the independent
+expected-reference and legacy paths. Tests require exact candidate order,
+feature order, tensor shape and masks plus values within tolerance. Negative
+controls cover feature omission and reordering, candidate reordering,
+cross-node broadcasting, mask mutation, out-of-tolerance values, a broken
+IPTV-P0 local reconstructor and a changed adapter record. Additional
+high-value observations after either cutoff leave the tensor unchanged.
+
+`QualificationMetrics` and all request-level authoritative gate scalars were
+removed. Frozen measured-result contracts now carry the individual semantic,
+mutation, topology-cutoff, feature, outcome, privacy, tuning, repeated-run and
+tamper records. The compiler revalidates those immutable records and derives
+coverage, leakage, alignment, mutation-rejection, determinism and tuning
+results. The request and derived result are hash-bound into the evidence
+manifest, and bundle verification recomputes the qualification from the sealed
+request.
+
+Signature metadata no longer contains a public key. Verification requires an
+independently supplied trusted signer registry whose entries bind signer and
+key identity to role, deployment, half-open validity interval and revocation.
+Signer IDs, key IDs and public keys are unique, preventing aliases of one key
+from satisfying distinct-signature policy. A real-ready result requires three
+distinct authorized signatures for the Domain Pack, Deployment Pack and replay
+protocol. Sealing additionally requires a fourth distinct qualification
+authority signature for the final manifest. The evidence bundle records a
+hash-bound registry copy for audit, while the verifier requires an out-of-band
+registry with the same commitment and therefore never trusts a bundle-supplied
+key registry by itself.
+
+The checked-in fixture and generated schemas were refreshed because they are
+unsigned synthetic v0.8 evidence governed by deterministic regeneration. No
+signed governance JSON, frozen v0.6/v0.7.2 artifact, model, threshold, policy,
+semantic identity or raw verification rule was modified.
+
+### Test-first evidence
+
+Before implementation, the v0.8 red-phase test failed with
+`KeyError: 'terminal_decision'`: the prior historical replay gate had no
+explicit `REAL_DATA_REQUIRED` terminal state for synthetic evidence. The gate
+now emits `REAL_DATA_REQUIRED`, `BLOCKED` or `REAL_REPLAY_READY` without
+weakening any existing criterion.
+
+The pre-change local baseline also exposed three checkout-policy failures:
+canonical v0.7.2 LF schemas and JSONL had been converted to CRLF. Narrow
+extension-scoped `eol=lf` rules restore their committed canonical bytes and
+cover the new v0.8 JSON, JSONL and Markdown evidence. No seal or verifier was
+changed.
+
+### Authority and claim statement
+
+No model training, threshold tuning, GNN, inference call, frontend, live
+endpoint, credential, ticket write, alarm suppression, customer notification
+or remediation authority was added. Frozen v0.6 and v0.7.2 semantic identities
+remain unchanged.
+
+Passing synthetic qualification tests permits only the claim: “Engineering
+qualification infrastructure only; no real IPTV deployment has passed the
+external gate.”
+
+### v0.8 validation evidence
+
+Commands were run from the repository root using the frozen Python 3.12
+environment and repository-local uv cache:
+
+```text
+uv lock --check
+Resolved 24 packages in 1ms
+
+uv run python -m tools.project_checks imports
+project check passed: imports
+
+uv run python -m compileall app tests tools
+Completed successfully
+
+uv run pytest tests/domain/nrim/shadow/iptv_p0 \
+  tests/domain/nrim/shadow/test_real_feature_parity.py \
+  tests/domain/nrim/shadow/test_iptv_p0_red_phase.py -q
+300 passed in 17.25s
+
+uv run pytest -q
+761 passed in 86.08s
+
+uv run pytest tests/domain/nrim/shadow/test_real_feature_parity.py -q
+1 passed in 9.72s
+
+uv run python -m app.domain.nrim.shadow.iptv_p0.qualification verify \
+  --directory app/domain/nrim/examples/shadow/iptv_p0_v0_8/expected \
+  --trusted-signer-registry \
+  app/domain/nrim/examples/shadow/iptv_p0_v0_8/expected/trusted_signer_registry.json
+decision=REAL_DATA_REQUIRED; claim_ceiling=engineering_readiness_only
+
+git diff --check
+Exit code 0; no whitespace errors (Windows emitted LF/CRLF checkout-policy
+advisories for modified source files).
+```
+
+The v0.8 fixture manifest SHA-256 is
+`e794b29a78636fe613db47ec64689b0baef142d17347daefe7623606e8f0909c`.
+The qualification evidence manifest SHA-256 is
+`a80afad03bcaf11c008a1c719acf64627895532529bcd1c31564894056993f61`.
+The sealed v0.6 Stage 2 parity example file SHA-256 is
+`909274e9a54d6577ba3f0a3b97b7092cf541505b0236818d483b6e03cc1bab02`;
+its canonical internal commitment is
+`1dc24ec1e7de422d576ab1384c5775471fb824f8eb538ba02096dc1ed3590cf6`.
 
 Date: 2026-07-24  
 Branch: `feat/standalone-foundation`  
@@ -119,7 +286,7 @@ those strings as live filesystem locations, so a relocated Ubuntu checkout
 could not find the locked manifest or its scenario files. Local validation
 masked the defect because the retired source repository still existed.
 
-The uncommitted correction resolves governed manifests, scenario sidecars, and
+The merged correction resolves governed manifests, scenario sidecars, and
 model-ready windows only from their current artifact location, declared split,
 scenario or window identifier, and required filename. Recorded paths are
 validated as metadata but are never dereferenced. Missing colocated files,
@@ -170,7 +337,8 @@ still requires an actual successful GitHub Actions run.
   Python imports, where coupling risk exists.
 - Evidence generation deliberately refuses a dirty Git tree or stale lock.
   The committed foundation at `a5f2a003` supplies the clean, commit-bound input
-  needed by CI. The current correction remains intentionally uncommitted.
+  needed by CI. The portable resolver and governed-newline correction are now
+  part of the merged baseline used by later releases.
 
 ## Acceptance status
 

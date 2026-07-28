@@ -136,3 +136,37 @@ mutation capability.
 This release proves deterministic software behavior and synthetic replay only.
 It does not establish real IPTV accuracy, calibration, causal validity, alert
 burden, human utility, outage prevention, or production readiness.
+
+## IPTV-P0 offline qualification (v0.8 Phase A)
+
+The `shadow.iptv_p0` package qualifies whether a lawful historical export can
+reconstruct the frozen inputs without changing or invoking the model. It
+contains strict Domain and Deployment Packs, a complete signal-availability
+registry, deterministic source identities, offline JSONL/CSV adapters,
+clock/watermark rules, bitemporal IPTV topology epochs, gap analysis, a
+no-inference feature dry run, repository hygiene checks, evidence sealing and a
+preregistered no-tuning replay protocol.
+
+The reference adapters are offline and read-only. They contain no network
+client, credential field, live polling, mutation, ticket, alarm-suppression,
+notification or remediation capability. Required, conditional, optional and
+unavailable signals remain distinct; absent data is never interpreted as
+healthy.
+
+Verify the checked-in synthetic qualification evidence:
+
+```bash
+uv run python -m app.domain.nrim.shadow.iptv_p0.qualification verify \
+  --directory app/domain/nrim/examples/shadow/iptv_p0_v0_8/expected
+```
+
+Regenerate the synthetic pack in a temporary directory:
+
+```bash
+uv run python -m app.domain.nrim.shadow.iptv_p0.synthetic_fixture \
+  --output /tmp/iptv_p0_v0_8
+```
+
+The checked-in bundle must return `REAL_DATA_REQUIRED`. It proves software
+behavior only and cannot support a real replay or prospective performance
+claim.
