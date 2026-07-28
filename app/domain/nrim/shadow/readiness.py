@@ -75,8 +75,15 @@ def historical_replay_gate(
             metrics.get("data_gap_report_complete") is True
         ),
     }
+    passed = all(criteria.values())
+    real_data = metrics.get("real_data") is True
     return {
-        "passed": all(criteria.values()),
+        "passed": passed,
+        "terminal_decision": (
+            "REAL_REPLAY_READY"
+            if passed
+            else ("BLOCKED" if real_data else "REAL_DATA_REQUIRED")
+        ),
         "criteria": criteria,
         "promotion_evidence": False,
         "truth_note": (

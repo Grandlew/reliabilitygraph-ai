@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.8.0",
+  "release": "ReliabilityGraph AI v0.8 Phase A",
+  "baseline": {
+    "merge_commit": "03ec7e47ced1729e7fb24e8b0e5d44b377e8261b",
+    "git_tree": "4cb62a67b122bae5c11e55e3d43e81b1341c891e",
+    "reported_test_count": 462,
+    "reported_ci_status": "green_per_supplied_implementation_brief",
+    "local_prechange_result": {
+      "passed": 459,
+      "failed": 3,
+      "cause": "v0.7.2 canonical LF artifacts checked out as CRLF",
+      "semantic_failures": 0
+    }
+  },
+  "frozen_identities": {
+    "bundle_manifest_sha256": "07bfab9d935e205e9372121622d674f03ab51e81c65f0cd4e063387b7baa4fb9",
+    "bundle_sha256": "9767bc9f3184a9e68fe99e0a31c5593a610c9dbd3b524dfa155c8bb53091ecf7",
+    "feature_schema_sha256": "b2cb5de814d319934e80f4eb9d474ac2831fed9b8db18077cc61d56185c6e9e7",
+    "policy_sha256": "f78e0bb65a39364b53cf5888d24455158090d056a6fd31a90df116f7fb85c036",
+    "prediction_envelope_schema_sha256": "a6d6a276bf89a76a8d4418664462583aeb3a7d060ad589baa817abaf8953f75c",
+    "source_benchmark_sha256": "7c1a78131522ae248675eedd77a7b2f3f350f2fc082acee3353a4b869ffe130e"
+  },
+  "decision_evidence_schemas": {
+    "candidate_set": "c2a0494b9314e427554d9dd1e421bf249ad4d97dec009cb185377c87def1f7e0",
+    "causal_evidence_set": "a922c759f410e0379acf718f2ee05689ae7fe203e150be4d70e0b1e8fb714533",
+    "decision_comparison": "ced0bfee1ed120de6c5af848bf64bf974e10a713dfffd7bb3f574a4def04ca6e",
+    "decision_event": "cd261a6e29bb5efea14e36ad2992ce560db3140d6a536cab66162b156f1aa549",
+    "decision_snapshot": "863c8cb90aeb3ea6d56b58d6062e7d2810081b58913cb1666e1f2444d75dea35"
+  },
+  "claim_ceiling": "engineering_readiness_only",
+  "real_operator_data_accessed": false
+}

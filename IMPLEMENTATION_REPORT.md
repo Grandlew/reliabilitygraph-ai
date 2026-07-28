@@ -1,4 +1,89 @@
-# NRIM standalone foundation implementation report
+# NRIM implementation and release ledger
+
+Current implementation branch: `feat/v0.8-iptv-p0-qualification`
+
+Current baseline commit: `03ec7e47ced1729e7fb24e8b0e5d44b377e8261b`
+
+Current phase: v0.8 Phase A IPTV-P0 qualification infrastructure
+
+Earlier branch, commit and validation statements below are retained as
+historical release evidence and are not descriptions of the current worktree.
+
+## v0.8 Phase A outcome
+
+The repository now contains an offline, read-only IPTV-P0 qualification layer.
+It freezes scope and exclusions, classifies every frozen input, validates
+source/clock/privacy semantics, reconstructs bitemporal topology, performs a
+no-inference feature dry run, compiles reason-coded gaps, seals deterministic
+evidence and preregisters historical replay without tuning.
+
+The supplied synthetic pack deterministically returns `REAL_DATA_REQUIRED`.
+No real operator pack was supplied or accessed, so v0.8 remains engineering
+readiness infrastructure and cannot claim real-deployment compatibility.
+
+The machine-readable baseline is `docs/v0.8/baseline_ledger.json`; the exact
+20-assignment ledger and claim boundary are in
+`docs/v0.8/qualification_ledger.md`.
+
+### Test-first evidence
+
+Before implementation, the v0.8 red-phase test failed with
+`KeyError: 'terminal_decision'`: the prior historical replay gate had no
+explicit `REAL_DATA_REQUIRED` terminal state for synthetic evidence. The gate
+now emits `REAL_DATA_REQUIRED`, `BLOCKED` or `REAL_REPLAY_READY` without
+weakening any existing criterion.
+
+The pre-change local baseline also exposed three checkout-policy failures:
+canonical v0.7.2 LF schemas and JSONL had been converted to CRLF. Narrow
+extension-scoped `eol=lf` rules restore their committed canonical bytes and
+cover the new v0.8 JSON, JSONL and Markdown evidence. No seal or verifier was
+changed.
+
+### Authority and claim statement
+
+No model training, threshold tuning, GNN, inference call, frontend, live
+endpoint, credential, ticket write, alarm suppression, customer notification
+or remediation authority was added. Frozen v0.6 and v0.7.2 semantic identities
+remain unchanged.
+
+Passing synthetic qualification tests permits only the claim: “Engineering
+qualification infrastructure only; no real IPTV deployment has passed the
+external gate.”
+
+### v0.8 validation evidence
+
+Commands were run from the repository root using the frozen Python 3.12
+environment and repository-local uv cache:
+
+```text
+uv lock --check
+Resolved 24 packages in 1ms
+
+uv run python -m tools.project_checks imports
+project check passed: imports
+
+uv run python -m compileall app tests tools
+Completed successfully
+
+uv run pytest tests/domain/nrim/shadow/iptv_p0 \
+  tests/domain/nrim/shadow/test_iptv_p0_red_phase.py -q
+269 passed
+
+uv run pytest -q
+731 passed in 110.26s
+
+uv run python -m app.domain.nrim.shadow.iptv_p0.qualification verify \
+  --directory app/domain/nrim/examples/shadow/iptv_p0_v0_8/expected
+decision=REAL_DATA_REQUIRED; claim_ceiling=engineering_readiness_only
+
+git diff --check
+No output; exit code 0
+```
+
+The v0.8 fixture manifest SHA-256 is
+`bb29016ed56190ec5acde631103f17d301e7dff6f70c1d76ce2ae35b3e90f355`.
+The qualification evidence manifest SHA-256 is
+`01c422bf13e9eaa9634d25fd3616043c4701f5036acf92515cf28579db2ad5da`.
 
 Date: 2026-07-24  
 Branch: `feat/standalone-foundation`  
@@ -119,7 +204,7 @@ those strings as live filesystem locations, so a relocated Ubuntu checkout
 could not find the locked manifest or its scenario files. Local validation
 masked the defect because the retired source repository still existed.
 
-The uncommitted correction resolves governed manifests, scenario sidecars, and
+The merged correction resolves governed manifests, scenario sidecars, and
 model-ready windows only from their current artifact location, declared split,
 scenario or window identifier, and required filename. Recorded paths are
 validated as metadata but are never dereferenced. Missing colocated files,
@@ -170,7 +255,8 @@ still requires an actual successful GitHub Actions run.
   Python imports, where coupling risk exists.
 - Evidence generation deliberately refuses a dirty Git tree or stale lock.
   The committed foundation at `a5f2a003` supplies the clean, commit-bound input
-  needed by CI. The current correction remains intentionally uncommitted.
+  needed by CI. The portable resolver and governed-newline correction are now
+  part of the merged baseline used by later releases.
 
 ## Acceptance status
 
